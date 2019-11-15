@@ -3,6 +3,7 @@
 #include <time.h>
 #include "libnova_interface.h"
 #include "bg_globals.h"
+#include "bg_geo.h"
 
 time_t get_gmtime_from_string( const char* szGmTime );
 // #include <mydate.h>

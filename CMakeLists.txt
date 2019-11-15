@@ -17,12 +17,13 @@ add_definitions(-D_UNIX -D_ENABLE_PROFILER_ -D_ENABLE_TRACING_ -D_ENABLE_VISUALI
 set_target_properties(msfitslib PROPERTIES
     VERSION ${PROJECT_VERSION}
     SOVERSION 1
-    PUBLIC_HEADER msfitslib.h)
+    PUBLIC_HEADER "msfitslib.h;spectrometer.h;bg_date.h;bg_globals.h")
 configure_file(msfitslib.pc.in msfitslib.pc @ONLY)
 target_include_directories(msfitslib PRIVATE .)
 install(TARGETS msfitslib
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
 install(FILES ${CMAKE_BINARY_DIR}/msfitslib.pc
     DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig)
 

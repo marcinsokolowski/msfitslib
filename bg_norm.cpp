@@ -1,10 +1,13 @@
 #include "bg_globals.h"
 #include "bg_norm.h"
 #include "libnova_interface.h"
+#include "bg_geo.h"
+
 
 #include <myfile.h>
 #include <myparser.h>
 #include <mystrtable.h>
+
 
 #include <math.h>
 

@@ -16,6 +16,7 @@
 
 #include "libnova_interface.h"
 #include "bg_globals.h"
+#include "bg_geo.h"
 
 #include <string>
 
