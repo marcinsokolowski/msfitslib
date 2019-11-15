@@ -10,6 +10,7 @@ add_library(msfitslib SHARED
      ccddriver_interface.cpp
      bg_bedlam.cpp  bg_fits.cpp  bg_globals.cpp  bg_stat.cpp         bg_units.cpp  calsol_values.cpp weather_station.cpp
      bg_array.cpp  bg_date.cpp    bg_geo.cpp   bg_norm.cpp     bg_total_power.cpp  bg_vis.cpp    cvalue_vector.cpp  libnova_interface.cpp  
+     spectrometer.cpp
            )
 
 add_definitions(-D_UNIX -D_ENABLE_PROFILER_ -D_ENABLE_TRACING_ -D_ENABLE_VISUALIZATION_ -D_MONTE_CARLO_ -O3 )
@@ -30,6 +31,7 @@ install(FILES ${CMAKE_BINARY_DIR}/msfitslib.pc
 find_library(CFITSIO_LIB cfitsio)
 find_library(LIBNOVA_LIB nova)
 find_path(FITSIO_INCLUDE_DIR NAMES fitsio.h)
+find_library(FFTW3_LIB fftw3 REQUIRED)
 include_directories(${FITSIO_INCLUDE_DIR})
 
 # You need to tell CMake where to find the ROOT installation. This can be done in a number of ways:
@@ -48,13 +50,13 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 add_executable(nan_test nan_test.cpp)
 add_executable(libtest  libtest.cpp)
-target_link_libraries(libtest msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES})
+target_link_libraries(libtest msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB})
 add_executable(radec2azh radec2azh.cpp)
-target_link_libraries(radec2azh msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES})
+target_link_libraries(radec2azh msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB})
 add_executable(sid2ux sid2ux.cpp)
-target_link_libraries(sid2ux msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES})
-add_executable(ux2sid   ux2sid.cpp)
-target_link_libraries(ux2sid msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES})
+target_link_libraries(sid2ux msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB})
+add_executable(ux2sid   ux2sid.cpp) 
+target_link_libraries(ux2sid msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB})
 add_executable(ux2sid_file   ux2sid_file.cpp)
-target_link_libraries(ux2sid_file msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES})
+target_link_libraries(ux2sid_file msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB})
 
