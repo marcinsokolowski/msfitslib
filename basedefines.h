@@ -30,7 +30,7 @@
 #define MAX_LAPLACE_DEFINED 20 
 
 #ifdef _UNIX
-	#define BASELIB_EI
+   #define BASELIB_EI
    #define STRCASECMP strcasecmp
 #else
    #ifdef _BASELIB_DEF_

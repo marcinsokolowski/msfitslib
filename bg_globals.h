@@ -8,7 +8,7 @@
 #include <string.h>
 
 #include "bg_date.h"
-#include "bg_geo.h"
+// #include "bg_geo.h"
 
 class cIntRange;
 

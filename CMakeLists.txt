@@ -13,11 +13,11 @@ add_library(msfitslib SHARED
      spectrometer.cpp
            )
 
-add_definitions(-D_UNIX -D_ENABLE_PROFILER_ -D_ENABLE_TRACING_ -D_ENABLE_VISUALIZATION_ -D_MONTE_CARLO_ -O3 )
+add_definitions(-D_UNIX -D_ENABLE_PROFILER_ -D_ENABLE_TRACING_ -D_ENABLE_VISUALIZATION_ -D_MONTE_CARLO_ -D_NO_ROOT_ )
 set_target_properties(msfitslib PROPERTIES
     VERSION ${PROJECT_VERSION}
     SOVERSION 1
-    PUBLIC_HEADER "msfitslib.h;spectrometer.h;bg_date.h;bg_globals.h")
+    PUBLIC_HEADER   "msfitslib.h;spectrometer.h;bg_date.h;bg_globals.h;cvalue_vector.h;calsol_values.h;myparser.h;mystring.h;mystrtable.h;mytypes.h;basedefines.h;basestring.h;myfile.h;basestructs.h")
 configure_file(msfitslib.pc.in msfitslib.pc @ONLY)
 target_include_directories(msfitslib PRIVATE .)
 install(TARGETS msfitslib
