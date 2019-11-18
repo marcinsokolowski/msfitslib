@@ -2,7 +2,13 @@
 #define _SIGHORNS_H__
 
 #include <stdlib.h>
+#ifdef _HAS_PX1500_
 #include <px1500.h>     // PX1500 library header
+#else
+#define PX4CHANSEL_SINGLE_CH1 0
+#define HPX4 void*
+typedef unsigned char px4_sample_t;
+#endif
 #include <string>
 using namespace std;
 
