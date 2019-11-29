@@ -2,8 +2,8 @@
 Common library with several C++ base classes, which might be useful of required by other projects by Marcin Sokolowski
 
 # required :
+   sudo apt-get install libnova-dev libnova fftw2 fftw-dev libnova-0.16-0 libnova-dev fftw3-dev libhdf5-dev
 
-libnova : sudo apt-get install libnova-dev libnova
 
 CERN root :   
    https://root.cern.ch/building-root
