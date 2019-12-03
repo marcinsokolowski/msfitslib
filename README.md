@@ -29,3 +29,7 @@ cmake ..
 make
 
 sudo make install
+
+# possible problems :
+
+   May need addition of -ldl to all target_link_libraries (if does not link) - requires to repeat steps: cmake ../;make 
