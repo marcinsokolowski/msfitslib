@@ -10,8 +10,11 @@ CERN root :
    https://root.cern.ch/downloading-root
 
    Can be removed by editing CMakeList.txt and comment out lines :
+   
    list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS})
+   
    and
+   
    find_package(ROOT REQUIRED COMPONENTS RIO Net)
 
 
