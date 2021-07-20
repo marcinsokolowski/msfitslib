@@ -684,10 +684,16 @@ int CBgFits::ParseSkyIntegrations()
    return ret; 
 }
 
-int CBgFits::ReadFits( const char* fits_file, int bAutoDetect /*=0*/, int bReadImage /* =1 */ , int bIgnoreHeaderErrors /* =0 */)
+int CBgFits::ReadFits( const char* fits_file, int bAutoDetect /*=0*/, int bReadImage /* =1 */ , int bIgnoreHeaderErrors /* =0 */ , bool transposed /* =false */ )
 {
   fitsfile *fp=0;
   int status = 0;
+  string szFreqKeyword = "CRVAL1", szFreqDelta = "CDELT1", szTimeDelta = "CDELT2";
+  if( transposed ){
+     szFreqKeyword = "CRVAL2";
+     szFreqDelta = "CDELT2";
+     szTimeDelta = "CDELT1";
+  }
 
   if( !fits_file || strlen(fits_file) == 0 ){
      fits_file = m_FileName.c_str();
@@ -866,7 +872,8 @@ int CBgFits::ReadFits( const char* fits_file, int bAutoDetect /*=0*/, int bReadI
        if( strstr(rec.Keyword.c_str(),"NACCUM" ) ){    
           naccum = atol(rec.Value.c_str());            
        }
-       if( strstr(rec.Keyword.c_str(),"STARTFRQ" ) || strstr(rec.Keyword.c_str(),"CRVAL1" ) ){
+       
+       if( strstr(rec.Keyword.c_str(),"STARTFRQ" ) || strstr(rec.Keyword.c_str(), szFreqKeyword.c_str() ) ){
 //       if( strstr(rec.Keyword.c_str(),"CRVAL1" ) ){       
 //          double unit = 1000000.00; // MHz in Hz 
           double unit = 1.00; // MHz 
@@ -884,11 +891,11 @@ int CBgFits::ReadFits( const char* fits_file, int bAutoDetect /*=0*/, int bReadI
           bStopFreqFound = 1;
        }                          
        
-       if( strstr(rec.Keyword.c_str(),"CDELT1" ) ){
+       if( strstr(rec.Keyword.c_str(), szFreqDelta.c_str() ) ){
           bDeltaFreqFound = 1; 
           delta_freq = atof(rec.Value.c_str());
        }                         
-       if( strstr(rec.Keyword.c_str(),"CDELT2" ) ){
+       if( strstr(rec.Keyword.c_str(), szTimeDelta.c_str() ) ){
           szCDELT2 = rec.Value.c_str();
        }                         
                                                                  
@@ -1091,6 +1098,66 @@ CBgFits& CBgFits::operator+=(const CBgFits& right)
    
    return (*this);
 }
+
+void CBgFits::NormalizeY()
+{
+   vector<double> col_avg;
+   col_avg.assign( GetYSize(), 0.00 );
+   
+   for(int y=0;y<GetYSize();y++){
+      for(int x=0;x<GetXSize();x++){
+         col_avg[y] += getXY(x,y);
+      }
+      
+      col_avg[y] = col_avg[y] / GetXSize();
+      printf("%d %.8f\n",y,col_avg[y]);
+   }
+   
+   for(int y=0;y<GetYSize();y++){
+      double norm_val = col_avg[y];
+   
+      for(int x=0;x<GetXSize();x++){
+         double val = getXY(x,y);
+         setXY( x, y, val/norm_val );
+      }
+   }   
+   
+   double mean,rms,minval,maxval;
+   GetStat( mean, rms, minval, maxval );
+   printf("INFO (NormalizeY) : mean = %.8f , rms = %.8f , minval = %.8f , maxval = %.8f\n",mean, rms, minval, maxval );
+}
+
+void CBgFits::NormalizeX()
+{
+   vector<double> line_avg;
+   int n_ch = GetXSize();
+   int n_times = GetYSize();
+   line_avg.assign( n_ch, 0.00 );
+   
+   for(int ch=0;ch<n_ch;ch++){
+      for(int t=0;t<n_times;t++){
+         line_avg[ch] += getXY(ch,t);
+      }
+      
+      line_avg[ch] = line_avg[ch] / n_times;
+      printf("%d %.8f\n",ch,line_avg[ch]);
+   }
+   
+   for(int ch=0;ch<n_ch;ch++){
+      double norm_val = line_avg[ch];
+   
+      for(int t=0;t<n_times;t++){
+         double val = getXY(ch,t);
+         setXY( ch, t, val/norm_val );
+      }
+   }   
+
+   double mean,rms,minval,maxval;
+   GetStat( mean, rms, minval, maxval );
+   printf("INFO (NormalizeX) : mean = %.8f , rms = %.8f , minval = %.8f , maxval = %.8f\n",mean, rms, minval, maxval );
+}
+
+
 
 void CBgFits::Normalize(double norm_factor)
 {
@@ -1332,6 +1399,33 @@ void CBgFits::Multiply( CBgFits& right )
    }
 }
 
+void CBgFits::AddImages( CBgFits& right, double mult_const )
+{
+   int size = m_SizeX*m_SizeY;
+   
+   double val = getXY(82,101);
+   
+   for(int i=0;i<size;i++){
+      data[i] = (data[i] + right.data[i]) * mult_const;
+   }
+   
+   printf("DEBUG : (%.4f + %.4f)/2 = %.4f\n",val,right.getXY(82,101),getXY(82,101));
+   
+}
+
+void CBgFits::SEFD_XX_YY( CBgFits& right )
+{
+   int size = m_SizeX*m_SizeY;
+   
+   for(int i=0;i<size;i++){
+      double xx_val = data[i];
+      double yy_val = right.data[i];
+      
+      double out_val = 0.5*sqrt( xx_val*xx_val + yy_val*yy_val );
+      data[i] = out_val;       
+   }
+}
+
 void CBgFits::Subtract( CBgFits& right )
 {
    int size = m_SizeX*m_SizeY;
@@ -1473,6 +1567,30 @@ void CBgFits::AvgChannels(int n_channels, CBgFits& outfits )
    }
 }
 
+bool CBgFits::Offset( double dx, double dy, CBgFits& out_fits, double multiplier )
+{
+   if( m_SizeX != out_fits.m_SizeX || m_SizeY != out_fits.m_SizeY ){
+      printf("RESULT : image sizes differ %dx%d != %dx%d\n",m_SizeX,m_SizeY,out_fits.m_SizeX,out_fits.m_SizeY);
+      return false;
+   }
+
+   int ret=0;
+   int size = m_SizeX*m_SizeY;
+   
+   for(int y=0;y<m_SizeY;y++){
+      for(int x=0;x<m_SizeY;x++){
+         double val = getXY( x , y );
+         int dx_int = int( double( dx ) );
+         int dy_int = int( double( dy ) );
+         
+         
+         out_fits.setXY( x + dx_int, y + dy_int, (val*multiplier) );
+      }
+   }
+
+   return true;
+}
+
 int CBgFits::Compare( CBgFits& right, float min_diff, int verb )
 {
    if( m_SizeX!=right.m_SizeX || m_SizeY!=right.m_SizeY ){
@@ -1599,6 +1717,7 @@ double CBgFits::GetStat( double& mean, double& rms, double& minval, double& maxv
    }
   
    int nan_count = 0, total_count = 0;   
+   int non_zero_count=0;
    for(int y=y_start;y<y_end;y++){
        for(int x=x_start;x<x_end;x++){
            double val = valXY(x,y);
@@ -1619,6 +1738,172 @@ double CBgFits::GetStat( double& mean, double& rms, double& minval, double& maxv
            if( val < minval ){
                minval = val;
            }
+           if( fabs(val) > 0.0000000001 ){
+              non_zero_count++;
+           }
+       }
+   }
+   
+   mean = sum / cnt;
+   rms  = sqrt( sum2/cnt - mean*mean );
+
+   if( nan_count > 0 ){
+      printf("WARNING : %d / %d are NaN values found and ignored\n",nan_count,total_count);
+   }
+   
+//   printf("Non-zero count = %d\n",non_zero_count);
+   
+   return 0.00;
+}
+
+double CBgFits::GetStatRadiusAll( double& mean, double& rms, double& minval, double& maxval, 
+                                  double& median, double& iqr, double& rms_iqr, int& cnt, int radius, 
+                                  bool do_iqr /* = true */,
+                                  int xc /*= -1*/, int yc /* = -1 */, int gDebugLevel /* = 0 */  )
+{
+   double sum = 0.00;
+   double sum2 = 0.00;
+   cnt  = 0;
+   
+   minval = 1e6;
+   maxval = -1e6;
+   iqr = 0.00;
+   rms_iqr = 0.00;
+   median  = 0.00;   
+
+   int center_x = m_SizeX/2;
+   int center_y = m_SizeY/2;
+   
+   if( xc >= 0 ){
+       center_x = xc;
+   }
+   if( yc >= 0 ){
+       center_y = yc;
+   }
+
+   int x_start = (center_x - radius);
+   int y_start = (center_y - radius);
+   
+   int x_end   = (center_x + radius);
+   int y_end   = (center_y + radius);
+   
+   int max_count = (y_end - y_start + 1)*(x_end - x_start + 1);
+   double* values = NULL;
+   if ( do_iqr ){
+//      printf("DEBUG : allocating max_count = %d ( %d x %d , from %d pixels around (%d,%d) )\n",max_count,(y_end - y_start + 1),(x_end - y_start + 1),radius,center_x,center_y);
+      values = new double[max_count];
+   }
+   
+   int nan_count = 0, total_count = 0;   
+   for(int y=y_start;y<y_end;y++){
+       for(int x=x_start;x<x_end;x++){
+           if ( x>=0 && x<m_SizeX && y>=0 && y<m_SizeY ){
+              double distance = sqrt( (x-center_x)*(x-center_x) + (y-center_y)*(y-center_y) );
+              
+              if( distance <= radius ){           
+                 double val = valXY(x,y);
+                 total_count++;
+                      
+                 if ( isnan(val) ){
+                    nan_count++;
+                    continue;
+                 }
+                 
+                 if( values ){
+                    if ( cnt < max_count ){
+                       values[cnt] = val;
+                    }else{
+                       printf("ERROR : cnt = %d >= max_count allocated = %d -> skipped !!!\n",cnt,max_count);
+                       continue;
+                    }
+                 }
+
+                 sum  += val;
+                 sum2 += val*val;
+                 cnt  += 1;                    
+           
+                 if( val > maxval ){
+                     maxval = val;
+                 }
+                 if( val < minval ){
+                     minval = val;
+                 }
+              }
+           }
+       }
+   }
+   
+   mean = sum / cnt;
+   rms  = sqrt( sum2/cnt - mean*mean );
+
+   if( nan_count > 0 ){
+      if ( gDebugLevel > 0 ){
+         printf("WARNING : %d / %d are NaN values found and ignored\n",nan_count,total_count);
+      }
+   }
+   
+   if( values ){
+      int q75= int(cnt*0.75);
+      int q25= int(cnt*0.25);
+
+   
+      my_sort_float( values, cnt );
+      median = values[ cnt / 2 ];
+      iqr = values[q75] - values[q25];
+      rms_iqr = iqr / 1.35;
+   
+      delete [] values;
+   }
+   
+   return 0.00;
+}
+
+
+double CBgFits::GetStatRadius( double& mean, double& rms, double& minval, double& maxval, int radius  )
+{
+   double sum = 0.00;
+   double sum2 = 0.00;
+   int    cnt  = 0;
+   
+   minval = 1e6;
+   maxval = -1e6;
+
+   int center_x = m_SizeX/2;
+   int center_y = m_SizeY/2;
+
+   int x_start = (center_x - radius);
+   int y_start = (center_y - radius);
+   
+   int x_end   = (center_x + radius);
+   int y_end   = (center_y + radius);
+   
+   int nan_count = 0, total_count = 0;   
+   for(int y=y_start;y<y_end;y++){
+       for(int x=x_start;x<x_end;x++){
+           if ( x>=0 && x<m_SizeX && y>=0 && y<m_SizeY ){
+              double distance = sqrt( (x-center_x)*(x-center_x) + (y-center_y)*(y-center_y) );
+              
+              if( distance <= radius ){           
+                 double val = valXY(x,y);
+                 total_count++;
+                      
+                 if ( isnan(val) ){
+                    nan_count++;
+                    continue;
+                 }
+
+                 sum  += val;
+                 sum2 += val*val;
+                 cnt  += 1;                    
+           
+                 if( val > maxval ){
+                     maxval = val;
+                 }
+                 if( val < minval ){
+                     minval = val;
+                 }
+              }
+           }
        }
    }
    
@@ -1631,6 +1916,8 @@ double CBgFits::GetStat( double& mean, double& rms, double& minval, double& maxv
    
    return 0.00;
 }
+
+
 
 double CBgFits::GetStat( CBgArray& avg_spectrum, CBgArray& rms_spectrum, 
                          int start_int, int end_int, const char* szState,
@@ -1807,9 +2094,15 @@ double CBgFits::GetStat( CBgArray& avg_spectrum, CBgArray& rms_spectrum,
    double total_inttime = inttime * n_int;
 
    double total_sum_test=0;
+   int non_zero_count=0;
    for(int yy=0;yy<GetYSize();yy++){
       for(int xx=0;xx<GetXSize();xx++){
-         total_sum_test += getXY(xx,yy);
+         double val =  getXY(xx,yy);
+         total_sum_test += val;
+         
+         if( fabs(val) > 0.0000000001 ){
+            non_zero_count++;
+         }
       }
    }      
 
@@ -1831,6 +2124,7 @@ double CBgFits::GetStat( CBgArray& avg_spectrum, CBgArray& rms_spectrum,
    printf("MIN val = %.8f at (%d,%d)\n",(double)minval,(minpos%m_SizeX),(minpos/m_SizeX));
    printf("INTTIME = %d x %.8f [sec] = %.8f [sec]\n",n_int,inttime,total_inttime);
    printf("TOTAL POWER ( uxtime = %.8f ) = %.20f [?] = %.2f [dBm]\n",GetUnixTime(),total_power,total_power_dbm);
+   printf("Non-zero values = %d\n",non_zero_count);
    printf("######################################################################################\n");
    
    if( out_number_of_used_integrations ){
@@ -1894,6 +2188,14 @@ int CBgFits::Recalc( eCalcFitsAction_T action, double value )
    
    for(int i=0;i<size;i++){
       switch( action ){
+
+         case eInvert :            
+            data[i] = 1.00 /  data[i];
+            break;
+
+         case eABS :            
+            data[i] = fabs( data[i] );
+            break;
 
          case eLog10File :
             data[i] = log10( data[i] );
@@ -1986,7 +2288,7 @@ int CBgFits::GetMedianInt( vector<cIntRange>& int_ranges, CBgArray& median_int, 
          max_count = count;
       }   
          
-      rms_iqr_int[x] = median_tab[q75] - median_tab[q25];
+      rms_iqr_int[x] = ( median_tab[q75] - median_tab[q25] ) / 1.35; // 2020-07-13 - division by 1.35 added !
    }
    
    delete [] median_tab;
@@ -2709,24 +3011,38 @@ int CBgFits::FixBadValues( double minValueOK, double maxValueOK )
    return count_bad;
 }
 
-void CBgFits::MeanLines( CBgArray& mean_lines )
+void CBgFits::MeanLines( CBgArray& mean_lines, CBgArray& rms_lines )
 {
    vector<int> counter;
    
    mean_lines.assign( GetYSize() , 0 );
+   rms_lines.assign( GetYSize() , 0 );
    counter.assign( GetYSize(), 0 );
    
    for(int y=0;y<GetYSize();y++){
+      double sum2 = 0.00;
       for(int x=0;x<GetXSize();x++){
          double value = getXY(x,y);
          
          if( ! isnan(value) ){
             mean_lines[y] += value;
+            sum2          += value*value;
             counter[y]    += 1;
          }
       }
       
       mean_lines[y] = mean_lines[y] / counter[y];
+      rms_lines[y]  = sqrt( (sum2/counter[y]) - (mean_lines[y]*mean_lines[y]) );
    }   
 }
 
+
+void CBgFits::Transpose( CBgFits& out_fits_t )
+{
+   for(int ch=0;ch<GetXSize();ch++){
+      for(int t=0;t<GetYSize();t++){
+         double val = getXY( ch, t );
+         out_fits_t.setXY( t, ch, val );
+      }
+   }
+}

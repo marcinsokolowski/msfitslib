@@ -8,8 +8,10 @@
 #include "bg_globals.h"
 #include "bg_total_power.h"
 
+#define BG_FITS_DATA_TYPE float
+
 // enum eBgFitsAction {eBgAct_None=0,eBgAct_Log10,eBgAct_DivideByConst,eBgAct_Sqrt,eBgAct_AstroRootImage};
-enum eCalcFitsAction_T  {eNone=0,eAdd,eSubtract,eMultiply,eDivide,eSubtractLines,eCompare,eGetStat,eDivideConst, eLog10File, eSqrtFile, eAstroRootImage, eDivideLines,eTimesConst, eNormalizeByMedian, eFindValue, eDumpForHisto, eAvgChannels, eSubtractSpectrum, eDivbySpectrum, eDBFile, eAddConst, eSubtractMedian, eFindZeroInt, eLin2DB, ePrintPixelValue, eComplexMag };
+enum eCalcFitsAction_T  {eNone=0,eAdd,eSubtract,eMultiply,eDivide,eSubtractLines,eCompare,eGetStat,eDivideConst, eLog10File, eSqrtFile, eAstroRootImage, eDivideLines,eTimesConst, eNormalizeByMedian, eFindValue, eDumpForHisto, eAvgChannels, eSubtractSpectrum, eDivbySpectrum, eDBFile, eAddConst, eSubtractMedian, eFindZeroInt, eLin2DB, ePrintPixelValue, eComplexMag, eAvgImages, eInvert, eABS, eSEFD_XX_YY };
 enum eFindValueType_T   {eFindValueExact=0,eFindValueSmaller,eFindValueLarger};
 
 
@@ -83,7 +85,7 @@ protected :
   int image_type;
   
   // fits DATA :  
-  float* data;
+  BG_FITS_DATA_TYPE* data;
   //! Fits header   
   vector<HeaderRecord> _fitsHeaderRecords;
   vector<cIntRange> m_IntegrationRanges;
@@ -124,7 +126,8 @@ public :
   void inc_lines_counter(){ m_lines_counter++; }
   
 
-  int ReadFits( const char* fits_file=NULL, int bAutoDetect=0, int bReadImage=1, int bIgnoreHeaderErrors=0 );  
+  int ReadFits( const char* fits_file=NULL, int bAutoDetect=0, int bReadImage=1, int bIgnoreHeaderErrors=0, bool transposed=false );  
+  int ReadFitsCube( const char* fits_file=NULL, int bAutoDetect=0, int bReadImage=1, int bIgnoreHeaderErrors=0 );  
   int WriteFits( const char* fits_file, int bUpdateSizeY=0, int bWriteKeys=1 );
   void ResetFilePointer(){ m_fptr = NULL; } // this is a workaround - not sure why required see line 416 in bg_fits.cpp
                                             // //      m_fptr = NULL; // NEW 2016-09-28 - will it be a problem for other things
@@ -182,6 +185,8 @@ public :
   void RMS( int n_count, CBgFits& right );
   
   void Normalize(double norm_factor);
+  void NormalizeY();
+  void NormalizeX();
   float setXY( int x, int y, float value );
   int setY( int y, float value );
   float* set_line( int y, vector<double>& line );
@@ -206,13 +211,22 @@ public :
   void Divide( CBgFits& right );
   void Multiply( CBgFits& right );
   void Subtract( CBgFits& right );
+  void SEFD_XX_YY( CBgFits& right );
+  void AddImages( CBgFits& right , double mult_const=1.00 );
   void ComplexMag( CBgFits& right );
   void SubtractLines( int y1, int y0, const char* outfile="diff.txt");
   void DivideLines( int y1, int y0, const char* outfile="ratio.txt");
   int Compare( CBgFits& right, float min_diff=0.00001, int verb=0 );
+  bool Offset( double dx, double dy, CBgFits& out_fits, double multiplier=1.00 );
+  void Transpose( CBgFits& out_fits_t );
   
   double GetStatBorder( double& mean, double& rms, double& minval, double& maxval, int border );
   double GetStat( double& mean, double& rms, double& minval, double& maxval, int x_start=0, int y_start=0, int x_end=-1, int y_end=-1 );
+  double GetStatRadius( double& mean, double& rms, double& minval, double& maxval, int radius  );
+  double GetStatRadiusAll( double& mean, double& rms, double& minval, double& maxval, 
+                           double& median, double& iqr, double& rms_iqr, int& cnt, int radius,
+                           bool do_iqr=true, 
+                           int xc=-1, int yc=-1, int gDebugLevel=0  );
 
   double GetStat( CBgArray& avg_spectrum, CBgArray& rms_spectrum, int start_int=0, int end_int=-1, const char* szState=NULL,
                   CBgArray* min_spectrum=NULL, CBgArray* max_spectrum=NULL,
@@ -234,7 +248,7 @@ public :
   int FixBadValues( double minValueOK, double maxValueOK );
   
   double MeanColumn( int x, double* out_rms=NULL );
-  void MeanLines( CBgArray& mean_lines ); // calculates mean value in every line and returns in array 
+  void MeanLines( CBgArray& mean_lines, CBgArray& rms_lines ); // calculates mean value in every line and returns in array 
   
   // operations on list of files 
   int CalcMedian( vector<string>& fits_list, CBgFits& out_rms, int bDoAverage=0 );
