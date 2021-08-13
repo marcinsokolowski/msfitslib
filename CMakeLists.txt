@@ -2,18 +2,18 @@ cmake_minimum_required(VERSION 3.9)
 project(msfitslib VERSION 1.0.1 DESCRIPTION "msfitslib description")
 include(GNUInstallDirs)
 add_library(msfitslib SHARED 
-     baseanal.cpp basedefines.cpp basestring.cpp basestructs.cpp ccdrowcollist.cpp cexcp.cpp cfgfile.cpp cmncfg.cpp cmn_tmpl.cpp laplace_info.cpp mybaseserver.cpp mybits.cpp mycmnglobals.cpp mydate2.cpp 
-     mydate.cpp myenv.cpp myfastlongtab.cpp myfile.cpp myfract.cpp myframeslist.cpp myhisto2D.cpp myhisto.cpp myinifile.cpp mykeytab.cpp mylibloader.cpp mylock.cpp mymatrix.cpp mymsgqueue.cpp mynet.cpp 
-     myparser.cpp mypipe.cpp mypixellist.cpp mypoints.cpp myprogress.cpp myranges.cpp myrequestdef.cpp mysafekeytab.cpp myshmem.cpp mysignal.cpp mystring.cpp mystrtable.cpp mytrace.cpp mytxtclient.cpp 
-     mytxtinetserver.cpp mytxtserver.cpp  myutil.cpp myvalcounter.cpp paramtab.cpp random.cpp tab2Ddesc.cpp templ.cpp 
-     gendistr.cpp calcrot.cpp mathfunc.cpp myfits.cpp mygraphcut.cpp vector.cpp
-     ccddriver_interface.cpp
-     bg_bedlam.cpp  bg_fits.cpp  bg_globals.cpp  bg_stat.cpp         bg_units.cpp  calsol_values.cpp weather_station.cpp
-     bg_array.cpp  bg_date.cpp    bg_geo.cpp   bg_norm.cpp     bg_total_power.cpp  bg_vis.cpp    cvalue_vector.cpp  libnova_interface.cpp  
-     spectrometer.cpp
+     src/baseanal.cpp src/basedefines.cpp src/basestring.cpp src/basestructs.cpp src/ccdrowcollist.cpp src/cexcp.cpp src/cfgfile.cpp src/cmncfg.cpp src/cmn_tmpl.cpp
+     src/laplace_info.cpp src/mybaseserver.cpp src/mybits.cpp src/mycmnglobals.cpp src/mydate2.cpp src/mydate.cpp src/myenv.cpp src/myfastlongtab.cpp src/myfile.cpp src/myfract.cpp 
+     src/myframeslist.cpp src/myhisto2D.cpp src/myhisto.cpp src/myinifile.cpp src/mykeytab.cpp src/mylibloader.cpp src/mylock.cpp src/mymatrix.cpp src/mymsgqueue.cpp src/mynet.cpp 
+     src/myparser.cpp src/mypipe.cpp src/mypixellist.cpp src/mypoints.cpp src/myprogress.cpp src/myranges.cpp src/myrequestdef.cpp src/mysafekeytab.cpp src/myshmem.cpp src/mysignal.cpp 
+     src/mystring.cpp src/mystrtable.cpp src/mytrace.cpp src/mytxtclient.cpp src/mytxtinetserver.cpp src/mytxtserver.cpp  src/myutil.cpp src/myvalcounter.cpp
+     src/paramtab.cpp src/random.cpp src/tab2Ddesc.cpp src/templ.cpp  src/gendistr.cpp src/calcrot.cpp src/mathfunc.cpp src/myfits.cpp src/mygraphcut.cpp src/vector.cpp  src/ccddriver_interface.cpp
+     src/bg_bedlam.cpp  src/bg_fits.cpp  src/bg_globals.cpp  src/bg_stat.cpp src/bg_units.cpp  src/calsol_values.cpp src/weather_station.cpp
+     src/bg_array.cpp  src/bg_date.cpp    src/bg_geo.cpp   src/bg_norm.cpp   src/bg_total_power.cpp  src/bg_vis.cpp src/cvalue_vector.cpp  src/libnova_interface.cpp  
+     src/spectrometer.cpp
            )
 
-add_definitions(-D_UNIX -D_ENABLE_PROFILER_ -D_ENABLE_TRACING_ -D_ENABLE_VISUALIZATION_ -D_MONTE_CARLO_ -D_NO_ROOT_ )
+add_definitions(-D_UNIX -D_ENABLE_PROFILER_ -D_ENABLE_TRACING_ -D_ENABLE_VISUALIZATION_ -D_MONTE_CARLO_ -D_NO_ROOT_ -I../src/)
 set_target_properties(msfitslib PROPERTIES
     VERSION ${PROJECT_VERSION}
     SOVERSION 1
@@ -49,15 +49,15 @@ find_package(ROOT REQUIRED COMPONENTS RIO Net)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 
-add_executable(nan_test nan_test.cpp)
-add_executable(libtest  libtest.cpp)
+add_executable(nan_test src/nan_test.cpp)
+add_executable(libtest  src/libtest.cpp)
 target_link_libraries(libtest msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB})
-add_executable(radec2azh radec2azh.cpp)
+add_executable(radec2azh src/radec2azh.cpp)
 target_link_libraries(radec2azh msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB})
-add_executable(sid2ux sid2ux.cpp)
+add_executable(sid2ux src/sid2ux.cpp)
 target_link_libraries(sid2ux msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB})
-add_executable(ux2sid   ux2sid.cpp) 
+add_executable(ux2sid   src/ux2sid.cpp) 
 target_link_libraries(ux2sid msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB})
-add_executable(ux2sid_file   ux2sid_file.cpp)
+add_executable(ux2sid_file   src/ux2sid_file.cpp)
 target_link_libraries(ux2sid_file msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB})
 
