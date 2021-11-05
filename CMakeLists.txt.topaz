@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.5.2)
-project(msfitslib VERSION 1.0.1)
+cmake_minimum_required(VERSION 3.9)
+project(msfitslib VERSION 1.0.1 DESCRIPTION "msfitslib description")
 include(GNUInstallDirs)
 add_library(msfitslib SHARED 
      src/baseanal.cpp src/basedefines.cpp src/basestring.cpp src/basestructs.cpp src/ccdrowcollist.cpp src/cexcp.cpp src/cfgfile.cpp src/cmncfg.cpp src/cmn_tmpl.cpp
@@ -30,19 +30,19 @@ install(FILES ${CMAKE_BINARY_DIR}/msfitslib.pc
 find_package(PkgConfig REQUIRED)
 
 # EXACUTABLES :
-find_library(CFITSIO_LIB cfitsio)
-# pkg_search_module(CFITSIO_LIB REQUIRED cfitsio IMPORTED_TARGET)
-# include_directories(${CFITSIO_INCLUDE_DIR})
-# link_libraries     (${CFITSIO_LIB})
+#find_library(CFITSIO_LIB cfitsio)
+pkg_search_module(CFITSIO_LIB REQUIRED cfitsio IMPORTED_TARGET)
+include_directories(PkgConfig::CFITSIO_LIB)
+link_libraries     (PkgConfig::CFITSIO_LIB)
 #
 # find_library(LIBNOVA_LIB nova)
 # find_path(FITSIO_INCLUDE_DIR NAMES fitsio.h)
 
-# pkg_search_module(FFTW REQUIRED fftw3 IMPORTED_TARGET)
-# include_directories(${FFTW_INCLUDE})
-# link_libraries     (${FFTW_LIB})
-find_library(FFTW3_LIB fftw3 HINTS ${FFTW_LIB} REQUIRED)
-# include_directories(${FITSIO_INCLUDE_DIR})
+pkg_search_module(FFTW REQUIRED fftw3 IMPORTED_TARGET)
+include_directories(PkgConfig::FFTW)
+link_libraries     (PkgConfig::FFTW)
+# find_library(FFTW3_LIB fftw3 HINTS ${FFTW_LIB} REQUIRED)
+include_directories(${FITSIO_INCLUDE_DIR})
 
 # EXACUTABLES :
 # pkg_search_module(LIBNOVA_LIB REQUIRED libnova IMPORTED_TARGET)

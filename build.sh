@@ -1,19 +1,90 @@
 #!/bin/bash
 
-module load fftw/3.3.8
+module purge
+module load cascadelake
+module load gcc/8.3.0
+module load fftw/3.3.8 
+module load libnova/0.15.0
+module load cfitsio_custom/3.49
 
-mkdir -p build/ lib/ bin/
+
+PROGRAM_NAME=msfitslib
+if [ $PAWSEY_CLUSTER = "mwa" ]; then
+    echo "Building cotter_wsclean on Garrawarla..."
+
+    
+    if [[ -n "$1" && $1 = 'group' ]]; then
+        MODULEFILE_DIR=/astro/mwavcs/pacer_blink/software/sles12sp5/modulefiles/$PROGRAM_NAME
+        INSTALL_DIR=/astro/mwavcs/pacer_blink/software/sles12sp5/development/$PROGRAM_NAME
+    elif [[ -n "$1" && $1 = 'test' ]]; then
+        INSTALL_DIR=`pwd`/build
+        MODULEFILE_DIR=$INSTALL_DIR/modulefiles/$PROGRAM_NAME
+    else
+        INSTALL_DIR=/astro/mwavcs/pacer_blink/$USER/software/$PROGRAM_NAME
+        MODULEFILE_DIR=/astro/mwavcs/pacer_blink/$USER/software/modulefiles/$PROGRAM_NAME
+        
+        if [[ -n "$2" && "$2" != "-" ]]; then
+            INSTALL_DIR=$2
+            MODULEFILE_DIR=$INSTALL_DIR/modulefiles/$PROGRAM_NAME
+        fi
+        if [[ -n "$3" && "$3" != "-" ]]; then
+            MODULEFILE_DIR=$3
+        fi
+    fi
+else
+    echo "Building cotter_wsclean on Topaz..."
+
+    # read script parameters
+    if [ $# -eq 1 ] && [ -n $1 && "$1" != "-" ] && [ $1 = 'group' ]; then
+        INSTALL_DIR=/group/director2183/software/centos7.6/development/$PROGRAM_NAME
+        MODULEFILE_DIR=/group/director2183/software/centos7.6/modulefiles/$PROGRAM_NAME
+        echo "Group installation at $INSTALL_DIR" 
+    else
+        INSTALL_DIR=/group/director2183/$USER/software/centos7.6/development/$PROGRAM_NAME
+        MODULEFILE_DIR=/group/director2183/$USER/software/centos7.6/modulefiles/$PROGRAM_NAME
+        echo "User installation at $INSTALL_DIR"
+    fi
+fi
+
+
+mkdir -p build/ lib/ bin/ ${INSTALL_DIR}/bin/ ${INSTALL_DIR}/lib/
 cd build
 cmake ..
-make
+make VERBOSE=1
+# make INSTALL_DIR=$INSTALL_DIR install
 
-cp libmsfitslib.so* ../lib/
+# cp libmsfitslib.so* ../lib/
+cp libmsfitslib.so* ${INSTALL_DIR}/lib/
 
-cp ux2sid ../bin/
-cp ux2sid_file ../bin/
-cp sid2ux ../bin/
-cp radec2azh ../bin/
+cp ux2sid ${INSTALL_DIR}//bin/
+cp ux2sid_file ${INSTALL_DIR}//bin/
+cp sid2ux ${INSTALL_DIR}//bin/
+cp radec2azh ${INSTALL_DIR}//bin/
+cp avg_images ${INSTALL_DIR}//bin/
 
-# cp libmscommonlib.so* ../lib/
+# create modulefile
+mkdir -p $MODULEFILE_DIR
+echo "
+local root_dir = '$INSTALL_DIR'
 
+load('cascadelake')
+load('slurm/20.02.3')
+load('gcc/8.3.0')
+load('fftw/3.3.8')
+load('libnova/0.15.0')
+load('cfitsio_custom/3.49')
+
+if (mode() ~= 'whatis') then
+prepend_path('MSFITSLIB_DIR', root_dir )
+prepend_path('PATH', root_dir .. '/bin')
+prepend_path('PATH', root_dir .. '/scripts')
+prepend_path('LD_LIBRARY_PATH', root_dir .. '/lib')
+end
+
+" > $MODULEFILE_DIR/devel.lua
+
+
+echo "Build of $PROGRAM_NAME finished at:"
+date
+echo "Installed $PROGRAM_NAME in $INSTALL_DIR and module in $MODULEFILE_DIR/devel.lua"
 
