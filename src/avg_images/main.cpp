@@ -14,7 +14,7 @@ using namespace std;
 string list="fits_list";
 string out_fits="out.fits";
 string out_rms_fits="out_rms.fits";
-
+string beam_fits_file;
 
 double gMinRMSOnSingle  = 0.00001;
 double gMaxRMSOnSingle  = 4.00; // maximum allowed RMS on 
@@ -36,13 +36,14 @@ void usage()
 {
    printf("avg_images fits_list out.fits out_rms.fits CALCULATE_RMS -x\n\n\n");
    printf("\t-x : enable calculation of max.fits [default %d]\n",gCalcMax);
-   printf("\t-r MAX_RMS_ALLOWED\n");   
+    printf("\t-r MAX_RMS_ALLOWED\n");   
    printf("\t-w (x_start,y_start)-(x_end,y_end) - do dump dynamic spectra of all pixels in this window\n");
    printf("\t-c RADIUS : calculate RMS around the center in radius of N pixels and RMS-IQR is used [default disabled]\n");
    printf("\t-i : ignore missing FITS files [default %d]\n",int(gIgnoreMissingFITS));
    printf("\t-C (x,y) : center position to calculate RMS around [default not defined]\n");
    printf("\t-S start_fits_index : default %d\n",gStartFitsIndex);
    printf("\t-E end_fits_index   : default %d\n",gEndFitsIndex);
+   printf("\t-B BEAM_IMAGE : for weighting the averaged images and calculating an average as < Image_(x,y) > = Sum_over_images Beam(x,y)^2 Image(x,y) / Sum_over_images Beam(x,y)^2\n");
    
    exit(0);
 }
@@ -57,6 +58,10 @@ void parse_cmdline(int argc, char * argv[]) {
          case 'h':
             // antenna1 = atol( optarg );
             usage();
+            break;
+
+         case 'B':
+            beam_fits_file = optarg;
             break;
 
          case 'i':
@@ -137,7 +142,8 @@ void print_parameters()
     if( gCalcRMSAroundPixel ){
        printf("\tRMS calculated around pixel (%d,%d)\n",gBorderStartX,gBorderStartY);
     }
-    printf("Ignore missing FITS = %d",int(gIgnoreMissingFITS));
+    printf("Ignore missing FITS = %d\n",int(gIgnoreMissingFITS));
+    printf("Beam image for weighting = %s\n",beam_fits_file.c_str());
     printf("############################################################################################\n");
 }
 
@@ -184,7 +190,7 @@ int main(int argc,char* argv[])
   }else{
      printf("OK : fits file %s read ok\n",fits_list[gStartFitsIndex].c_str());
   }
-
+  
   // read the same second time to save RMS 
   if( strlen(out_rms_fits.c_str()) > 0 ){
       if( first_fits2.ReadFits( fits_list[gStartFitsIndex].c_str() ) ){
@@ -209,6 +215,25 @@ int main(int argc,char* argv[])
       sum2_tab = new double[size];
       printf("DEBUG : sum2_tab initialised\n");      
   }
+
+  CBgFits* pBeamImage = NULL;
+  double* sum_beam = NULL;
+  if( strlen( beam_fits_file.c_str() ) > 0 ){
+     pBeamImage = new CBgFits( beam_fits_file.c_str() );
+     if( pBeamImage->ReadFits( beam_fits_file.c_str() ) ){
+        printf("ERROR : could not read beam file %s to be used for weighthing images\n",beam_fits_file.c_str());
+        exit(-1);
+     }else{
+        printf("OK : beam fits file %s read OK\n",beam_fits_file.c_str());
+     }
+     if( pBeamImage->GetXSize() != first_fits.GetXSize() || pBeamImage->GetYSize() != first_fits.GetYSize() ){
+        printf("ERROR : size of the beam FITS file is %d x %d != size of image FITS %d x %d -> cannot continue\n",pBeamImage->GetXSize(),first_fits.GetXSize(),pBeamImage->GetYSize(),first_fits.GetYSize());
+        exit(-1);
+     }
+     
+     sum_beam = new double[size];
+  }
+
 
   // initialise sum_tab and sum2_tab with values from the 1st image :
   float* first_fits_data_ptr = first_fits.get_data();
@@ -277,8 +302,14 @@ int main(int argc,char* argv[])
      if ( gMaxRMSOnSingle <= 0 || ( gMinRMSOnSingle <= rms_iqr_center && rms_iqr_center <= gMaxRMSOnSingle ) ){     
          for (int pos=0;pos<size;pos++){
             double val = fits.get_data()[pos];
-        
-            sum_tab[pos] += val;
+            double beam = 1.00;
+            if( pBeamImage ){
+               beam = (pBeamImage->get_data())[pos];
+               sum_tab[pos] += val*(beam*beam);               
+               sum_beam[pos] += (beam*beam);
+            }else{                   
+               sum_tab[pos] += val;
+            }
             if( sum2_tab ){
                 sum2_tab[pos] += (val*val);
             }
@@ -305,6 +336,10 @@ int main(int argc,char* argv[])
   printf("STAT_INFO : averaged %d good images of %d all\n",good_image_count,fits_list.size());    
   for (int pos=0;pos<size;pos++){       
      double mean = ( sum_tab[pos] / good_image_count );
+     
+     if( pBeamImage && sum_beam ){
+        mean = sum_tab[pos] / sum_beam[pos];
+     }
      
      first_fits.get_data()[pos] = mean;
      if( sum2_tab ){
@@ -348,6 +383,14 @@ int main(int argc,char* argv[])
   delete [] sum_tab;
   if( sum2_tab ){
       delete [] sum2_tab;
+  }
+  
+  if( pBeamImage ){
+     delete pBeamImage;
+  }
+  
+  if( sum_beam ){
+     delete [] sum_beam;
   }
 }
 
