@@ -7,6 +7,7 @@
 
 #include <bg_globals.h>
 #include "bg_fits.h"
+#include <mystring.h>
 
 #include <vector>
 using namespace std;
@@ -219,12 +220,25 @@ int main(int argc,char* argv[])
   CBgFits* pBeamImage = NULL;
   double* sum_beam = NULL;
   if( strlen( beam_fits_file.c_str() ) > 0 ){
-     pBeamImage = new CBgFits( beam_fits_file.c_str() );
-     if( pBeamImage->ReadFits( beam_fits_file.c_str() ) ){
-        printf("ERROR : could not read beam file %s to be used for weighthing images\n",beam_fits_file.c_str());
+     mystring szFullBeamFitsFile = beam_fits_file.c_str();
+     if( strstr( beam_fits_file.c_str() , "/" ) ){
+        printf("INFO : directory already included in beam file name %s\n",beam_fits_file.c_str());
+     }else{
+        mystring szDrv,szDir,szFName, szExt;
+        mystring szTmp = beam_fits_file.c_str();
+        szTmp.splitpath( szDrv,szDir,szFName,szExt );
+                
+        szFullBeamFitsFile = szDrv.c_str();
+        szFullBeamFitsFile += "/";
+        szFullBeamFitsFile += beam_fits_file.c_str();
+        printf("INFO : full beam FITS file path = %s\n",szFullBeamFitsFile.c_str());
+     }
+     pBeamImage = new CBgFits( szFullBeamFitsFile.c_str() );
+     if( pBeamImage->ReadFits( szFullBeamFitsFile.c_str() ) ){
+        printf("ERROR : could not read beam file %s to be used for weighthing images\n",szFullBeamFitsFile.c_str());
         exit(-1);
      }else{
-        printf("OK : beam fits file %s read OK\n",beam_fits_file.c_str());
+        printf("OK : beam fits file %s read OK\n",szFullBeamFitsFile.c_str());
      }
      if( pBeamImage->GetXSize() != first_fits.GetXSize() || pBeamImage->GetYSize() != first_fits.GetYSize() ){
         printf("ERROR : size of the beam FITS file is %d x %d != size of image FITS %d x %d -> cannot continue\n",pBeamImage->GetXSize(),first_fits.GetXSize(),pBeamImage->GetYSize(),first_fits.GetYSize());
