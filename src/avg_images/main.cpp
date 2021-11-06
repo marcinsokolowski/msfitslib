@@ -219,35 +219,6 @@ int main(int argc,char* argv[])
 
   CBgFits* pBeamImage = NULL;
   double* sum_beam = NULL;
-  if( strlen( beam_fits_file.c_str() ) > 0 ){
-     mystring szFullBeamFitsFile = beam_fits_file.c_str();
-     if( strstr( beam_fits_file.c_str() , "/" ) ){
-        printf("INFO : directory already included in beam file name %s\n",beam_fits_file.c_str());
-     }else{
-        mystring szDrv,szDir,szFName, szExt;
-        mystring szTmp = beam_fits_file.c_str();
-        szTmp.splitpath( szDrv,szDir,szFName,szExt );
-                
-        szFullBeamFitsFile = szDrv.c_str();
-        szFullBeamFitsFile += "/";
-        szFullBeamFitsFile += beam_fits_file.c_str();
-        printf("INFO : full beam FITS file path = %s\n",szFullBeamFitsFile.c_str());
-     }
-     pBeamImage = new CBgFits( szFullBeamFitsFile.c_str() );
-     if( pBeamImage->ReadFits( szFullBeamFitsFile.c_str() ) ){
-        printf("ERROR : could not read beam file %s to be used for weighthing images\n",szFullBeamFitsFile.c_str());
-        exit(-1);
-     }else{
-        printf("OK : beam fits file %s read OK\n",szFullBeamFitsFile.c_str());
-     }
-     if( pBeamImage->GetXSize() != first_fits.GetXSize() || pBeamImage->GetYSize() != first_fits.GetYSize() ){
-        printf("ERROR : size of the beam FITS file is %d x %d != size of image FITS %d x %d -> cannot continue\n",pBeamImage->GetXSize(),first_fits.GetXSize(),pBeamImage->GetYSize(),first_fits.GetYSize());
-        exit(-1);
-     }
-     
-     sum_beam = new double[size];
-  }
-
 
   // initialise sum_tab and sum2_tab with values from the 1st image :
   float* first_fits_data_ptr = first_fits.get_data();
@@ -282,6 +253,41 @@ int main(int argc,char* argv[])
      }else{
         printf("OK : fits file %s read ok\n",fits_list[i].c_str());
      }
+     
+     //  if weigthing by the beam is required :
+     if( strlen( beam_fits_file.c_str() ) > 0 ){
+        mystring szFullBeamFitsFile = beam_fits_file.c_str();
+        if( strstr( beam_fits_file.c_str() , "/" ) ){
+           printf("INFO : directory already included in beam file name %s\n",beam_fits_file.c_str());
+        }else{
+           mystring szDrv,szDir,szFName, szExt;
+           mystring szTmp = fits_list[i].c_str();
+           szTmp.splitpath( szDrv,szDir,szFName,szExt );
+                
+           szFullBeamFitsFile = szDrv.c_str();
+           szFullBeamFitsFile += "/";
+           szFullBeamFitsFile += beam_fits_file.c_str();
+           printf("INFO : full beam FITS file path = %s\n",szFullBeamFitsFile.c_str());
+        }
+        if( !pBeamImage ){
+           pBeamImage = new CBgFits( szFullBeamFitsFile.c_str() );
+        }
+        if( pBeamImage->ReadFits( szFullBeamFitsFile.c_str() ) ){
+           printf("ERROR : could not read beam file %s to be used for weighthing images\n",szFullBeamFitsFile.c_str());
+           exit(-1);
+        }else{
+           printf("OK : beam fits file %s read OK\n",szFullBeamFitsFile.c_str());
+        }
+        if( pBeamImage->GetXSize() != first_fits.GetXSize() || pBeamImage->GetYSize() != first_fits.GetYSize() ){
+           printf("ERROR : size of the beam FITS file is %d x %d != size of image FITS %d x %d -> cannot continue\n",pBeamImage->GetXSize(),first_fits.GetXSize(),pBeamImage->GetYSize(),first_fits.GetYSize());
+           exit(-1);
+        }
+
+        if( !sum_beam ){     
+           sum_beam = new double[size];
+        }
+     }
+
 
      // check image :
      double mean, rms, minval, maxval;
