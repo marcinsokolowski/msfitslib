@@ -264,7 +264,7 @@ int main(int argc,char* argv[])
            mystring szTmp = fits_list[i].c_str();
            szTmp.splitpath( szDrv,szDir,szFName,szExt );
                 
-           szFullBeamFitsFile = szDrv.c_str();
+           szFullBeamFitsFile = szDir.c_str();
            szFullBeamFitsFile += "/";
            szFullBeamFitsFile += beam_fits_file.c_str();
            printf("INFO : full beam FITS file path = %s\n",szFullBeamFitsFile.c_str());
