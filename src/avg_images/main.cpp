@@ -49,7 +49,7 @@ void usage()
 }
 
 void parse_cmdline(int argc, char * argv[]) {
-   char optstring[] = "hixr:w:c:C:S:E:";
+   char optstring[] = "hixr:w:c:C:S:E:B:";
    int opt;
         
    while ((opt = getopt(argc, argv, optstring)) != -1) {
