@@ -220,17 +220,18 @@ int main(int argc,char* argv[])
   CBgFits* pBeamImage = NULL;
   double* sum_beam = NULL;
 
+// 2021-11-06 : start with zeros to do everything in the loop (required after adding beam weighting) 
   // initialise sum_tab and sum2_tab with values from the 1st image :
-  float* first_fits_data_ptr = first_fits.get_data();
+//  float* first_fits_data_ptr = first_fits.get_data();
   for (int pos=0;pos<size;pos++){
-     double val = first_fits_data_ptr[pos];
+//     double val = first_fits_data_ptr[pos];
   
-     sum_tab[pos] = val;
+     sum_tab[pos] = 0; // val;
      if( sum2_tab ){
-         sum2_tab[pos] = val*val;
+         sum2_tab[pos] = 0; // val*val;
      }
      if( pMax ){
-        pMax->get_data()[pos] = val;
+        pMax->get_data()[pos] = -1e20; // val;
      }
   }
   int good_image_count = 1; // first image already included 
@@ -241,7 +242,7 @@ int main(int argc,char* argv[])
   if( gEndFitsIndex < last_fits ){
      last_fits = gEndFitsIndex;
   }
-  for(int i=(gStartFitsIndex+1);i<last_fits;i++){ // 2019-07-11 - start from the 2nd (1st or 0-based) image 
+  for(int i=(gStartFitsIndex);i<last_fits;i++){ // 2019-07-11 - start from the 2nd (1st or 0-based) image 
      if( fits.ReadFits( fits_list[i].c_str() ) ){
         if( gIgnoreMissingFITS ){
            printf("WARNING : could not read fits file %s on the list, -i option means that it is ignored -> FITS file skipped\n",fits_list[i].c_str());
