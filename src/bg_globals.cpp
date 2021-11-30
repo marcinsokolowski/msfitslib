@@ -22,7 +22,8 @@ int gBGPrintfLevel=0;
 
 #define REPLACE_ELEMS( tab, pos1, pos2 ) { tmp=tab[pos1]; tab[pos1]=tab[pos2]; tab[pos2]=tmp; }
 
-/*int is_number(const char* string)
+/*
+int is_number(const char* string)
 {
    if( string && string[0] ){
       int i=0;
@@ -228,6 +229,30 @@ double calc_avg_rms( double* ftab, long cnt, double& rms, int bOnlyPositive /*=0
 	}
 
 }*/
+
+void my_sort_float( vector<double>& ftab, long cnt /*=-1*/ )
+{
+   // WARNING / TODO :
+   // it's a temporary solutions and unnecessarily slow -> should be changed to proper Quick sort on vector<double> 
+
+   if( cnt < 0 ){
+      cnt = ftab.size();
+   }
+   double* ftab_tmp = new double[ cnt ];
+   
+   for(int i=0;i<cnt;i++){
+      ftab_tmp[i] = ftab[i];
+   }
+   
+   my_sort_float( ftab_tmp, cnt );
+
+   for(int i=0;i<cnt;i++){
+      ftab[i] = ftab_tmp[i];
+   }
+   
+   delete [] ftab_tmp;
+}
+
 
 
 int freq2channel( double freq )
@@ -606,3 +631,18 @@ void print_cmdline(int argc, char * argv[])
    return -1;
 }
 */
+
+// #include <unistd.h>
+#include <sys/stat.h>
+//#include <sys/types.h>
+// #include <fcntl.h>
+
+int get_file_size( const char* filename )
+{
+//        if( !DoesFileExist( filename ) ){
+//                return -1;
+//        }
+        struct stat buf;
+        stat( filename, &buf );
+        return (int)buf.st_size;
+}

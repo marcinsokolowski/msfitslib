@@ -51,6 +51,7 @@ const char* add_postfix(const char* name,const char* new_ext,string& out);
 
 // reading list files :
 int bg_read_list( const char* file, vector<string>& out_list );
+int bg_does_file_exists(const char* fname);
 void print_cmdline(int argc, char * argv[]);
 
 // angles :
@@ -59,6 +60,7 @@ double rad2deg(double in_rad);
 
 // sort/median :
 void my_sort_float( double* ftab, long cnt );
+void my_sort_float( vector<double>& ftab, long cnt=-1 );
 double calc_rms( double* ftab, long cnt );
 double calc_avg_rms( double* ftab, long cnt, double& rms, int bOnlyPositive=0 );
 
@@ -103,5 +105,8 @@ void alloc(vector<cValue>& arr, int _size );
 
 // vector<int>
 int find_value( vector<int>& arr, int value );
+
+// file functions :
+int get_file_size( const char* filename );
 
 #endif
