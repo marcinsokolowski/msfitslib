@@ -1,1 +1,1 @@
-COMMON_LIBS=-L$(MWA_FRB)/lib -lfitslib libmscommonlib.a -lcfitsio -lnova 
+COMMON_LIBS=-L$(MWA_FRB)/lib -lmscommon -lcfitsio -lnova 
