@@ -1,1 +1,1 @@
-COMMON_LIBS=-lcfitsio -lnova 
+COMMON_LIBS=-lcfitsio -lnova -ldl

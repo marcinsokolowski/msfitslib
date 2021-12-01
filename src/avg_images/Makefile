@@ -1,7 +1,7 @@
 include ../flags_main.mak
 
 all :
-	g++ main.cpp -o avg_images -g -I ../ $(MWA_FRB)/lib/libmscommonlib.a $(COMMON_LIBS) -D_UNIX
+	g++ main.cpp -o avg_images -g -I ../ $(MWA_FRB)/lib/libmscommonlib.a $(MWA_FRB)/lib/libmsfitslib.a $(COMMON_LIBS) -D_UNIX
 	mkdir -p $(MWA_FRB)/bin/
 	cp avg_images $(MWA_FRB)/bin/
 	
