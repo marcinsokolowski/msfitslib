@@ -183,9 +183,10 @@ int main(int argc,char* argv[])
      }
   }
   
+  //  int ReadFits( const char* fits_file=NULL, int bAutoDetect=0, int bReadImage=1, int bIgnoreHeaderErrors=0, bool transposed=false );
   printf("Reading fits file %s ...\n",fits_list[gStartFitsIndex].c_str());
   CBgFits first_fits, first_fits2;
-  if( first_fits.ReadFits( fits_list[gStartFitsIndex].c_str() ) ){
+  if( first_fits.ReadFits( fits_list[gStartFitsIndex].c_str()  , 0, 1, 1 ) ){
      printf("ERROR : could not read first fits file %s on the list\n",fits_list[gStartFitsIndex].c_str());
      exit(-1); 
   }else{
@@ -194,7 +195,7 @@ int main(int argc,char* argv[])
   
   // read the same second time to save RMS 
   if( strlen(out_rms_fits.c_str()) > 0 ){
-      if( first_fits2.ReadFits( fits_list[gStartFitsIndex].c_str() ) ){
+      if( first_fits2.ReadFits( fits_list[gStartFitsIndex].c_str() , 0, 1, 1 ) ){
          printf("ERROR : could not read first fits file %s on the list\n",fits_list[gStartFitsIndex].c_str());
          exit(-1); 
       }else{
@@ -243,7 +244,7 @@ int main(int argc,char* argv[])
      last_fits = gEndFitsIndex;
   }
   for(int i=(gStartFitsIndex);i<last_fits;i++){ // 2019-07-11 - start from the 2nd (1st or 0-based) image 
-     if( fits.ReadFits( fits_list[i].c_str() ) ){
+     if( fits.ReadFits( fits_list[i].c_str() , 0, 1, 1 ) ){
         if( gIgnoreMissingFITS ){
            printf("WARNING : could not read fits file %s on the list, -i option means that it is ignored -> FITS file skipped\n",fits_list[i].c_str());
            continue;
@@ -273,7 +274,7 @@ int main(int argc,char* argv[])
         if( !pBeamImage ){
            pBeamImage = new CBgFits( szFullBeamFitsFile.c_str() );
         }
-        if( pBeamImage->ReadFits( szFullBeamFitsFile.c_str() ) ){
+        if( pBeamImage->ReadFits( szFullBeamFitsFile.c_str() , 0, 1, 1 ) ){
            printf("ERROR : could not read beam file %s to be used for weighthing images\n",szFullBeamFitsFile.c_str());
            exit(-1);
         }else{
@@ -332,7 +333,11 @@ int main(int argc,char* argv[])
                sum_tab[pos] += val;
             }
             if( sum2_tab ){
-                sum2_tab[pos] += (val*val);
+                if( pBeamImage ){
+                   sum2_tab[pos] += (val*val)*(beam*beam*beam*beam);
+                }else{
+                   sum2_tab[pos] += (val*val);
+                }
             }
          }
 
@@ -364,7 +369,14 @@ int main(int argc,char* argv[])
      
      first_fits.get_data()[pos] = mean;
      if( sum2_tab ){
-         first_fits2.get_data()[pos] = sqrt( (sum2_tab[pos] / good_image_count ) - mean*mean );
+         if( pBeamImage ){
+            // RMS for BeamWeighted version :
+            double C = 1.00/sum_beam[pos];
+            double mean2 = good_image_count*(C*C)*sum2_tab[pos];
+            first_fits2.get_data()[pos] = sqrt( mean2 - mean*mean );
+         }else{
+            first_fits2.get_data()[pos] = sqrt( (sum2_tab[pos] / good_image_count ) - mean*mean );
+         }
      }
      
 //     printf("%.8f %.20f\n",first_fits.ch2freq(pos),( sum_tab[pos] / fits_list.size() ));
