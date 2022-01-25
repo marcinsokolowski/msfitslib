@@ -195,6 +195,7 @@ public :
   void NormalizeY();
   void NormalizeX();
   float setXY( int x, int y, float value );
+  float addXY( int x, int y, float value );
   int setY( int y, float value );
   float* set_line( int y, vector<double>& line );
   float* set_reim_line( int y, vector<double>& line_re, vector<double>& line_im );
@@ -227,6 +228,7 @@ public :
   int Compare( CBgFits& right, float min_diff=0.00001, int verb=0 );
   bool Offset( double dx, double dy, CBgFits& out_fits, double multiplier=1.00 );
   void Transpose( CBgFits& out_fits_t );
+  double Sum(); // calculates sum of pixel values in the image
   
   double GetStatBorder( double& mean, double& rms, double& minval, double& maxval, int border );
   double GetStat( double& mean, double& rms, double& minval, double& maxval, int x_start=0, int y_start=0, int x_end=-1, int y_end=-1 );

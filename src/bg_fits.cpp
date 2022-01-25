@@ -702,6 +702,8 @@ int CBgFits::ParseSkyIntegrations()
 
 int CBgFits::ReadFits( const char* fits_file, int bAutoDetect /*=0*/, int bReadImage /* =1 */ , int bIgnoreHeaderErrors /* =0 */ , bool transposed /* =false */ )
 {
+  printf("DEBUG : ReadFits( %s , %d , %d , %d , %d )\n",fits_file,bAutoDetect,bReadImage,bIgnoreHeaderErrors,transposed);
+
   fitsfile *fp=0;
   int status = 0;
   string szFreqKeyword = "CRVAL1", szFreqDelta = "CDELT1", szTimeDelta = "CDELT2";
@@ -943,7 +945,7 @@ int CBgFits::ReadFits( const char* fits_file, int bAutoDetect /*=0*/, int bReadI
            inttime = atof(szCDELT2.c_str());
         }else{
            if( bIgnoreHeaderErrors <= 0 ){
-               printf("ERROR : could not read INTTIME nor CDELT2 to get time resolutions information for file %s\n",fits_file);
+               printf("WARNING : could not read INTTIME nor CDELT2 to get time resolutions information for file %s\n",fits_file);
            }
         }
      }
@@ -981,7 +983,7 @@ int CBgFits::ReadFits( const char* fits_file, int bAutoDetect /*=0*/, int bReadI
            }*/
         }else{
            if( bIgnoreHeaderErrors <= 0 ){
-               printf("ERROR : cannot get start UT time of the image %s !\n",fits_file);
+               printf("WARNING : cannot get start UT time of the image %s !\n",fits_file);
            }
         }
      }
@@ -1252,6 +1254,17 @@ int CBgFits::setY( int y, float value )
    return ret;
 }
 
+float CBgFits::addXY( int x, int y, float value )
+{
+   int pos = y*m_SizeX + x;
+   if( pos>=0 && pos < (m_SizeX*m_SizeY) ){
+      data[pos] += value;
+      return data[pos];
+   }
+   
+   return -1;
+}
+
 float CBgFits::setXY( int x, int y, float value )
 {
    int pos = y*m_SizeX + x;
@@ -1428,6 +1441,18 @@ void CBgFits::Multiply( CBgFits& right )
    }
 }
 
+double CBgFits::Sum()
+{
+   double sum = 0.00;
+   int size = m_SizeX*m_SizeY;
+   
+   for(int i=0;i<size;i++){
+      sum += data[i];
+   }
+   
+   return sum;
+}
+
 void CBgFits::AddImages( CBgFits& right, double mult_const )
 {
    int size = m_SizeX*m_SizeY;
@@ -1568,7 +1593,9 @@ void CBgFits::Divide( CBgFits& right )
    int size = m_SizeX*m_SizeY;
    
    for(int i=0;i<size;i++){
-      data[i] = (data[i] / right.data[i]);
+      if ( right.data[i] != 0.00 ){
+         data[i] = (data[i] / right.data[i]);
+      }
    }
 }
 
