@@ -17,7 +17,7 @@ add_definitions(-D_UNIX -D_ENABLE_PROFILER_ -D_ENABLE_TRACING_ -D_ENABLE_VISUALI
 set_target_properties(msfitslib PROPERTIES
     VERSION ${PROJECT_VERSION}
     SOVERSION 1
-    PUBLIC_HEADER "src/msfitslib.h;src/spectrometer.h;src/bg_date.h;src/bg_globals.h;src/cvalue_vector.h;src/calsol_values.h;src/myparser.h;src/mystring.h;src/mystrtable.h;src/mytypes.h;src/basedefines.h;src/basestring.h;src/myfile.h;src/basestructs.h")
+    PUBLIC_HEADER "src/msfitslib.h;src/bg_fits.h;src/spectrometer.h;src/bg_date.h;src/bg_globals.h;src/cvalue_vector.h;src/calsol_values.h;src/myparser.h;src/mystring.h;src/mystrtable.h;src/mytypes.h;src/basedefines.h;src/basestring.h;src/myfile.h;src/basestructs.h")
 configure_file(msfitslib.pc.in msfitslib.pc @ONLY)
 target_include_directories(msfitslib PRIVATE .)
 install(TARGETS msfitslib
