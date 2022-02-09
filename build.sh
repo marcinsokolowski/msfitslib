@@ -48,20 +48,11 @@ else
 fi
 
 
-mkdir -p build/ lib/ bin/ ${INSTALL_DIR}/bin/ ${INSTALL_DIR}/lib/
+mkdir -p build/ 
 cd build
-cmake ..
+cmake ..  -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR}
 make VERBOSE=1
-# make INSTALL_DIR=$INSTALL_DIR install
-
-# cp libmsfitslib.so* ../lib/
-cp libmsfitslib.so* ${INSTALL_DIR}/lib/
-
-cp ux2sid ${INSTALL_DIR}//bin/
-cp ux2sid_file ${INSTALL_DIR}//bin/
-cp sid2ux ${INSTALL_DIR}//bin/
-cp radec2azh ${INSTALL_DIR}//bin/
-cp avg_images ${INSTALL_DIR}//bin/
+make INSTALL_DIR=$INSTALL_DIR install
 
 # create modulefile
 mkdir -p $MODULEFILE_DIR
