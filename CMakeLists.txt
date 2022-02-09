@@ -30,7 +30,7 @@ install(FILES ${CMAKE_BINARY_DIR}/msfitslib.pc
 find_package(PkgConfig REQUIRED)
 
 # EXACUTABLES :
-find_library(CFITSIO_LIB cfitsio)
+find_library(CFITSIO_LIB cfitsio HINTS ENV LD_LIBRARY_PATH)
 # pkg_search_module(CFITSIO_LIB REQUIRED cfitsio IMPORTED_TARGET)
 # include_directories(${CFITSIO_INCLUDE_DIR})
 # link_libraries     (${CFITSIO_LIB})
@@ -41,7 +41,7 @@ find_library(CFITSIO_LIB cfitsio)
 # pkg_search_module(FFTW REQUIRED fftw3 IMPORTED_TARGET)
 # include_directories(${FFTW_INCLUDE})
 # link_libraries     (${FFTW_LIB})
-find_library(FFTW3_LIB fftw3 HINTS ${FFTW_LIB} REQUIRED)
+find_library(FFTW3_LIB fftw3 HINTS ENV FFTW_LIB REQUIRED)
 # include_directories(${FITSIO_INCLUDE_DIR})
 
 # EXACUTABLES :
