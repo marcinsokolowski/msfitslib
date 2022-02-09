@@ -73,7 +73,7 @@ load('slurm/20.02.3')
 load('gcc/8.3.0')
 load('fftw/3.3.8')
 load('libnova/0.15.0')
-load('cfitsio_custom/3.49')
+load('cfitsio/3.48')
 
 if (mode() ~= 'whatis') then
 prepend_path('MSFITSLIB_DIR', root_dir )
