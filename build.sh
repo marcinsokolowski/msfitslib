@@ -6,7 +6,7 @@ module load gcc/8.3.0
 module load fftw/3.3.8 
 module load libnova/0.15.0
 # module load cfitsio_custom/3.49
-module load cfitsio
+module load cfitsio/3.48
 module load cmake/3.18.0
 
 PROGRAM_NAME=msfitslib
