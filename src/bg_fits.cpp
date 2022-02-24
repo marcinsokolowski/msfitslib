@@ -67,7 +67,8 @@ int CBgFits::freq2ch(double freq)
 }
 
 CBgFits::CBgFits( const char* fits_file, int xSize, int ySize )
- : data(NULL),m_SizeX(xSize),m_SizeY(ySize),bitpix(-32),inttime(0), start_freq(0), stop_freq(480), m_fptr(NULL), total_counter(0),m_lines_counter(0),delta_freq(480.00/4096.00), m_pRFIMask(NULL), image_type(TFLOAT), dtime_fs(0), dtime_fu(0)
+ : data(NULL),m_SizeX(xSize),m_SizeY(ySize),bitpix(-32),inttime(0), start_freq(0), stop_freq(480), m_fptr(NULL), total_counter(0),m_lines_counter(0),delta_freq(480.00/4096.00), m_pRFIMask(NULL), 
+   image_type(TFLOAT), dtime_fs(0), dtime_fu(0), m_bExternalData(false)
 {
   if( fits_file && strlen(fits_file) ){   
      m_FileName = fits_file;
@@ -78,7 +79,7 @@ CBgFits::CBgFits( const char* fits_file, int xSize, int ySize )
 }
 
 CBgFits::CBgFits( int xSize, int ySize )
-: data(NULL),m_SizeX(xSize),m_SizeY(ySize),bitpix(-32),inttime(0), start_freq(0), stop_freq(480), m_fptr(NULL), total_counter(0),m_lines_counter(0),delta_freq(480.00/4096.00), m_pRFIMask(NULL), image_type(TFLOAT), dtime_fs(0), dtime_fu(0)
+: data(NULL),m_SizeX(xSize),m_SizeY(ySize),bitpix(-32),inttime(0), start_freq(0), stop_freq(480), m_fptr(NULL), total_counter(0),m_lines_counter(0),delta_freq(480.00/4096.00), m_pRFIMask(NULL), image_type(TFLOAT), dtime_fs(0), dtime_fu(0), m_bExternalData(false)
 {
    int size = m_SizeX*m_SizeY;
    Realloc( xSize, ySize, FALSE );   
@@ -111,10 +112,12 @@ void CBgFits::Realloc( int sizeX, int sizeY, int bKeepOldData )
 
 void CBgFits::Clean()
 {
-  if( data ){
-     delete [] data;
-     data = NULL;
-  }   
+  if( !m_bExternalData ){
+     if( data ){
+        delete [] data;
+        data = NULL;
+     }   
+  }
 }
 
 CBgFits::~CBgFits()

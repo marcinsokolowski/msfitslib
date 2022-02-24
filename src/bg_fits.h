@@ -92,6 +92,8 @@ protected :
   
   // fits DATA :  
   BG_FITS_DATA_TYPE* data;
+  bool m_bExternalData;
+  
   //! Fits header   
   vector<HeaderRecord> _fitsHeaderRecords;
   vector<cIntRange> m_IntegrationRanges;
@@ -131,7 +133,7 @@ public :
   int get_lines_counter() { return m_lines_counter; }
   void reset_lines_counter(){ m_lines_counter = 0; }
   void inc_lines_counter(){ m_lines_counter++; }
-  void SetData( BG_FITS_DATA_TYPE* ptr ){ data = ptr; }
+  void SetData( BG_FITS_DATA_TYPE* ptr ){ data = ptr; m_bExternalData=true; }
   
 
   int ReadFits( const char* fits_file=NULL, int bAutoDetect=0, int bReadImage=1, int bIgnoreHeaderErrors=0, bool transposed=false );  
