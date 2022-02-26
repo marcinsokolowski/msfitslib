@@ -92,4 +92,4 @@ add_executable(dump_lc  src/dump_lc/main.cpp src/dump_lc/lc_table.cpp)
 target_link_libraries(dump_lc msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl)
 
 # INSTALLATION:
-install(TARGETS dump_lc avg_images ux2sid_file ux2sid sid2ux radec2azh  RUNTIME DESTINATION ${RUNTIME_DIR} -ldl)
+install(TARGETS dump_lc avg_images ux2sid_file ux2sid sid2ux radec2azh  RUNTIME DESTINATION ${RUNTIME_DIR})
