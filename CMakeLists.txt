@@ -74,22 +74,22 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 add_executable(nan_test src/nan_test.cpp)
 add_executable(libtest  src/libtest.cpp)
-target_link_libraries(libtest msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB})
+target_link_libraries(libtest msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl)
 add_executable(radec2azh src/radec2azh.cpp)
-target_link_libraries(radec2azh msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB})
+target_link_libraries(radec2azh msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl)
 add_executable(sid2ux src/sid2ux.cpp)
-target_link_libraries(sid2ux msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB})
+target_link_libraries(sid2ux msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl)
 add_executable(ux2sid   src/ux2sid.cpp) 
-target_link_libraries(ux2sid msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB})
+target_link_libraries(ux2sid msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl)
 add_executable(ux2sid_file   src/ux2sid_file.cpp)
-target_link_libraries(ux2sid_file msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB})
+target_link_libraries(ux2sid_file msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl)
 
 # larger programs :
 add_executable(avg_images  src/avg_images/main.cpp)
-target_link_libraries(avg_images msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB})
+target_link_libraries(avg_images msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl)
 
 add_executable(dump_lc  src/dump_lc/main.cpp src/dump_lc/lc_table.cpp)
-target_link_libraries(dump_lc msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB})
+target_link_libraries(dump_lc msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl)
 
 # INSTALLATION:
-install(TARGETS dump_lc avg_images ux2sid_file ux2sid sid2ux radec2azh  RUNTIME DESTINATION ${RUNTIME_DIR})
+install(TARGETS dump_lc avg_images ux2sid_file ux2sid sid2ux radec2azh  RUNTIME DESTINATION ${RUNTIME_DIR} -ldl)
