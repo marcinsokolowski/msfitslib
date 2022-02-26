@@ -80,3 +80,7 @@ target_link_libraries(ux2sid_file msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT
 # larger programs :
 add_executable(avg_images  src/avg_images/main.cpp)
 target_link_libraries(avg_images msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB})
+
+add_executable(dump_lc  src/dump_lc/main.cpp src/dump_lc/lc_table.cpp)
+target_link_libraries(dump_lc msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB})
+
