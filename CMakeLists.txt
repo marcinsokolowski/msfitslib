@@ -1,5 +1,12 @@
 cmake_minimum_required(VERSION 3.1.0)
 project(msfitslib VERSION 1.0.1)
+
+if(NOT RUNTIME_DIR)
+    set(RUNTIME_DIR ${CMAKE_INSTALL_PREFIX}/bin/)
+endif(NOT RUNTIME_DIR)
+
+
+
 include(GNUInstallDirs)
 add_library(msfitslib SHARED 
      src/baseanal.cpp src/basedefines.cpp src/basestring.cpp src/basestructs.cpp src/ccdrowcollist.cpp src/cexcp.cpp src/cfgfile.cpp src/cmncfg.cpp src/cmn_tmpl.cpp
@@ -84,3 +91,5 @@ target_link_libraries(avg_images msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_
 add_executable(dump_lc  src/dump_lc/main.cpp src/dump_lc/lc_table.cpp)
 target_link_libraries(dump_lc msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB})
 
+# INSTALLATION:
+install(TARGETS dump_lc avg_images ux2sid_file ux2sid sid2ux radec2azh  RUNTIME DESTINATION ${RUNTIME_DIR})
