@@ -5,7 +5,6 @@ module load cascadelake
 module load gcc/8.3.0
 module load fftw/3.3.8 
 module load libnova/0.15.0
-# module load cfitsio_custom/3.49
 module load cfitsio/3.48
 module load cmake/3.18.0
 
@@ -36,7 +35,7 @@ else
     echo "Building cotter_wsclean on Topaz..."
 
     # read script parameters
-    if [ $# -eq 1 ] && [ -n $1 && "$1" != "-" ] && [ $1 = 'group' ]; then
+    if [ $# -eq 1 ] && [[ -n $1 && "$1" != "-" ]] && [ $1 = 'group' ]; then
         INSTALL_DIR=/group/director2183/software/centos7.6/development/$PROGRAM_NAME
         MODULEFILE_DIR=/group/director2183/software/centos7.6/modulefiles/$PROGRAM_NAME
         echo "Group installation at $INSTALL_DIR" 
@@ -70,6 +69,7 @@ if (mode() ~= 'whatis') then
 prepend_path('MSFITSLIB_DIR', root_dir )
 prepend_path('PATH', root_dir .. '/bin')
 prepend_path('PATH', root_dir .. '/scripts')
+prepend_path('CPATH', root_dir .. '/include')
 prepend_path('LD_LIBRARY_PATH', root_dir .. '/lib')
 end
 
