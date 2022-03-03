@@ -1,26 +1,32 @@
-cmake_minimum_required(VERSION 3.15.0)
+cmake_minimum_required(VERSION 3.1.0)
 project(msfitslib VERSION 1.0.1)
+
+if(NOT RUNTIME_DIR)
+    set(RUNTIME_DIR ${CMAKE_INSTALL_PREFIX}/bin/)
+endif(NOT RUNTIME_DIR)
+
+
+
 include(GNUInstallDirs)
+add_library(msfitslib SHARED 
+     src/baseanal.cpp src/basedefines.cpp src/basestring.cpp src/basestructs.cpp src/ccdrowcollist.cpp src/cexcp.cpp src/cfgfile.cpp src/cmncfg.cpp src/cmn_tmpl.cpp
+     src/laplace_info.cpp src/mybaseserver.cpp src/mybits.cpp src/mycmnglobals.cpp src/mydate2.cpp src/mydate.cpp src/myenv.cpp src/myfastlongtab.cpp src/myfile.cpp src/myfract.cpp 
+     src/myframeslist.cpp src/myhisto2D.cpp src/myhisto.cpp src/myinifile.cpp src/mykeytab.cpp src/mylibloader.cpp src/mylock.cpp src/mymatrix.cpp src/mymsgqueue.cpp src/mynet.cpp 
+     src/myparser.cpp src/mypipe.cpp src/mypixellist.cpp src/mypoints.cpp src/myprogress.cpp src/myranges.cpp src/myrequestdef.cpp src/mysafekeytab.cpp src/myshmem.cpp src/mysignal.cpp 
+     src/mystring.cpp src/mystrtable.cpp src/mytrace.cpp src/mytxtclient.cpp src/mytxtinetserver.cpp src/mytxtserver.cpp  src/myutil.cpp src/myvalcounter.cpp
+     src/paramtab.cpp src/random.cpp src/tab2Ddesc.cpp src/templ.cpp  src/gendistr.cpp src/calcrot.cpp src/mathfunc.cpp src/myfits.cpp src/mygraphcut.cpp src/vector.cpp  src/ccddriver_interface.cpp
+     src/bg_bedlam.cpp  src/bg_fits.cpp  src/bg_globals.cpp  src/bg_stat.cpp src/bg_units.cpp  src/calsol_values.cpp src/weather_station.cpp
+     src/bg_array.cpp  src/bg_date.cpp    src/bg_geo.cpp   src/bg_norm.cpp   src/bg_total_power.cpp  src/bg_vis.cpp src/cvalue_vector.cpp  src/libnova_interface.cpp  
+     src/spectrometer.cpp
+           )
 
-#if(NOT RUNTIME_DIR)
-#    set(RUNTIME_DIR ${CMAKE_INSTALL_PREFIX}/bin/)
-#endif(NOT RUNTIME_DIR)
-
-
-file(GLOB msfitslib_sources "src/*.cpp")
-file(GLOB msfitslib_headers "src/*.h")
-add_library(msfitslib SHARED ${msfitslib_sources})
-
-add_definitions(-D_UNIX -D_ENABLE_PROFILER_ -D_ENABLE_TRACING_ -D_ENABLE_VISUALIZATION_ -D_MONTE_CARLO_ -D_NO_ROOT_ -I${CMAKE_SOURCE_DIR}/src)
-
+add_definitions(-D_UNIX -D_ENABLE_PROFILER_ -D_ENABLE_TRACING_ -D_ENABLE_VISUALIZATION_ -D_MONTE_CARLO_ -D_NO_ROOT_ -I../src/)
 set_target_properties(msfitslib PROPERTIES
     VERSION ${PROJECT_VERSION}
     SOVERSION 1
-    PUBLIC_HEADER ${msfitslib_headers})
- 
+    PUBLIC_HEADER "src/msfitslib.h;src/bg_array.h;src/bg_defines.h;src/bg_total_power.h;src/bg_fits.h;src/spectrometer.h;src/bg_date.h;src/bg_globals.h;src/cvalue_vector.h;src/calsol_values.h;src/myparser.h;src/mystring.h;src/mystrtable.h;src/mytypes.h;src/basedefines.h;src/basestring.h;src/myfile.h;src/basestructs.h;src/mylock.h")
 configure_file(msfitslib.pc.in msfitslib.pc @ONLY)
-
-
+target_include_directories(msfitslib PRIVATE .)
 install(TARGETS msfitslib
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
@@ -28,9 +34,27 @@ install(TARGETS msfitslib
 install(FILES ${CMAKE_BINARY_DIR}/msfitslib.pc
     DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig)
 
+find_package(PkgConfig REQUIRED)
 
+# EXACUTABLES :
 find_library(CFITSIO_LIB cfitsio HINTS ENV LD_LIBRARY_PATH)
+# pkg_search_module(CFITSIO_LIB REQUIRED cfitsio IMPORTED_TARGET)
+# include_directories(${CFITSIO_INCLUDE_DIR})
+# link_libraries     (${CFITSIO_LIB})
+#
+# find_library(LIBNOVA_LIB nova)
+# find_path(FITSIO_INCLUDE_DIR NAMES fitsio.h)
+
+# pkg_search_module(FFTW REQUIRED fftw3 IMPORTED_TARGET)
+# include_directories(${FFTW_INCLUDE})
+# link_libraries     (${FFTW_LIB})
 find_library(FFTW3_LIB fftw3 HINTS ENV FFTW_LIB REQUIRED)
+# include_directories(${FITSIO_INCLUDE_DIR})
+
+# EXACUTABLES :
+# pkg_search_module(LIBNOVA_LIB REQUIRED libnova IMPORTED_TARGET)
+# include_directories(PkgConfig::LIBNOVA_LIB)
+# link_libraries     (PkgConfig::LIBNOVA_LIB)
 find_library(LIBNOVA_LIB nova PATHS ENV LD_LIBRARY_PATH)
 
 
@@ -45,27 +69,27 @@ find_library(LIBNOVA_LIB nova PATHS ENV LD_LIBRARY_PATH)
 #---Define useful ROOT functions and macros (e.g. ROOT_GENERATE_DICTIONARY)
 # include(${ROOT_USE_FILE})
 
-#include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 
-add_executable(nan_test apps/nan_test.cpp)
-add_executable(libtest  apps/libtest.cpp)
+add_executable(nan_test src/nan_test.cpp)
+add_executable(libtest  src/libtest.cpp)
 target_link_libraries(libtest msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl)
-add_executable(radec2azh apps/radec2azh.cpp)
+add_executable(radec2azh src/radec2azh.cpp)
 target_link_libraries(radec2azh msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl)
-add_executable(sid2ux apps/sid2ux.cpp)
+add_executable(sid2ux src/sid2ux.cpp)
 target_link_libraries(sid2ux msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl)
-add_executable(ux2sid   apps/ux2sid.cpp) 
+add_executable(ux2sid   src/ux2sid.cpp) 
 target_link_libraries(ux2sid msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl)
-add_executable(ux2sid_file   apps/ux2sid_file.cpp)
+add_executable(ux2sid_file   src/ux2sid_file.cpp)
 target_link_libraries(ux2sid_file msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl)
 
 # larger programs :
-add_executable(avg_images  apps/avg_images.cpp)
+add_executable(avg_images  src/avg_images/main.cpp)
 target_link_libraries(avg_images msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl)
 
-add_executable(dump_lc  apps/dump_lc/main.cpp apps/dump_lc/lc_table.cpp)
+add_executable(dump_lc  src/dump_lc/main.cpp src/dump_lc/lc_table.cpp)
 target_link_libraries(dump_lc msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl)
 
 # INSTALLATION:
-install(TARGETS dump_lc avg_images ux2sid_file ux2sid sid2ux radec2azh) # RUNTIME DESTINATION ${RUNTIME_DIR})
+install(TARGETS dump_lc avg_images ux2sid_file ux2sid sid2ux radec2azh  RUNTIME DESTINATION ${RUNTIME_DIR})
