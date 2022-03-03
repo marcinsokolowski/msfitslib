@@ -35,7 +35,7 @@ else
     echo "Building cotter_wsclean on Topaz..."
 
     # read script parameters
-    if [ $# -eq 1 ] && [[ -n $1 && "$1" != "-" ]] && [ $1 = 'group' ]; then
+    if [ $# -eq 1 ] && [ $1 = 'group' ]; then
         INSTALL_DIR=/group/director2183/software/centos7.6/development/$PROGRAM_NAME
         MODULEFILE_DIR=/group/director2183/software/centos7.6/modulefiles/$PROGRAM_NAME
         echo "Group installation at $INSTALL_DIR" 
