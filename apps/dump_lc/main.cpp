@@ -46,12 +46,15 @@ void usage()
    printf("\t-s : slow (old legacy) version for comparisons\n");
    printf("\t-o OUTDIR : name of output directory [default %s]\n",gOutDir.c_str());
    printf("\t-i MIN_MODULATION_INDEX : minimu modulation index to save lightcurve [default %.4f]\n",CLcTable::m_MinModulationIndex);
+   printf("\t-x MIN_CHI2 : minimum value of Chi2 [default %.4f]\n",CLcTable::m_MinChi2);
+   printf("\t-m : use median and rms_iqr to calculate Chi2 and modulation index as in Martin Bell et al. (2016) eq. 1,2,3 (this is default)\n");
+   printf("\t-M : use mean and normal rms (not median/rms_iqr) to calculate Chi2 and modulation index as in Martin Bell et al. (2016) eq. 1,2,3\n");
    
    exit(0);
 }
 
 void parse_cmdline(int argc, char * argv[]) {
-   char optstring[] = "hr:w:so:i:";
+   char optstring[] = "hr:w:so:i:x:mM";
    int opt;
         
    while ((opt = getopt(argc, argv, optstring)) != -1) {
@@ -74,10 +77,27 @@ void parse_cmdline(int argc, char * argv[]) {
          case 'r' :
             gMaxRMSOnSingle = atof( optarg );
             break; 
+         
+         case 'm' :
+            CLcTable::m_bUseMedian = true;
+            printf("DEBUG : option -m ???\n");
+            break;
+
+         case 'M' :            
+            CLcTable::m_bUseMedian = false;
+            printf("DEBUG : option -M ???\n");
+            break;
+
 
          case 'o' :
             if( optarg ){
                gOutDir = optarg;
+            }
+            break; 
+
+         case 'x' :
+            if( optarg ){
+               CLcTable::m_MinChi2 = atof( optarg );
             }
             break; 
 
@@ -119,6 +139,32 @@ bool generate_lc_in_memory( vector<string>& fits_list )
   for(int i=0;i<fits_list.size();i++){
      CBgFits fits; // if not here field dtime_fs needs to be set to -1 as otherwise it will be the same for all the FITS files 
      fits.dtime_fs = -1000;
+     
+     char rms_fits_file[1024];     
+     bool bRMSFileFound=false;
+     CBgFits rms_fits;
+     if( strncmp( fits_list[i].c_str(), "mean_", 5 ) == 0 ){
+        sprintf(rms_fits_file, "rms_%s", fits_list[i].c_str()+5 );
+        printf("INFO : trying to read RMS FITS file %s\n",rms_fits_file);
+        
+        if( MyFile::DoesFileExist( rms_fits_file ) ){
+           printf("INFO : reading RMS FITS file %s\n",rms_fits_file);
+           if( rms_fits.ReadFits( rms_fits_file , 0, 1, 1 ) ){
+              if( gIgnoreMissingFITS ){
+                 printf("WARNING : could not read RMS FITS file %s on the list, -i option means that it is ignored -> FITS file skipped\n",rms_fits_file);
+                 continue;
+              }else{
+                 printf("ERROR : could not read RMS FITS file %s on the list\n",rms_fits_file);
+                 exit(-1); 
+              }
+           }else{
+              bRMSFileFound=true;
+              printf("INFO : rms file %s read OK\n",rms_fits_file);
+           }
+        }
+     }else{
+        printf("WARNING : FITS file name not in expected format mean_*.fits -> do not know what is the name of RMS file\n");
+     }
      
      if( fits.ReadFits( fits_list[i].c_str() , 0, 1, 1 ) ){
         if( gIgnoreMissingFITS ){
@@ -178,14 +224,21 @@ bool generate_lc_in_memory( vector<string>& fits_list )
      for(int y=gBorderStartY;y<gBorderEndY;y++){
         for(int x=gBorderStartX;x<gBorderEndX;x++){
            double value = fits.getXY(x,y);
+           double stddev_noise = 1.00;
+           if( bRMSFileFound ){
+              stddev_noise = rms_fits.getXY(x,y);
+              // printf("DEBUG : stddev_noise = %.8f",stddev_noise);
+           }
            
-           lc_table.setXY(x,y,uxtime,value);                              
+           lc_table.setXY(x,y,uxtime,value,stddev_noise);                              
         }
      }
    }
 
    // save lightcurves :
+   printf("DEBUG : saving lightcurves in window (%d,%d) - (%d,%d)\n",gBorderStartX, gBorderStartY, gBorderEndX, gBorderEndY );
    lc_table.SaveLC( gOutDir.c_str(), gBorderStartX, gBorderStartY, gBorderEndX, gBorderEndY );   
+   printf("DEBUG : end of generate_lc_in_memory\n");fflush(stdout);
 }
 
 void generate_lc_slow( vector<string>& fits_list )
@@ -268,6 +321,9 @@ void print_parameters()
     printf("List file        = %s\n",list.c_str());
     printf("Output directory = %s\n",gOutDir.c_str());
     printf("Min. mod. index  = %.8f\n",CLcTable::m_MinModulationIndex);
+    printf("Minimum CHI2     = %.8f\n",CLcTable::m_MinChi2);
+    printf("Fast code = %d\n",gFast);
+    printf("Use median in Eq. 1 and rms_iqr in Eq. 3 in Bell et al. (2016) = %d\n",CLcTable::m_bUseMedian);
     printf("############################################################################################\n");
 }
 
