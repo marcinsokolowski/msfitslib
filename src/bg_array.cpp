@@ -76,15 +76,23 @@ CBgArray& CBgArray::Divide( double val )
 }
 
 
-void CBgArray::SaveToFile( const char* outfile, CBgFits* pFits  )
+void CBgArray::SaveToFile( const char* outfile, CBgFits* pFits, CBgArray* pColumn2  )
 {
    FILE* outf = fopen(outfile,"w");
    
    for(int i=0;i<size();i++){
       if( pFits ){
-         fprintf(outf,"%.3f %.8f\n",pFits->ch2freq(i),(*this)[i]);         
+         if( pColumn2 ){
+            fprintf(outf,"%.3f %.8f %.8f\n",pFits->ch2freq(i),(*this)[i], (*pColumn2)[i] );
+         }else{
+            fprintf(outf,"%.3f %.8f\n",pFits->ch2freq(i),(*this)[i]);         
+         }
       }else{
-         fprintf(outf,"%d %.8f\n",i,(*this)[i]);
+         if( pColumn2 ){
+            fprintf(outf,"%d %.8f %.8f\n",i,(*this)[i],(*pColumn2)[i] );
+         }else{
+            fprintf(outf,"%d %.8f\n",i,(*this)[i]);
+         }
       }
    }
    

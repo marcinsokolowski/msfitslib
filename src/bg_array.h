@@ -22,7 +22,7 @@ public :
   CBgArray& Subtract( CBgArray& right );
   CBgArray& Multiply( double val );
   CBgArray& Divide( double val );
-  void SaveToFile( const char* outfile , CBgFits* pFits=NULL );
+  void SaveToFile( const char* outfile , CBgFits* pFits=NULL, CBgArray* pColumn2=NULL );
   int find_min_max( double& min_val, double& max_val, double& avg_val );
   void array2vector( CValueVector& out_vector );
 };
