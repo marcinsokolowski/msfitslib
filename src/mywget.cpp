@@ -32,15 +32,14 @@ int CMyWget::SendRequest( const char* url_req )
 
 #else
 
-#include <curl/curl.h>
-// #include <curl/types.h>
-#include <curl/easy.h>
+/*#include <curl/curl.h>
+#include <curl/easy.h>*/
 #include <string.h>
 
 void CMyWget::Init()
 {
 	if(!m_bInitDone){
-		curl_global_init(CURL_GLOBAL_ALL);
+//		curl_global_init(CURL_GLOBAL_ALL);
 		m_bInitDone = TRUE;
 	}
 }
@@ -49,14 +48,14 @@ void CMyWget::Init()
 int CMyWget::SendRequest( const char* url_req )
 {
 	Init();
-	CURLcode res;
+/*	CURLcode res;
 
 	curl_handle = curl_easy_init(); 
 	curl_easy_setopt(curl_handle, CURLOPT_URL, url_req);
 //	curl_easy_setopt(curl_handle, CURLOPT_ERRORBUFFER );
 	curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
 	curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&chunk);	
-	res = curl_easy_perform(curl_handle);
+	res = curl_easy_perform(curl_handle);*/
 /*	if(res==CURLE_OK){
 		CURLINFO info;
 		double ret;
@@ -65,9 +64,10 @@ int CMyWget::SendRequest( const char* url_req )
 		printf("res2 = %d\n",(int)res2);
 	}*/	
 
-	curl_easy_cleanup(curl_handle);
+//	curl_easy_cleanup(curl_handle);
 
-	return (res == CURLE_OK);
+//	return (res == CURLE_OK);
+        return 0;
 }
 
 #endif

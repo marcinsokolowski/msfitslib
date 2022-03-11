@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15.0)
+cmake_minimum_required(VERSION 3.10.0)
 project(msfitslib VERSION 1.0.1)
 include(GNUInstallDirs)
 
@@ -68,4 +68,4 @@ add_executable(dump_lc  apps/dump_lc/main.cpp apps/dump_lc/lc_table.cpp)
 target_link_libraries(dump_lc msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl)
 
 # INSTALLATION:
-install(TARGETS dump_lc avg_images ux2sid_file ux2sid sid2ux radec2azh) # RUNTIME DESTINATION ${RUNTIME_DIR})
+install(TARGETS dump_lc avg_images ux2sid_file ux2sid sid2ux radec2azh RUNTIME DESTINATION bin)
