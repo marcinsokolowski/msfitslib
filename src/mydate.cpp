@@ -534,7 +534,7 @@ mystring get_clock_in_sec_string( long cl)
 	long sec = (msec/100);
 	long l_msec = (msec%100);
 	mystring szStr;
-	szStr << cl << " ticks (=" << sec << ".";
+	szStr << cl << " ticks (= " << sec << ".";
 	if(l_msec<10)
 		szStr << "0";
 	szStr << l_msec << " sec)";
