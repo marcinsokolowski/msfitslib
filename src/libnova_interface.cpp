@@ -93,9 +93,9 @@ void get_galaxy_info( time_t unix_time, double geo_long_deg, double geo_lat_deg,
    get_galaxy_up_down( unix_time, geo_long_deg, geo_lat_deg, max_alt_ux, max_alt, min_alt_ux, min_alt );
 
    string szRise,szTransit,szSet; 
-   szRise = get_localtime_string(out_rise_ux);
-   szTransit = get_localtime_string(out_transit_ux);
-   szSet = get_localtime_string(out_set_ux);            
+   szRise = get_localtime_string_bgversion(out_rise_ux);
+   szTransit = get_localtime_string_bgversion(out_transit_ux);
+   szSet = get_localtime_string_bgversion(out_set_ux);            
    
    printf("Galaxy rise    = %.8f JD = %d UX = %s LOCAL\n",galaxy_info.rise,(int)out_rise_ux,szRise.c_str());
    printf("Galaxy transit = %.8f JD = %d UX = %s LOCAL\n",galaxy_info.transit,(int)out_transit_ux,szTransit.c_str());
@@ -342,9 +342,9 @@ void get_sun_info( time_t unix_time, double geo_long_deg, double geo_lat_deg,
    }
 
    string szRise,szTransit,szSet;
-   szRise = get_localtime_string(out_rise_ux);
-   szTransit = get_localtime_string(out_transit_ux);
-   szSet = get_localtime_string(out_set_ux);                        
+   szRise = get_localtime_string_bgversion(out_rise_ux);
+   szTransit = get_localtime_string_bgversion(out_transit_ux);
+   szSet = get_localtime_string_bgversion(out_set_ux);                        
    
    if( bVerb > 0 ){
       double jd;
@@ -393,9 +393,9 @@ void get_moon_info( time_t unix_time, double geo_long_deg, double geo_lat_deg,
    moon_radius_deg = ln_get_lunar_sdiam( JD )/3600.00;
    
    string szRise,szTransit,szSet; 
-   szRise = get_localtime_string(out_rise_ux);
-   szTransit = get_localtime_string(out_transit_ux);
-   szSet = get_localtime_string(out_set_ux);                    
+   szRise = get_localtime_string_bgversion(out_rise_ux);
+   szTransit = get_localtime_string_bgversion(out_transit_ux);
+   szSet = get_localtime_string_bgversion(out_set_ux);                    
    
    printf("Moon rise    = %.8f JD = %d UX = %s LOCAL\n",moon_info.rise,(int)out_rise_ux,szRise.c_str());
    printf("Moon transit = %.8f JD = %d UX = %s LOCAL ( phase = %.2f %% , phase_angle = %.2f [deg] )\n",moon_info.transit,(int)out_transit_ux,szTransit.c_str(),phase_in_transit*100.00,phase_angle_in_transit);

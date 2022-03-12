@@ -87,7 +87,7 @@ string get_gmtime_string_bg()
    szRet = szDate;                       
    return szRet;  
 }*/
-string get_localtime_string( time_t ut_time )
+string get_localtime_string_bgversion( time_t ut_time )
 {
    mystring tmp = get_date_time_string( ut_time );
    string ret = tmp.c_str();
