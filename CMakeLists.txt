@@ -2,11 +2,6 @@ cmake_minimum_required(VERSION 3.10.0)
 project(msfitslib VERSION 1.0.1)
 include(GNUInstallDirs)
 
-#if(NOT RUNTIME_DIR)
-#    set(RUNTIME_DIR ${CMAKE_INSTALL_PREFIX}/bin/)
-#endif(NOT RUNTIME_DIR)
-
-
 file(GLOB msfitslib_sources "src/*.cpp")
 file(GLOB msfitslib_headers "src/*.h")
 add_library(msfitslib SHARED ${msfitslib_sources})
@@ -32,20 +27,6 @@ install(FILES ${CMAKE_BINARY_DIR}/msfitslib.pc
 find_library(CFITSIO_LIB cfitsio HINTS ENV LD_LIBRARY_PATH)
 find_library(FFTW3_LIB fftw3 HINTS ENV FFTW_LIB REQUIRED)
 find_library(LIBNOVA_LIB nova PATHS ENV LD_LIBRARY_PATH)
-
-
-# You need to tell CMake where to find the ROOT installation. This can be done in a number of ways:
-#   - ROOT built with classic configure/make use the provided $ROOTSYS/etc/cmake/FindROOT.cmake
-#   - ROOT built with CMake. Add in CMAKE_PREFIX_PATH the installation prefix for ROOT
-#list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS})
-
-#---Locate the ROOT package and defines a number of variables (e.g. ROOT_INCLUDE_DIRS)
-#find_package(ROOT REQUIRED COMPONENTS RIO Net)
-
-#---Define useful ROOT functions and macros (e.g. ROOT_GENERATE_DICTIONARY)
-# include(${ROOT_USE_FILE})
-
-#include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 
 add_executable(nan_test apps/nan_test.cpp)
