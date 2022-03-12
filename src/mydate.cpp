@@ -533,11 +533,15 @@ mystring get_clock_in_sec_string( long cl)
 	long msec = (long)(r*100.00);
 	long sec = (msec/100);
 	long l_msec = (msec%100);
-	mystring szStr;
-	szStr << cl << " ticks (= " << sec << ".";
-	if(l_msec<10)
-		szStr << "0";
-	szStr << l_msec << " sec)";
+//	mystring szStr;
+//	szStr << cl << " ticks (= " << sec << ".";
+//	if(l_msec<10)
+//		szStr << "0";
+//	szStr << l_msec << " sec)";
+        char szMsg[128];
+        sprintf(szMsg,"%ld ticks ( = %.8f sec )",cl,r);
+        mystring szStr;
+        szStr << szMsg;
 	return szStr;
 }
 
