@@ -1847,7 +1847,9 @@ double CBgFits::GetStat( double& mean, double& rms, double& minval, double& maxv
    rms  = sqrt( sum2/cnt - mean*mean );
 
    if( nan_count > 0 ){
-      printf("WARNING : %d / %d are NaN values found and ignored\n",nan_count,total_count);
+      if( gBGPrintfLevel >= BG_WARNING_LEVEL ){
+         printf("WARNING : %d / %d are NaN values found and ignored\n",nan_count,total_count);
+      }
    }
    
 //   printf("Non-zero count = %d\n",non_zero_count);
