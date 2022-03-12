@@ -90,7 +90,9 @@ void CBgFits::Realloc( int sizeX, int sizeY, int bKeepOldData )
    if( sizeX>0 && sizeY>0 ){
       float* new_data = NULL;
       long int size = ((long int)(sizeX))*((long int)(sizeY));
-      printf("CBgFits::Realloc : allocated array of size = %ld floats = %ld bytes = %.2f GB\n",(long int)size,size*sizeof(float),(float(size)*sizeof(float))/(1024*1024*1024));
+      if( gBGPrintfLevel >= BG_INFO_LEVEL ){
+         printf("CBgFits::Realloc : allocated array of size = %ld floats = %ld bytes = %.2f GB\n",(long int)size,size*sizeof(float),(float(size)*sizeof(float))/(1024*1024*1024));
+      }
       try{ 
          new_data = new float[size];
       }catch(...){
@@ -215,7 +217,9 @@ int CBgFits::add_line( CBgArray& line )
       }
       m_lines_counter++;
    }else{
-      printf("Line size = %d different than %d -> ignored\n",(int)line.size(),m_SizeX);
+      if( gBGPrintfLevel >= BG_INFO_LEVEL ){
+         printf("Line size = %d different than %d -> ignored\n",(int)line.size(),m_SizeX);
+      }
    }
    
    return m_lines_counter;
@@ -523,11 +527,13 @@ int CBgFits::ParseStates( const char* szStatesList )
    strcpy(szTmpList,szStatesList);
    ParseCommaList( szTmpList , states_list );
    
-   printf("Parsed states = ");
-   for(int i=0;i<states_list.size();i++){
-      printf("%s,",states_list[i].c_str());
+   if( gBGPrintfLevel >= BG_INFO_LEVEL ){
+      printf("Parsed states = ");
+      for(int i=0;i<states_list.size();i++){
+         printf("%s,",states_list[i].c_str());
+      }
+      printf("\n");
    }
-   printf("\n");
 
 /* Previous version, with states in order not agreeing with FITS header (first TERM, then ANT keywords) 
    not working well in calib_bg_data program, so I changed it to be exactly like in fits header to be in 
@@ -579,7 +585,7 @@ int CBgFits::ParseStates( const char* szStatesList )
       m_IntegrationRanges.clear(); // added 2016-04-11 so that every new file have ANT,REF keywords cleared
       for(int i=0;i<_fitsHeaderRecords.size();i++){
          HeaderRecord& key = _fitsHeaderRecords[i];
-         if( gBGPrintfLevel >= 2 ){
+         if( gBGPrintfLevel >= BG_INFO_LEVEL ){
             printf("DEBUG : %s = %s\n",key.Keyword.c_str(),key.Value.c_str());
          }
 
@@ -691,7 +697,7 @@ int CBgFits::ParseSkyIntegrations()
       m_IntegrationRanges.push_back(ref_int);                           
    }
    
-   if( gBGPrintfLevel >= 1 && m_IntegrationRanges.size()>0 ){
+   if( gBGPrintfLevel >= BG_INFO_LEVEL && m_IntegrationRanges.size()>0 ){
       printf("INTEGRATION RANGES:\n");
       for(int i=0;i<m_IntegrationRanges.size();i++){
          cIntRange& range = m_IntegrationRanges[i];
@@ -705,7 +711,9 @@ int CBgFits::ParseSkyIntegrations()
 
 int CBgFits::ReadFits( const char* fits_file, int bAutoDetect /*=0*/, int bReadImage /* =1 */ , int bIgnoreHeaderErrors /* =0 */ , bool transposed /* =false */ )
 {
-  printf("DEBUG : ReadFits( %s , %d , %d , %d , %d )\n",fits_file,bAutoDetect,bReadImage,bIgnoreHeaderErrors,transposed);
+  if( gBGPrintfLevel >= BG_DEBUG_LEVEL ){
+     printf("DEBUG : ReadFits( %s , %d , %d , %d , %d )\n",fits_file,bAutoDetect,bReadImage,bIgnoreHeaderErrors,transposed);
+  }
 
   fitsfile *fp=0;
   int status = 0;
@@ -734,7 +742,7 @@ int CBgFits::ReadFits( const char* fits_file, int bAutoDetect /*=0*/, int bReadI
      long axsizes[2];
                 
      fits_get_img_param(fp, 2, &bitpix, &naxis, axsizes, &status);
-     if( gBGPrintfLevel >= 1 ){
+     if( gBGPrintfLevel >= BG_INFO_LEVEL ){
         printf("INFO : auto-detected file format = %d bits\n",bitpix);
      }
      if( status ){ 
@@ -763,7 +771,9 @@ int CBgFits::ReadFits( const char* fits_file, int bAutoDetect /*=0*/, int bReadI
      if( bReadImage > 0 ){
          long int sizeXY = ((long int)m_SizeX)*((long int)m_SizeY);
          if( !data ){
-            printf("Allocating %d x %d = %ld image for naxis = %d \n",m_SizeX,m_SizeY,sizeXY,naxis);fflush(stdout);
+            if( gBGPrintfLevel >= BG_DEBUG_LEVEL ){
+               printf("Allocating %d x %d = %ld image for naxis = %d \n",m_SizeX,m_SizeY,sizeXY,naxis);fflush(stdout);
+            }
             data = new float[sizeXY];
          }
      
@@ -847,7 +857,9 @@ int CBgFits::ReadFits( const char* fits_file, int bAutoDetect /*=0*/, int bReadI
        rec.Value = keyvalue;
        rec.Comment = comment; 
        
-       printf("DEBUG0 : %s = %s\n",rec.Keyword.c_str(),rec.Value.c_str());
+       if( gBGPrintfLevel >= BG_DEBUG_LEVEL ){
+          printf("DEBUG0 : %s = %s\n",rec.Keyword.c_str(),rec.Value.c_str());
+       }
        
        if( ( strcmp(rec.Keyword.c_str(),"CTYPE2") == 0  && strcmp(rec.Value.c_str(),"Frequency")==0 ) || ( strcmp(rec.Keyword.c_str(),"CTYPE1") ==0 && strcmp(rec.Value.c_str(),"Time")==0 ) ){
           if( !transposed ){
@@ -855,7 +867,9 @@ int CBgFits::ReadFits( const char* fits_file, int bAutoDetect /*=0*/, int bReadI
              szFreqKeyword = "CRVAL2";
              szFreqDelta = "CDELT2";
              szTimeDelta = "CDELT1";             
-             printf("DEBUG : auto-detected that the dynamic spectrum has time on horizontal axis and frequency on vertical (frequency vs. time)\n");
+             if( gBGPrintfLevel >= BG_INFO_LEVEL ){
+                printf("DEBUG : auto-detected that the dynamic spectrum has time on horizontal axis and frequency on vertical (frequency vs. time)\n");
+             }
           }
        }
 
@@ -912,14 +926,14 @@ int CBgFits::ReadFits( const char* fits_file, int bAutoDetect /*=0*/, int bReadI
 //          double unit = 1000000.00; // MHz in Hz 
           double unit = 1.00; // MHz 
           start_freq = atof(rec.Value.c_str())/unit; // in header in Hz
-          if( gBGPrintfLevel >= 2 ){
+          if( gBGPrintfLevel >= BG_INFO_LEVEL ){
              printf("DEBUG : start freq = %.2f MHz\n",start_freq);
           }
        }
        if( strstr(rec.Keyword.c_str(),"STOPFRQ" ) ){
           double unit = 1.00; // MHz
           stop_freq = atof(rec.Value.c_str())/unit; // in header in Hz
-          if( gBGPrintfLevel >= 2 ){
+          if( gBGPrintfLevel >= BG_INFO_LEVEL ){
              printf("DEBUG : stop freq = %.2f MHz\n",stop_freq);
           }
           bStopFreqFound = 1;
@@ -999,7 +1013,7 @@ int CBgFits::ReadFits( const char* fits_file, int bAutoDetect /*=0*/, int bReadI
         sky_int_count = ParseSkyIntegrations();
      }
 
-     if( gBGPrintfLevel >= 1 ){
+     if( gBGPrintfLevel >= BG_INFO_LEVEL ){
         printf("---------------------------------------\n");                                                                                                                 
         printf("CBgFits::ReadFits %s : read %d header keys\n",fits_file,nkeys);
         printf("---------------------------------------\n");
@@ -1144,7 +1158,10 @@ void CBgFits::NormalizeY()
       }
       
       col_avg[y] = col_avg[y] / GetXSize();
-      printf("%d %.8f\n",y,col_avg[y]);
+      
+      if( gBGPrintfLevel >= BG_DEBUG_LEVEL ){
+         printf("%d %.8f\n",y,col_avg[y]);
+      }
    }
    
    for(int y=0;y<GetYSize();y++){
@@ -1158,7 +1175,10 @@ void CBgFits::NormalizeY()
    
    double mean,rms,minval,maxval;
    GetStat( mean, rms, minval, maxval );
-   printf("INFO (NormalizeY) : mean = %.8f , rms = %.8f , minval = %.8f , maxval = %.8f\n",mean, rms, minval, maxval );
+   
+   if( gBGPrintfLevel >= BG_INFO_LEVEL ){
+      printf("INFO (NormalizeY) : mean = %.8f , rms = %.8f , minval = %.8f , maxval = %.8f\n",mean, rms, minval, maxval );
+   }
 }
 
 void CBgFits::NormalizeX()
@@ -1174,7 +1194,9 @@ void CBgFits::NormalizeX()
       }
       
       line_avg[ch] = line_avg[ch] / n_times;
-      printf("%d %.8f\n",ch,line_avg[ch]);
+      if( gBGPrintfLevel >= BG_DEBUG_LEVEL ){
+         printf("%d %.8f\n",ch,line_avg[ch]);
+      }
    }
    
    for(int ch=0;ch<n_ch;ch++){
@@ -1188,7 +1210,10 @@ void CBgFits::NormalizeX()
 
    double mean,rms,minval,maxval;
    GetStat( mean, rms, minval, maxval );
-   printf("INFO (NormalizeX) : mean = %.8f , rms = %.8f , minval = %.8f , maxval = %.8f\n",mean, rms, minval, maxval );
+   
+   if( gBGPrintfLevel >= BG_INFO_LEVEL ){
+      printf("INFO (NormalizeX) : mean = %.8f , rms = %.8f , minval = %.8f , maxval = %.8f\n",mean, rms, minval, maxval );
+   }
 }
 
 
@@ -1466,8 +1491,9 @@ void CBgFits::AddImages( CBgFits& right, double mult_const )
       data[i] = (data[i] + right.data[i]) * mult_const;
    }
    
-   printf("DEBUG : (%.4f + %.4f)/2 = %.4f\n",val,right.getXY(82,101),getXY(82,101));
-   
+   if( gBGPrintfLevel >= BG_DEBUG_LEVEL ){
+      printf("DEBUG : (%.4f + %.4f)/2 = %.4f\n",val,right.getXY(82,101),getXY(82,101));
+   }   
 }
 
 void CBgFits::SEFD_XX_YY( CBgFits& right )
@@ -1682,7 +1708,7 @@ int CBgFits::Compare( CBgFits& right, float min_diff, int verb )
       double fabs_diff = fabs(data[i]-right.data[i]);
       
       if( fabs_diff > min_diff ){
-         if( verb >= 1 ){
+         if( verb >= 1 && gBGPrintfLevel >= BG_INFO_LEVEL ){
             printf("%e != %e at (%d,%d) - %.2f [MHz]\n",data[i],right.data[i],(i % m_SizeX),(i / m_SizeX),freq);
          }
          ret++;
@@ -2028,7 +2054,7 @@ double CBgFits::GetStat( CBgArray& avg_spectrum, CBgArray& rms_spectrum,
             continue;
          }
          
-         if( gBGPrintfLevel >= 3 ){
+         if( gBGPrintfLevel >= BG_DEBUG_LEVEL ){
             printf("Integration %d used\n",y);
          }
       }
@@ -2188,17 +2214,19 @@ double CBgFits::GetStat( CBgArray& avg_spectrum, CBgArray& rms_spectrum,
    }
    double total_power_dbm = mW2dbm( total_power_mW );
 
-   printf("##################################### STATISTICS %d - %d #####################################\n",start_int,end_int);
-   printf("Mean    = %e\n",(double)mean);
-   printf("RMS     = %e\n",(double)rms);
-   printf("SUM     = %.8f\n",total_sum_test);
-   printf("Int count = %d\n",y_lines_counter);
-   printf("MAX val = %.8f at (%d,%d)\n",(double)maxval,(maxpos%m_SizeX),(maxpos/m_SizeX));
-   printf("MIN val = %.8f at (%d,%d)\n",(double)minval,(minpos%m_SizeX),(minpos/m_SizeX));
-   printf("INTTIME = %d x %.8f [sec] = %.8f [sec]\n",n_int,inttime,total_inttime);
-   printf("TOTAL POWER ( uxtime = %.8f ) = %.20f [?] = %.2f [dBm]\n",GetUnixTime(),total_power,total_power_dbm);
-   printf("Non-zero values = %d\n",non_zero_count);
-   printf("######################################################################################\n");
+   if( gBGPrintfLevel >= BG_INFO_LEVEL ){
+      printf("##################################### STATISTICS %d - %d #####################################\n",start_int,end_int);
+      printf("Mean    = %e\n",(double)mean);
+      printf("RMS     = %e\n",(double)rms);
+      printf("SUM     = %.8f\n",total_sum_test);
+      printf("Int count = %d\n",y_lines_counter);
+      printf("MAX val = %.8f at (%d,%d)\n",(double)maxval,(maxpos%m_SizeX),(maxpos/m_SizeX));
+      printf("MIN val = %.8f at (%d,%d)\n",(double)minval,(minpos%m_SizeX),(minpos/m_SizeX));
+      printf("INTTIME = %d x %.8f [sec] = %.8f [sec]\n",n_int,inttime,total_inttime);
+      printf("TOTAL POWER ( uxtime = %.8f ) = %.20f [?] = %.2f [dBm]\n",GetUnixTime(),total_power,total_power_dbm);
+      printf("Non-zero values = %d\n",non_zero_count);
+      printf("######################################################################################\n");
+   }
    
    if( out_number_of_used_integrations ){
      (*out_number_of_used_integrations) = y_lines_counter;
@@ -2593,7 +2621,9 @@ void CBgFits::PrepareBigHornsHeader( double ux_start, double _inttime, double fr
   time_t fs = (time_t)ux_start;
   int usec = (ux_start-fs)*1000000.00;
   
-  printf("DEBUG : CBgFits::PrepareBigHornsHeader , freq_start = %.4f [MHz]\n",freq_start);
+  if( gBGPrintfLevel >= BG_INFO_LEVEL ){
+     printf("INFO : CBgFits::PrepareBigHornsHeader , freq_start = %.4f [MHz]\n",freq_start);
+  }
 
   char szUtTime[128];
   strftime(szUtTime,80,"%Y-%m-%d %H:%M:%S",gmtime(&fs));
@@ -2754,7 +2784,9 @@ int CBgFits::CalcMedian( vector<string>& fits_list, CBgFits& out_rms, int bDoAve
 //      }                                
    }
    
-   printf("Re-sizing current image to (%d,%d)\n",xSize,ySize);
+   if( gBGPrintfLevel >= BG_INFO_LEVEL ){
+      printf("INFO : Re-sizing current image to (%d,%d)\n",xSize,ySize);
+   }
    Realloc(xSize,ySize);
    out_rms.Realloc(xSize,ySize);
    

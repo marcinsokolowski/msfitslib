@@ -58,5 +58,10 @@ struct cRangeDef
 };
 
 
+#define BG_DEBUG_LEVEL   5
+#define BG_INFO_LEVEL    2  
+#define BG_WARNING_LEVEL 1
+#define BG_ERROR_LEVEL   0
+#define BG_ALL_MSG_LEVEL 100
 
 #endif
