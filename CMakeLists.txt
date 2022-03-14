@@ -11,7 +11,7 @@ add_definitions(-D_UNIX -D_ENABLE_PROFILER_ -D_ENABLE_TRACING_ -D_ENABLE_VISUALI
 set_target_properties(msfitslib PROPERTIES
     VERSION ${PROJECT_VERSION}
     SOVERSION 1
-    PUBLIC_HEADER ${msfitslib_headers})
+    PUBLIC_HEADER "${msfitslib_headers}")
  
 configure_file(msfitslib.pc.in msfitslib.pc @ONLY)
 
