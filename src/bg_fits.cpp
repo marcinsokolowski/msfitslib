@@ -85,6 +85,18 @@ CBgFits::CBgFits( int xSize, int ySize )
    Realloc( xSize, ySize, FALSE );   
 }
 
+CBgFits& CBgFits::operator=(const CBgFits& right)
+{
+   if( GetXSize() != right.GetXSize() || GetYSize() != right.GetYSize() ){
+      printf("WARNING : size of the left is (%d,%d) != right (%d,%d) -> realloc called\n",GetXSize(),GetYSize(),right.GetXSize(),right.GetYSize());
+      Realloc( right.GetXSize(), right.GetYSize() );
+   }
+   
+   memcpy( data, right.data, sizeof(BG_FITS_DATA_TYPE));
+   
+   return (*this);
+}
+
 void CBgFits::Realloc( int sizeX, int sizeY, int bKeepOldData )
 {   
    if( sizeX>0 && sizeY>0 ){

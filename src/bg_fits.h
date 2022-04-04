@@ -117,6 +117,8 @@ public :
   CBgFits( const char* fits_file=NULL, int xSize=0, int ySize=0 );
   CBgFits( int xSize, int ySize );
   ~CBgFits();
+  CBgFits& operator=(const CBgFits& right);
+  
   void Clean();
   
   // memory allocation :
@@ -182,8 +184,8 @@ public :
   int GetAntRanges( vector<cIntRange>& ranges );
 
   // 
-  inline int GetXSize(){ return m_SizeX; }
-  inline int GetYSize(){ return m_SizeY; }
+  inline int GetXSize() const{ return m_SizeX; }
+  inline int GetYSize() const{ return m_SizeY; }
   void SetYSize( int ySize ){ m_SizeY = ySize; }
   
   inline float* get_data(){ return data; }
