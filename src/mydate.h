@@ -88,7 +88,7 @@ mystring get_gmtime_string();
 
 mystring get_localtime_string( time_t ut_time );
 
-time_t get_gmtime_from_string( const char* szGmTime );
+time_t get_gmtime_from_string( const char* szGmTime , const char* format="%Y%m%d_%H%M%S" );
 time_t get_unixtime_from_local_string( const char* szDTM );
 time_t get_unixtime_from_local_string2( const char* szDTM );
 

@@ -5,8 +5,8 @@
 #include "bg_globals.h"
 #include "bg_geo.h"
 
-time_t get_gmtime_from_string( const char* szGmTime );
-// #include <mydate.h>
+// time_t get_gmtime_from_string( const char* szGmTime );
+#include <mydate.h>
 
 void usage()
 {
@@ -36,7 +36,7 @@ int main(int argc,char* argv[])
 	
         char szDTM[64];
         sprintf(szDTM,"%d_000000",(int)dtm);
-        time_t uxtime = get_gmtime_from_string(szDTM );
+        time_t uxtime = get_gmtime_from_string( szDTM );
 
 	double jd;
 	double sid_time_h = get_local_sidereal_time( (double)uxtime, jd ); // OK

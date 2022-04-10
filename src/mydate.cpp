@@ -273,13 +273,13 @@ time_t get_unixtime_from_local_string2( const char* szDTM )
 }
 
 
-time_t get_gmtime_from_string( const char* szGmTime )
+time_t get_gmtime_from_string( const char* szGmTime , const char* format /*="%Y%m%d_%H%M%S"*/)
 {
    struct tm gmtime_tm;
    // sscanf( szGmTime, "%.4u%.2u%.2u_%.2u%.2u%.2u", &gmtime_tm.tm_year,&gmtime_tm.tm_mon,
    // &gmtime_tm.tm_mday,&gmtime_tm.tm_hour,&gmtime_tm.tm_min,&gmtime_tm.tm_sec);
 
-   strptime( szGmTime, "%Y%m%d_%H%M%S", &gmtime_tm );
+   strptime( szGmTime, format, &gmtime_tm );
 
    // gmtime_tm.tm_year -= 1900;
    // gmtime_tm.tm_mon--;
