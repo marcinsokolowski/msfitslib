@@ -142,14 +142,15 @@ bool generate_lc_in_memory( vector<string>& fits_list )
    
    CLcTable lc_table( first_fits.GetXSize(), first_fits.GetYSize() );
    // lc_table.Alloc( first_fits.GetXSize(), first_fits.GetYSize() );
-   
+
+  CBgFits fits, rms_fits;   
   for(int i=0;i<fits_list.size();i++){
-     CBgFits fits; // if not here field dtime_fs needs to be set to -1 as otherwise it will be the same for all the FITS files 
+     // CBgFits fits; // if not here field dtime_fs needs to be set to -1 as otherwise it will be the same for all the FITS files 
+     // WARNING : if this is here I think there seem to be some memory leak !!!
      fits.dtime_fs = -1000;
      
      char rms_fits_file[1024];     
      bool bRMSFileFound=false;
-     CBgFits rms_fits;
      if( strncmp( fits_list[i].c_str(), "mean_", 5 ) == 0 ){
         sprintf(rms_fits_file, "rms_%s", fits_list[i].c_str()+5 );
         printf("INFO : trying to read RMS FITS file %s\n",rms_fits_file);
@@ -246,6 +247,8 @@ bool generate_lc_in_memory( vector<string>& fits_list )
    printf("DEBUG : saving lightcurves in window (%d,%d) - (%d,%d)\n",gBorderStartX, gBorderStartY, gBorderEndX, gBorderEndY );
    lc_table.SaveLC( gOutDir.c_str(), gBorderStartX, gBorderStartY, gBorderEndX, gBorderEndY );   
    printf("DEBUG : end of generate_lc_in_memory\n");fflush(stdout);
+   
+   return true;
 }
 
 void generate_lc_slow( vector<string>& fits_list )
