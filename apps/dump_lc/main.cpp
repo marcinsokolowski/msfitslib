@@ -49,12 +49,13 @@ void usage()
    printf("\t-x MIN_CHI2 : minimum value of Chi2 [default %.4f]\n",CLcTable::m_MinChi2);
    printf("\t-m : use median and rms_iqr to calculate Chi2 and modulation index as in Martin Bell et al. (2016) eq. 1,2,3 (this is default)\n");
    printf("\t-M : use mean and normal rms (not median/rms_iqr) to calculate Chi2 and modulation index as in Martin Bell et al. (2016) eq. 1,2,3\n");
+   printf("\t-I : ignore missing FITS files [default %d]\n",gIgnoreMissingFITS);
    
    exit(0);
 }
 
 void parse_cmdline(int argc, char * argv[]) {
-   char optstring[] = "hr:w:so:i:x:mM";
+   char optstring[] = "hr:w:so:i:x:mMI";
    int opt;
         
    while ((opt = getopt(argc, argv, optstring)) != -1) {
@@ -64,6 +65,12 @@ void parse_cmdline(int argc, char * argv[]) {
             usage();
             break;
 
+         case 'I' :
+            if( optarg ){
+               gIgnoreMissingFITS = true;
+            }
+            break;
+            
          case 'i' :
             if( optarg ){
                CLcTable::m_MinModulationIndex = atof( optarg );
