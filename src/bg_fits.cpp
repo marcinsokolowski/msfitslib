@@ -827,7 +827,7 @@ int CBgFits::ReadFits( const char* fits_file, int bAutoDetect /*=0*/, int bReadI
        
        if( strcmp(keyname,"CHANNELS") == 0 ){        
            char long_keyvalue1[1024],long_comment[1024],long_keyvalue2[1024],long_keyvalue3[1024];
-           char* longstr[1];
+           char* longstr[3];
            longstr[0] = long_keyvalue1;
            longstr[1] = long_keyvalue2;
            longstr[2] = long_keyvalue3;
@@ -1629,6 +1629,20 @@ void CBgFits::RMS( int n_count, CBgFits& right )
    }
 }
 
+void CBgFits::HorFlip()
+{
+   CBgArray buffer;
+   
+   for(int y=0;y<GetYSize();y++){
+      get_line(y,buffer);
+      
+      for(int x=0;x<buffer.size();x++){
+         int x_new = GetXSize()-1-x;
+         setXY(x_new,y,buffer[x]);
+      }
+   }
+}
+
 void CBgFits::Divide( CBgFits& right )
 {
    int size = m_SizeX*m_SizeY;
@@ -2355,6 +2369,8 @@ int CBgFits::Recalc( eCalcFitsAction_T action, double value )
             return -1;
       }
    }                  
+   
+   return 1;
 }
 
 int CBgFits::GetMedianInt( CBgArray& median_int, CBgArray& rms_iqr_int )
