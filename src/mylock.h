@@ -13,6 +13,7 @@ public :
 
 	void Lock();
 	void UnLock();
+	int TryLock();
 	int IsLocked(){ return is_locked; }
 	
 protected :	

@@ -28,3 +28,8 @@ void CMyMutex::UnLock()
 	is_locked = 0;
 	_TRACE_PRINTF_6("Mutex %x : UN-LOCKED\n",this);
 }
+
+int CMyMutex::TryLock()
+{
+   return pthread_mutex_trylock( &mutex );
+}
