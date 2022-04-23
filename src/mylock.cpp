@@ -14,22 +14,27 @@ CMyMutex::~CMyMutex()
 	pthread_mutex_destroy( &mutex );
 }
 
-void CMyMutex::Lock()
+int CMyMutex::Lock()
 {
-	pthread_mutex_lock( &mutex );
+	int ret = pthread_mutex_lock( &mutex );
 	is_locked = 1;
-	_TRACE_PRINTF_6("Mutex %x : LOCKED\n",this);
+	_TRACE_PRINTF_6("Mutex %ld : LOCKED\n",(long int)(this));
+	
+	return ret;
 }
 
 
-void CMyMutex::UnLock()
+int CMyMutex::UnLock()
 {
-	pthread_mutex_unlock( &mutex );
+	int ret = pthread_mutex_unlock( &mutex );
 	is_locked = 0;
-	_TRACE_PRINTF_6("Mutex %x : UN-LOCKED\n",this);
+	_TRACE_PRINTF_6("Mutex %ld : UN-LOCKED\n",(long int)(this));
+	
+	return ret;
 }
 
 int CMyMutex::TryLock()
 {
    return pthread_mutex_trylock( &mutex );
 }
+
