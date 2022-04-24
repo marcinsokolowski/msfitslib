@@ -221,6 +221,7 @@ public :
   float valXY_auto( int x, int y );
   
   // arithmetical operations :
+  void HorFlip();
   void Divide( CBgFits& right );
   void Multiply( CBgFits& right );
   void Subtract( CBgFits& right );
