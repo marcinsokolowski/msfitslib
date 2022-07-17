@@ -18,7 +18,11 @@ public :
    double x;
    double y;
    double z;
-
+ 
+   double local_x;
+   double local_y;
+   double local_z;
+ 
    // constructor and definition in .cpp file
    InputMapping();
 
