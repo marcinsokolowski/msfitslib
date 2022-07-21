@@ -437,6 +437,23 @@ void get_moon_info( time_t unix_time, double geo_long_deg, double geo_lat_deg,
    printf("Moon angular radius = %.4f [deg]\n",moon_radius_deg);
 }                   
 
+double date2jd( int years, int months, int days, int hours, int minutes, int seconds )
+{
+   double JD;
+   struct ln_date date;
+
+   date.years  = years;
+   date.months = months;
+   date.days   = days;
+   date.hours  = hours;
+   date.minutes = minutes;
+   date.seconds = seconds;
+   
+   JD = ln_get_julian_day (&date);
+   
+   return JD;
+} 
+
 double ux2jd( time_t unix_time )
 {
    double JD;

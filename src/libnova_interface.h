@@ -44,6 +44,7 @@ double get_local_sidereal_time(double uxtime_d,double geo_long_deg,double& jd_ou
 double get_jd_plus_ndays_sidalligned(double start_ux_d,double n_days);
 double ux2jd( time_t unix_time );
 double uxd2jd( double unix_time );
+double date2jd( int years, int months, int days, int hours, int minutes, int seconds );
 
 
 // general functions :
