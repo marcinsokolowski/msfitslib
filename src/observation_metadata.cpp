@@ -39,7 +39,7 @@ bool CObsMetadata::checkStatus(int status, const char* szErrorMsg )
    return true;
 }
 
-CObsMetadata::CObsMetadata() :
+CObsMetadata::CObsMetadata( const char* filename ) :
         nInputs(0),
         nScans(0),
         nChannels(0),
@@ -66,7 +66,7 @@ CObsMetadata::CObsMetadata() :
         
         // from MWAHeaderExt
         gpsTime(0), observerName("Unknown"), projectName("Unknown"),
-        gridName("Unknown"), mode("Unknown"), filename("Unknown"),
+        gridName("Unknown"), mode("Unknown"),
         hasCalibrator(false), hasGlobalSubbandGains(false),
         centreSBNumber(0),
         //fiberFactor(VEL_FACTOR),
@@ -76,14 +76,31 @@ CObsMetadata::CObsMetadata() :
 {
    for(size_t i=0; i!=16; ++i) delays[i] = 0;
    for(size_t i=0; i!=24; ++i) subbandGains[i] = 0;
+   
+   if( filename && strlen(filename) ){
+      m_filename = filename;
+   }
 }
 
+
+bool CObsMetadata::ReadMetaData()
+{
+   if( strlen(m_filename.c_str()) ){
+      if( strstr(m_filename.c_str(),".txt") ){
+         return ReadMetaDataTxt( m_filename.c_str() );
+      }
+      if( strstr(m_filename.c_str(),".metafits") ){
+         return ReadMetaFitsFile( m_filename.c_str() );
+      }
+   }
+   
+   printf("ERROR : no filename specified\n");
+   return false;   
+}
 
 
 bool CObsMetadata::ReadMetaDataTxt( const char* filename )
 {
-   return false;
-   
    if( filename && strlen(filename) ){
       if( !MyFile::DoesFileExist( filename ) ){
          printf("ERROR: filename %s does not exist\n",filename);
@@ -121,7 +138,9 @@ bool CObsMetadata::ReadMetaDataTxt( const char* filename )
       }
    }
    
-   
+   if(strcmp(m_filename.c_str(),filename)){
+      m_filename = filename;
+   }
    return true;
 }
 
@@ -218,6 +237,10 @@ bool CObsMetadata::ReadMetaFitsFile( const char* filename )
       }
    }
    
+   if(strcmp(m_filename.c_str(),filename)){
+      m_filename = filename;
+   }
+   
    return true;
 }
 
@@ -229,7 +252,7 @@ bool CObsMetadata::parseKeyword( const std::string& keyName, const std::string& 
                 gpsTime = atoi(keyValue.c_str());
         else if(keyName == "FILENAME")
         {
-                if( !parseFitsString(keyValue.c_str(),filename ) ){
+                if( !parseFitsString(keyValue.c_str(), filename ) ){
                    return false;
                 }
                 // filename = parseFitsString(keyValue.c_str());

@@ -8,10 +8,14 @@
 
 // based on mwaconfig.h(cpp) and metafitsfile.h(cpp) in cotter 
 
+#define DEFUALT_STRING_VALUE "Unknown"
+
 class CObsMetadata 
 {
 public :
-   CObsMetadata();
+   CObsMetadata( const char* filename=DEFUALT_STRING_VALUE );
+   
+   std::string m_filename; // Meta data file (txt,metafits etc).
 
    size_t nInputs;                 // the number of inputs to the correlator
    size_t nScans;                  // the number of time samples
@@ -36,7 +40,8 @@ public :
    
    // part from MWAHeaderExt
    int gpsTime;
-   std::string observerName, projectName, gridName, mode, filename, mwaPyVersion, mwaPyDate, metaDataVersion;
+   std::string observerName, projectName, gridName, mode, mwaPyVersion, mwaPyDate, metaDataVersion;
+   std::string filename; // name of file in the METADATA
    int delays[16], subbandGains[24], subbandNumbers[24];
    bool hasCalibrator, hasGlobalSubbandGains;
    int centreSBNumber;
@@ -59,6 +64,8 @@ public :
    bool ReadMetaDataTxt( const char* filename );
    
    bool ReadMetaFitsFile( const char* filename );
+   
+   bool ReadMetaData();
 
    // parsing Metafits file information :
    bool parseKeyword( const std::string& keyName, const std::string& keyValue );
