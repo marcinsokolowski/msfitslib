@@ -1,3 +1,6 @@
+// --------------------------------------------------------------------------------------------
+// based on mwaconfig.h(cpp) and metafitsfile.h(cpp) in cotter
+// --------------------------------------------------------------------------------------------
 #include "observation_metadata.h"
 #include "myfile.h"
 #include "myparser.h"

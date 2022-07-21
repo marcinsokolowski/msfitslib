@@ -6,7 +6,7 @@
 #include <string>
 #include <map>
 
-// based on mwaconfig.h in cotter 
+// based on mwaconfig.h(cpp) and metafitsfile.h(cpp) in cotter 
 
 class CObsMetadata 
 {
