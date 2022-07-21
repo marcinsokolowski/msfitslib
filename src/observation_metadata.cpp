@@ -83,8 +83,12 @@ CObsMetadata::CObsMetadata( const char* filename ) :
 }
 
 
-bool CObsMetadata::ReadMetaData()
+bool CObsMetadata::ReadMetaData( const char* filename )
 {
+   if( strlen(m_filename.c_str())<=0 || strcmp(m_filename.c_str(),filename) ){
+      m_filename = filename;
+   }
+
    if( strlen(m_filename.c_str()) ){
       if( strstr(m_filename.c_str(),".txt") ){
          return ReadMetaDataTxt( m_filename.c_str() );

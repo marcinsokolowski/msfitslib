@@ -65,7 +65,7 @@ public :
    
    bool ReadMetaFitsFile( const char* filename );
    
-   bool ReadMetaData();
+   bool ReadMetaData( const char* filename );
 
    // parsing Metafits file information :
    bool parseKeyword( const std::string& keyName, const std::string& keyValue );
