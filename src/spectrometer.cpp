@@ -1,12 +1,16 @@
 #include "spectrometer.h"
 #include "sighorns.h"
-#include "bg_fits.h"
+#include <bg_fits.h>
+#include <libnova_interface.h>
+#include <vector.h>
 
 // for file size:
 #include <sys/stat.h>
 #include <sys/types.h>
 // #include <fcntl.h>
 #include <bg_fits.h>
+
+#include <complex>
 
 int CSpectrometer::m_DebugNSpectra=10;
 string CSpectrometer::gPfbCoeffFile;
@@ -19,6 +23,7 @@ int CSpectrometer::m_MaxBytesToProcess=-1;
 string CSpectrometer::m_szVoltageDumpFile;
 
 double CSpectrometer::m_EDA_ElectricalLenM=140.00; // 140m of EDA electrical length (assuming BIGHORNS=0m)
+int    CSpectrometer::m_GeometryCorrection=1;      // no geometry correction
 
 CSpectrometer::CSpectrometer()
 {
@@ -92,7 +97,6 @@ int CSpectrometer::doFFT( std::complex<float>* in, int in_count, double* spectru
 
    return 1;
 }
-
 
 int CSpectrometer::doFFT( double* in, int in_count, double* spectrum, double* spectrum_re, double* spectrum_im, int& out_count, double norm )    
 {
@@ -708,8 +712,46 @@ int CSpectrometer::dumpSignatecBinFile( const char* binfile, int dump_idx, int n
 int CSpectrometer::CorrelateBinary( const char* eda_file, const char* bighorns_file, 
                                     vector<double>& avg_power, vector<double>& avg_eda_power,
                                     vector<double>& cross_power_re, vector<double>& cross_power_im,
-                                    int spectrum_size, int bytes_per_channel, CBgFits* pCrossPowerFullTimeRes )
+                                    int spectrum_size, int bytes_per_channel, CBgFits* pCrossPowerFullTimeRes,
+                                    int nIntegrations /*=20000*/  )
 {
+   // date2date -ut2ux=20171129_205406
+   double start_uxtime = 1511988846.1021090000; // see calculation in /home/msok/Desktop/MWA/students/2019/SummerStudents/Archana/logbook/2019_2020_Archana.odt
+                                            // was 1511988846; 
+                                            // check if start time is really where ANTENNA starts ! not the start of the RECORDING !!! This seems to be wrong !!!
+   double time_step    = 0.1 / 1000.0; // seconds = 0.1ms
+   double hyda_ra_deg  = 9.30158333*15.00;
+   double hyda_dec_deg = -12.09555556;
+   double unix_time     = start_uxtime;
+//   double geo_long_mwa = 116.670815; // nominal MWA position (The Stone at the Donga)
+//   double geo_lat_mwa  = -26.703319;
+
+   double geo_long_mwa = 116.6717555000; // (116.671254 + 116.672257)/2.00 - mean of the EDA and BIGHORNS from dropbox link
+   double geo_lat_mwa =  -26.7029685000; // (-26.702868+(-26.703069))/2.00 - mean of the EDA and BIGHORNS from dropbox link
+   double C_ms = 299792458.00;
+   double C_mhz = C_ms / 1000000.00;
+      
+
+   bool   bGeoCorrection = ( CSpectrometer::m_GeometryCorrection != 0 );
+   bool   bCableCorrectAll = false; // do not correct all spectra just mean RE/IM spectrum
+   
+   // https://www.dropbox.com/home/students/2019/SummerStudents/Archana/MS_memo_series/201801/geo_corr?preview=BIGHORNS_position_RW.txt
+   // Interaction point of Bighorns changes with frequency ! - see Adrian's Hybrid Interferometry paper (2015) : https://ui.adsabs.harvard.edu/abs/2017ITAP...65.3967S/abstract
+   double H_bighorns = 2491.1 / 1000.00; // mm
+   double R_bighorns = 750.00 / 1000.00 ; // mm
+   double tan_alpha = R_bighorns / H_bighorns;
+   double cable_len_eda = CSpectrometer::m_EDA_ElectricalLenM;
+//   double z_bighorns = -0.827 + 0.5 + H_bighorns - C_mhz/(2.00*M_PI*freq_mhz*tan_alpha); // 0.5m for concrete blocks 
+   // this might help to fix Z(freq) dependence, but may not be sufficient then full Jones treatment of Bighorns x EDA correlation might be required !
+   
+//   CCmnVector vecBighornsLocation( 43.658, 50.009, z_bighorns ); // Bighorns Antenna position 
+   CCmnVector vecEdaLocation( 143.441, 27.773, -3.045 );     // EDA-1 center position
+//   CCmnVector vecBaseline( (43.658 - 143.441)/2.00, (50.009 - 27.773)/2.00, (-0.827-(-3.045))/2.00 ); // CCmnVector has not operator- implemented ...
+   
+
+//   CCmnVector vecBaseline( (43.658 - 143.441), (50.009 - 27.773), (z_bighorns-(-3.045)) ); // CCmnVector has not operator- implemented ...
+   
+
    printf("DEBUG : CorrelateBinary\n");
    FILE* eda_f = fopen(eda_file, "rb");
    if( !eda_f ){
@@ -738,16 +780,42 @@ int CSpectrometer::CorrelateBinary( const char* eda_file, const char* bighorns_f
    int index=0;
    while( (n_eda = fread(eda_buffer, bytes_per_channel, spectrum_size, eda_f)) > 0 ){
       int n_bighorns = fread(bighorns_buffer, bytes_per_channel, spectrum_size, bighorns_f);
+      // void radec2azh( double ra, double dec, time_t unix_time, double& out_azim, double& out_alt );
+      double hyda_az_deg, hyda_alt_deg;
+//      void radec2azh( double ra, double dec, time_t unix_time, double geo_long_deg, double geo_lat_deg, double& out_az, double& out_alt );
+      radec2azh( hyda_ra_deg, hyda_dec_deg, unix_time, geo_long_mwa, geo_lat_mwa, hyda_az_deg, hyda_alt_deg );
+      double hyda_za_deg = (90.00 - hyda_alt_deg);
+      double hyda_za_rad = hyda_za_deg*(M_PI/180.00);
+      double hyda_az_rad = hyda_az_deg*(M_PI/180.00);
+      CCmnVector en_HydA( sin(hyda_za_rad)*sin(hyda_az_rad), sin(hyda_za_rad)*cos(hyda_az_rad) , cos(hyda_za_rad) );
+      
+      if( index == 0 || index == 1000 ){
+         printf("DEBUG(index=%d) : eda[0] = %d eda[1000] = %d , bighorns[0] = %d bighorns[1000] = %d\n",index,eda_buffer[0],eda_buffer[1000],bighorns_buffer[0],bighorns_buffer[1000]);fflush(stdout);
+      }
+
       
        if( pCrossPowerFullTimeRes ){
           if( index >= pCrossPowerFullTimeRes->GetYSize() ){
-             printf("INFO : doubling size of pCrossPowerFullTimeRes image\n");fflush(stdout);
-             pCrossPowerFullTimeRes->Realloc( pCrossPowerFullTimeRes->GetXSize(), 2*pCrossPowerFullTimeRes->GetYSize() );
+//             if( pCrossPowerFullTimeRes->GetYSize()  >= 51200 ){
+//                printf("WARNING : maximum size exceeded -> breaking the loop\n");
+//                break;
+//             }
+             printf("INFO : doubling size of pCrossPowerFullTimeRes image ( %d -> %d lines) - on new Ubuntu >= 18 program crashes at 51000 or close\n",pCrossPowerFullTimeRes->GetYSize(),2*pCrossPowerFullTimeRes->GetYSize() );fflush(stdout);
+             pCrossPowerFullTimeRes->Realloc( pCrossPowerFullTimeRes->GetXSize(), 2*pCrossPowerFullTimeRes->GetYSize() );                          
           }         
       }
    
       for(int i=0;i<spectrum_size;i++){
          double freq_mhz = ((double)i)*0.01; // 10kHz channels 
+
+         // Bighorns Z has to be calculated for each frequency channel separately as the interaction point depends on the height Z ~ is there circumference = lamda -> 2PiR = lamda 
+         double delta = C_mhz/(2.00*M_PI*freq_mhz*tan_alpha);
+         double z_bighorns = -0.827 + 0.5 + H_bighorns - delta; // 0.5m for concrete blocks 
+         CCmnVector vecBighornsLocation( 43.658, 50.009, z_bighorns ); // Bighorns Antenna position
+         CCmnVector vecBaseline( (43.658 - 143.441), (50.009 - 27.773), (z_bighorns-(-3.045)) ); // CCmnVector has not operator- implemented ...
+// Strange test          CCmnVector vecBaseline( (43.658 - 143.441), (50.009 - 27.773), (z_bighorns - 1.36) ); // TEST 
+         double geo_delay_distance = CCmnVector::V_scalar_product( en_HydA, vecBaseline );
+         
       
          short eda_fft_reim = ((short*)eda_buffer)[i];         
          double val_re = (char)((unsigned char*)(&eda_fft_reim))[0];
@@ -756,27 +824,62 @@ int CSpectrometer::CorrelateBinary( const char* eda_file, const char* bighorns_f
          short bighorns_fft_reim = ((short*)bighorns_buffer)[i];         
          double val2_re = (char)((unsigned char*)(&bighorns_fft_reim))[0];
          double val2_im = (char)((unsigned char*)(&bighorns_fft_reim))[1];
+         
+         if( index == 0 || index==100 ){
+            printf("Integration %d , channel = %d : EDA = (%.1f / %.1f) , BIGHORNS = (%.1f / %.1f)\n",index,i,val_re,val_im,val2_re,val2_im);
+         }
 
-         double cable_len_bighorns = 0; // meters 
-         double phi_rad_bighorns = 2.00*M_PI*(freq_mhz/300.00)*cable_len_bighorns;
+         double cable_len_bighorns = 0; //  + delta; // meters + delta where we assume that the spireal arms act like a piece of cable when interaction point changes its vertical position 
+         double phi_rad_bighorns = 2.00*M_PI*(freq_mhz/C_mhz)*cable_len_bighorns;
          double sin_phi_bighorns = sin(phi_rad_bighorns);
          double cos_phi_bighorns = cos(phi_rad_bighorns);
          double val2_re_new = val2_re*cos_phi_bighorns - val2_im*sin_phi_bighorns;
          double val2_im_new = val2_re*sin_phi_bighorns + val2_im*cos_phi_bighorns;
          val2_re = val2_re_new;
          val2_im = val2_im_new;
-
-
-         double cable_len_eda = CSpectrometer::m_EDA_ElectricalLenM; // meters - >= 250m change the direction of the fringes !
-         double phi_rad_eda = 2.00*M_PI*(freq_mhz/300.00)*cable_len_eda;
-         double sin_phi_eda = sin(phi_rad_eda);
-         double cos_phi_eda = cos(phi_rad_eda);
-
-         double val_re_new = val_re*cos_phi_eda - val_im*sin_phi_eda;
-         double val_im_new = val_re*sin_phi_eda + val_im*cos_phi_eda;
          
-         val_re = val_re_new;
-         val_im = val_im_new;
+         // geometric correction :
+         if ( bGeoCorrection ){
+            double phi_rad_bighorns_geo = CSpectrometer::m_GeometryCorrection*2.00*M_PI*(freq_mhz/C_mhz)*geo_delay_distance; // tested both signs
+            double sin_phi_bighorns_geo = sin(phi_rad_bighorns_geo);
+            double cos_phi_bighorns_geo = cos(phi_rad_bighorns_geo);
+            double val3_re_new = val2_re*cos_phi_bighorns_geo - val2_im*sin_phi_bighorns_geo;
+            double val3_im_new = val2_re*sin_phi_bighorns_geo + val2_im*cos_phi_bighorns_geo;
+            val2_re = val3_re_new;
+            val2_im = val3_im_new;
+            
+            if( (index % 1000) == 0 && (i>=15000 && i<=15010) ){
+               printf("DEBUG (time_index = %d , channel = %d) : geo_delay_distance = %.8f [m] -> phase = %.8f [deg]\n",index,i,geo_delay_distance,phi_rad_bighorns_geo*(180.00/M_PI));
+            }
+         }
+         
+/*
+         // experimental - additional phenomenological term from parabola fit :
+
+//cd /home/msok/Desktop/MWA/students/2019/SummerStudents/Archana/logbook/20200213_C++/Cable140m/Cable+140m/GeoMinus_FullWithZvsFreq
+//root / fit parabola 
+//p0                        =     -1086.69   +/-   18.3686     
+//p1                        =     0.195676   +/-   0.00322282  
+//p2                        = -8.19657e-06   +/-   1.37242e-07 
+         
+/         double fitted_A = -8.19657e-06;
+//         double fitted_B = 0.195676;
+//         double fitted_C = -1086.69;         
+//         double extra_len_term = ((2.00*fitted_A*freq_mhz + fitted_B) / ( 2.00*M_PI*freq_mhz ))*C_mhz;
+//         cable_len_eda = cable_len_eda - extra_len_term;      
+        
+*/
+         if( bCableCorrectAll ){         
+            double phi_rad_eda = 2.00*M_PI*(freq_mhz/C_mhz)*cable_len_eda;
+            double sin_phi_eda = sin(phi_rad_eda);
+            double cos_phi_eda = cos(phi_rad_eda);
+
+            double val_re_new = val_re*cos_phi_eda - val_im*sin_phi_eda;
+            double val_im_new = val_re*sin_phi_eda + val_im*cos_phi_eda;
+         
+            val_re = val_re_new;
+            val_im = val_im_new;
+         }
 
 /*         if( index==1 ){
             printf("channel=%d (%.2f MHz) : Phase due to cables BIGHORNS = %.2f [rad], EDA = %.2f [rad]\n",i,freq_mhz,phi_rad_bighorns,phi_rad_eda);
@@ -817,6 +920,157 @@ int CSpectrometer::CorrelateBinary( const char* eda_file, const char* bighorns_f
          double power_eda = val_re*val_re + val_im*val_im;
          avg_eda_power[i] += power_eda;
       }      
+
+      if( nIntegrations > 0 ){
+         if( index >= nIntegrations ){
+            printf("WARNING : index=%d -> stopping here !\n",nIntegrations);
+            break;
+         }
+      }
+      
+      index++;
+      unix_time += time_step;
+   }
+   fclose(eda_f);
+   fclose(bighorns_f);
+
+   if( pCrossPowerFullTimeRes ){   
+      printf("Setting size of full resulting output file to %d\n",index);
+      pCrossPowerFullTimeRes->SetYSize(index);
+   }
+   
+   if( avg_power.size()!=cross_power_re.size() || avg_power.size()!=cross_power_im.size() ){
+      printf("ERROR : wrong size of output array !!!\n");
+      exit(-1);
+   }
+   
+   for(int i=0;i<((int)avg_power.size());i++){
+      double freq_mhz = ((double)i)*0.01; // 10kHz channels
+   
+      avg_power[i] = avg_power[i] / index;
+      avg_eda_power[i] = avg_eda_power[i] / index;            
+      cross_power_re[i] = cross_power_re[i] / index;
+      cross_power_im[i] = cross_power_im[i] / index;
+      
+      // cable correction applied to mean :
+      complex<double> cross_power( cross_power_re[i] , cross_power_im[i] );
+      
+      if( !bCableCorrectAll ){
+         // only if not applied to every single spectrum earlier :
+         double phi_rad_eda = 2.00*M_PI*(freq_mhz/C_mhz)*cable_len_eda;
+         complex<double> phase_corr_cable( cos(phi_rad_eda) , sin(phi_rad_eda) );  
+         cross_power = cross_power * phase_corr_cable;
+      }
+      
+      cross_power_re[i] = cross_power.real();
+      cross_power_im[i] = cross_power.imag();
+   }
+
+   delete [] eda_buffer;
+   delete [] bighorns_buffer;
+
+   return index; // returns number of averaged spectra 
+}
+
+int CSpectrometer::CorrelateBinarySimple( const char* eda_file, const char* bighorns_file, 
+                                    vector<double>& avg_power, vector<double>& avg_eda_power,
+                                    vector<double>& cross_power_re, vector<double>& cross_power_im,
+                                    int spectrum_size, int bytes_per_channel, CBgFits* pCrossPowerFullTimeRes,
+                                    int nIntegrations /*=20000*/ , int n_pols /*=2*/, int pol /*=0*/ )
+{
+   printf("DEBUG : CorrelateBinary\n");
+   FILE* eda_f = fopen(eda_file, "rb");
+   if( !eda_f ){
+      printf("ERROR : could not open file %s\n",eda_file);
+      return -1;
+   }
+   printf("Opened EDA file %s\n",eda_file);
+   
+   FILE* bighorns_f = fopen(bighorns_file, "rb");
+   if( !bighorns_f ){
+      printf("ERROR : could not open file %s\n",bighorns_file);
+      return -1;
+   }
+   printf("Opened BIGHORNS file %s\n",bighorns_file);
+
+   avg_power.assign( spectrum_size, 0 );
+   avg_eda_power.assign( spectrum_size, 0 );
+   cross_power_re.assign( spectrum_size, 0 );
+   cross_power_im.assign( spectrum_size, 0 );
+
+   int single_spectrum_size = spectrum_size*bytes_per_channel*n_pols; // assuming sizeof(short)
+   unsigned char* eda_buffer = (unsigned char*)(new char[single_spectrum_size]);
+   unsigned char* bighorns_buffer = (unsigned char*)(new char[single_spectrum_size]);
+
+   int n_eda=0;
+   int index=0;
+   while( (n_eda = fread(eda_buffer, bytes_per_channel, spectrum_size*n_pols, eda_f)) > 0 ){
+      int n_bighorns = fread(bighorns_buffer, bytes_per_channel, spectrum_size*n_pols, bighorns_f);
+      if( index == 0 || index == 1000 ){
+         printf("DEBUG(index=%d) : eda[0] = %d eda[1000] = %d , bighorns[0] = %d bighorns[1000] = %d\n",index,eda_buffer[0],eda_buffer[1000],bighorns_buffer[0],bighorns_buffer[1000]);fflush(stdout);
+      }
+
+      
+       if( pCrossPowerFullTimeRes ){
+          if( index >= pCrossPowerFullTimeRes->GetYSize() ){
+//             if( pCrossPowerFullTimeRes->GetYSize()  >= 51200 ){
+//                printf("WARNING : maximum size exceeded -> breaking the loop\n");
+//                break;
+//             }
+             printf("INFO : doubling size of pCrossPowerFullTimeRes image ( %d -> %d lines) - on new Ubuntu >= 18 program crashes at 51000 or close\n",pCrossPowerFullTimeRes->GetYSize(),2*pCrossPowerFullTimeRes->GetYSize() );fflush(stdout);
+             pCrossPowerFullTimeRes->Realloc( pCrossPowerFullTimeRes->GetXSize(), 2*pCrossPowerFullTimeRes->GetYSize() );                          
+          }         
+      }
+   
+      for(int i=0;i<spectrum_size; i++ ){
+         double freq_mhz = ((double)i)*0.01; // 10kHz channels 
+      
+         short eda_fft_reim = ((short*)eda_buffer)[i*n_pols+pol]; // *n_pols to only select 0 polarisation 
+         double val_re = (char)((unsigned char*)(&eda_fft_reim))[0];
+         double val_im = (char)((unsigned char*)(&eda_fft_reim))[1];
+
+         short bighorns_fft_reim = ((short*)bighorns_buffer)[i*n_pols+pol]; // *n_pols to only select 0 polarisation 
+         double val2_re = (char)((unsigned char*)(&bighorns_fft_reim))[0];
+         double val2_im = (char)((unsigned char*)(&bighorns_fft_reim))[1];
+         
+         if( index == 0 || index==100 ){
+            printf("Integration %d , channel = %d : EDA = (%.1f / %.1f) , BIGHORNS = (%.1f / %.1f)\n",index,i,val_re,val_im,val2_re,val2_im);
+         }
+
+         double cable_len_bighorns = 0; //  + delta; // meters + delta where we assume that the spireal arms act like a piece of cable when interaction point changes its vertical position 
+/*         double sin_phi_bighorns = sin(phi_rad_bighorns);
+         double cos_phi_bighorns = cos(phi_rad_bighorns);
+         double val2_re_new = val2_re*cos_phi_bighorns - val2_im*sin_phi_bighorns;
+         double val2_im_new = val2_re*sin_phi_bighorns + val2_im*cos_phi_bighorns;
+         val2_re = val2_re_new;
+         val2_im = val2_im_new;*/
+         
+         double product_re = val_re*val2_re + val_im*val2_im;
+         double product_im = val_im*val2_re - val_re*val2_im;
+         
+         if( pCrossPowerFullTimeRes ){
+            // double cross_power = sqrt( product_re*product_re + product_im*product_im );
+            // TEST 
+            double cross_power = val2_re*val2_re + val2_im*val2_im;
+            pCrossPowerFullTimeRes->setXY( i, index, cross_power );
+         }
+            
+         cross_power_re[i] += product_re;
+         cross_power_im[i] += product_im;         
+            
+         double power = val2_re*val2_re + val2_im*val2_im;
+         avg_power[i] += power;
+         
+         double power_eda = val_re*val_re + val_im*val_im;
+         avg_eda_power[i] += power_eda;
+      }      
+
+      if( nIntegrations > 0 ){
+         if( index >= nIntegrations ){
+            printf("WARNING : index=%d -> stopping here !\n",nIntegrations);
+            break;
+         }
+      }
       
       index++;
    }
@@ -834,10 +1088,25 @@ int CSpectrometer::CorrelateBinary( const char* eda_file, const char* bighorns_f
    }
    
    for(int i=0;i<((int)avg_power.size());i++){
+      double freq_mhz = ((double)i)*0.01; // 10kHz channels
+   
       avg_power[i] = avg_power[i] / index;
-      avg_eda_power[i] = avg_eda_power[i] / index;
+      avg_eda_power[i] = avg_eda_power[i] / index;            
       cross_power_re[i] = cross_power_re[i] / index;
       cross_power_im[i] = cross_power_im[i] / index;
+      
+      // cable correction applied to mean :
+      complex<double> cross_power( cross_power_re[i] , cross_power_im[i] );
+      
+/*      if( !bCableCorrectAll ){
+         // only if not applied to every single spectrum earlier :
+         double phi_rad_eda = 2.00*M_PI*(freq_mhz/C_mhz)*cable_len_eda;
+         complex<double> phase_corr_cable( cos(phi_rad_eda) , sin(phi_rad_eda) );  
+         cross_power = cross_power * phase_corr_cable;
+      }*/
+      
+      cross_power_re[i] = cross_power.real();
+      cross_power_im[i] = cross_power.imag();
    }
 
    delete [] eda_buffer;
@@ -852,7 +1121,7 @@ int CSpectrometer::CorrelateBinaryFloat( const char* eda_file, const char* bigho
                                     vector<double>& cross_power_re, vector<double>& cross_power_im,
                                     int spectrum_size, CBgFits* pCrossPowerFullTimeRes )
 {
-   printf("DEBUG : CorrelateBinary\n");
+   printf("DEBUG : CorrelateBinaryFloat\n");
    FILE* eda_f = fopen(eda_file, "rb");
    if( !eda_f ){
       printf("ERROR : could not open file %s\n",eda_file);
@@ -880,6 +1149,10 @@ int CSpectrometer::CorrelateBinaryFloat( const char* eda_file, const char* bigho
    int index=0;
    while( (n_eda = fread(eda_buffer, sizeof(float), single_spectrum_size, eda_f)) > 0 ){
       int n_bighorns = fread(bighorns_buffer, sizeof(float), single_spectrum_size, bighorns_f);
+      
+      if( index == 0 || index == 1000 ){
+         printf("DEBUG(index=%d) : eda[0] = %.2f eda[1000] = %.2f , bighorns[0] = %.2f bighorns[1000] = %.2f\n",index,eda_buffer[0],eda_buffer[1000],bighorns_buffer[0],bighorns_buffer[1000]);fflush(stdout);
+      }
       
        if( pCrossPowerFullTimeRes ){
           if( index >= pCrossPowerFullTimeRes->GetYSize() ){

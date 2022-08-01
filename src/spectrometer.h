@@ -6,8 +6,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <fftw3.h>
-
-// std :
 #include <vector>
 #include <string>
 #include <complex>
@@ -38,6 +36,7 @@ public :
    
    // eda parameters
    static double m_EDA_ElectricalLenM;
+   static int    m_GeometryCorrection; // 0 , no correction, +1 / -1 is sign
 
    static int doFFT( unsigned char* data_fft, int in_count, double* spectrum, double* spectrum_re, double* spectrum_im, int& out_count, double norm );
    static int doFFT( double* in, int in_count, double* spectrum, double* spectrum_re, double* spectrum_im, int& out_count, double norm );
@@ -57,7 +56,18 @@ public :
                                vector<double>& avg_power, vector<double>& avg_eda_power, 
                                vector<double>& cross_power_re, vector<double>& cross_power_im,
                                int spectrum_size=32768, int bytes_per_channel=2,
-                               CBgFits* pCrossPowerFullTimeRes=NULL );
+                               CBgFits* pCrossPowerFullTimeRes=NULL, 
+                               int nIntegrations=20000  // 20000 of 0.1ms -> 2seconds of data
+                             );
+   
+   static int CorrelateBinarySimple( const char* eda_file, const char* bighorns_file, 
+                               vector<double>& avg_power, vector<double>& avg_eda_power, 
+                               vector<double>& cross_power_re, vector<double>& cross_power_im,
+                               int spectrum_size=32768, int bytes_per_channel=2,
+                               CBgFits* pCrossPowerFullTimeRes=NULL, 
+                               int nIntegrations=20000,  // 20000 of 0.1ms -> 2seconds of data
+                               int n_pols=2, int pol=0
+                             );
    
    static int CorrelateBinaryFloat( const char* eda_file, const char* bighorns_file, 
                                vector<double>& avg_power, vector<double>& avg_eda_power, 
