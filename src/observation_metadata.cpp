@@ -234,6 +234,9 @@ bool CObsMetadata::ReadMetaFitsFile( const char* filename )
         }
    }
    
+   // calculate other variables :
+   dateFirstScanMJD = GetDateFirstScanFromFields();
+   
    if( _fptr ){
       if(fits_close_file(_fptr, &status)){
          printf("ERROR : could not close FITS file %s (fits_close_file status = %d)\n",filename,status);
@@ -456,4 +459,10 @@ bool CObsMetadata::parseBool(const char* valueStr)
         if(valueStr[0] != 'T' && valueStr[0] != 'F')
                 throw std::runtime_error("Error parsing boolean in fits file");
         return valueStr[0]=='T';
+}
+
+double CObsMetadata::GetDateFirstScanFromFields() const
+{
+//        return 0.5*(integrationTime/86400.0) + Geometry::GetMJD( year, month, day, refHour, refMinute, refSecond);
+   return -1;
 }
