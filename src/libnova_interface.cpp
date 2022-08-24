@@ -39,7 +39,9 @@ void get_ymd_hms_ut( time_t ut_time, int& year, int& month, int& day,
    day = gmtm.tm_mday;
 	hour = gmtm.tm_hour;
 	minute = gmtm.tm_min;
-	sec = gmtm.tm_sec;
+	
+        double frac_sec = (sec-int(sec));
+	sec = gmtm.tm_sec + frac_sec;
 }
 
 
