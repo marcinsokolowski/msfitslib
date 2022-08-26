@@ -1,14 +1,25 @@
 #!/bin/bash
 
-module purge
-module load cascadelake
-module load gcc/8.3.0
-module load fftw/3.3.8 
-module load libnova/0.15.0
-module load cfitsio/3.48
-module load cmake/3.18.0
-
 PROGRAM_NAME=msfitslib
+
+if [ $PAWSEY_CLUSTER = "setonix" ]; then
+   echo "Loading modules for PAWSEY_CLUSTER = $PAWSEY_CLUSTER"
+   
+   module load cfitsio/4.0.0
+   module load libnova/0.15.0-pfj3ef7
+   module load fftw/3.3.9
+else
+   echo "Loading modules for PAWSEY_CLUSTER = $PAWSEY_CLUSTER (!= setonix)"
+
+   module purge   
+   module load cascadelake
+   module load gcc/8.3.0
+   module load fftw/3.3.8 
+   module load libnova/0.15.0
+   module load cfitsio/3.48
+   module load cmake/3.18.0
+fi
+
 if [ $PAWSEY_CLUSTER = "mwa" ]; then
     echo "Building cotter_wsclean on Garrawarla..."
 
@@ -32,17 +43,33 @@ if [ $PAWSEY_CLUSTER = "mwa" ]; then
         fi
     fi
 else
-    echo "Building cotter_wsclean on Topaz..."
+    if [ $PAWSEY_CLUSTER = "setonix" ]; then
+       echo "Building msfitslib on Setonix ..."
+       
+       # read script parameters
+       if [ $# -eq 1 ] && [ $1 = 'group' ]; then
+           INSTALL_DIR=/software/projects/director2183/setonix/software/$PROGRAM_NAME
+           MODULEFILE_DIR=/software/projects/director2183/setonix/modules/$PROGRAM_NAME
+           echo "Group installation at $INSTALL_DIR" 
+       else
+           INSTALL_DIR=/software/projects/director2183/msok/setonix/software/$PROGRAM_NAME
+           MODULEFILE_DIR=/software/projects/director2183/msok/setonix/modules/$PROGRAM_NAME
+           echo "User installation at $INSTALL_DIR"
+       fi
 
-    # read script parameters
-    if [ $# -eq 1 ] && [ $1 = 'group' ]; then
-        INSTALL_DIR=/group/director2183/software/centos7.6/development/$PROGRAM_NAME
-        MODULEFILE_DIR=/group/director2183/software/centos7.6/modulefiles/$PROGRAM_NAME
-        echo "Group installation at $INSTALL_DIR" 
     else
-        INSTALL_DIR=/group/director2183/$USER/software/centos7.6/development/$PROGRAM_NAME
-        MODULEFILE_DIR=/group/director2183/$USER/software/centos7.6/modulefiles/$PROGRAM_NAME
-        echo "User installation at $INSTALL_DIR"
+       echo "Building msfitslib on Topaz..."
+
+       # read script parameters
+       if [ $# -eq 1 ] && [ $1 = 'group' ]; then
+           INSTALL_DIR=/group/director2183/software/centos7.6/development/$PROGRAM_NAME
+           MODULEFILE_DIR=/group/director2183/software/centos7.6/modulefiles/$PROGRAM_NAME
+           echo "Group installation at $INSTALL_DIR" 
+       else
+           INSTALL_DIR=/group/director2183/$USER/software/centos7.6/development/$PROGRAM_NAME
+           MODULEFILE_DIR=/group/director2183/$USER/software/centos7.6/modulefiles/$PROGRAM_NAME
+           echo "User installation at $INSTALL_DIR"
+       fi
     fi
 fi
 
@@ -54,23 +81,25 @@ make VERBOSE=1
 make INSTALL_DIR=$INSTALL_DIR install
 
 # create modulefile
+LOAD_MODULES="load('cascadelake');load('slurm/20.02.3');load('gcc/8.3.0');load('fftw/3.3.8');load('libnova/0.15.0');load('cfitsio/3.48')"
+LIBDIR=lib
+if [ $PAWSEY_CLUSTER = "setonix" ]; then
+   LOAD_MODULES="load('cfitsio/4.0.0');load('libnova/0.15.0-pfj3ef7');load('fftw/3.3.9')"
+   LIBDIR=lib64
+fi   
+
 mkdir -p $MODULEFILE_DIR
 echo "
 local root_dir = '$INSTALL_DIR'
 
-load('cascadelake')
-load('slurm/20.02.3')
-load('gcc/8.3.0')
-load('fftw/3.3.8')
-load('libnova/0.15.0')
-load('cfitsio/3.48')
+$LOAD_MODULES
 
 if (mode() ~= 'whatis') then
 prepend_path('MSFITSLIB_DIR', root_dir )
 prepend_path('PATH', root_dir .. '/bin')
 prepend_path('PATH', root_dir .. '/scripts')
 prepend_path('CPATH', root_dir .. '/include')
-prepend_path('LD_LIBRARY_PATH', root_dir .. '/lib')
+prepend_path('LD_LIBRARY_PATH', root_dir .. '/$LIBDIR')
 end
 
 " > $MODULEFILE_DIR/devel.lua
