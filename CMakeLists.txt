@@ -29,6 +29,9 @@ find_library(FFTW3_LIB fftw3 HINTS ENV FFTW_LIB REQUIRED)
 find_library(LIBNOVA_LIB nova PATHS ENV LD_LIBRARY_PATH)
 
 
+# required to properly link the dynamic library :
+target_link_libraries(msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl -lpthread)
+
 add_executable(nan_test apps/nan_test.cpp)
 add_executable(libtest  apps/libtest.cpp)
 target_link_libraries(libtest msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl -lpthread)
@@ -40,6 +43,8 @@ add_executable(ux2sid   apps/ux2sid.cpp)
 target_link_libraries(ux2sid msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl -lpthread)
 add_executable(ux2sid_file   apps/ux2sid_file.cpp)
 target_link_libraries(ux2sid_file msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl -lpthread)
+add_executable(eda_spectrometer   apps/main_fft_file.cpp)
+target_link_libraries(eda_spectrometer msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl -lpthread)
 
 # larger programs :
 add_executable(avg_images  apps/avg_images.cpp)
