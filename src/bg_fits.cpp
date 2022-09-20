@@ -92,7 +92,8 @@ CBgFits& CBgFits::operator=(const CBgFits& right)
       Realloc( right.GetXSize(), right.GetYSize() );
    }
    
-   memcpy( data, right.data, sizeof(BG_FITS_DATA_TYPE));
+   int size=right.GetXSize()*right.GetYSize();
+   memcpy( data, right.data, size*sizeof(BG_FITS_DATA_TYPE));
    
    return (*this);
 }
