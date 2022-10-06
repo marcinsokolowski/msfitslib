@@ -1257,11 +1257,13 @@ char CBgFits::valXY_char( int x, int y )
 {
    int pos = y*m_SizeX + x;
    char* data_char = (char*)data;
-   if( pos>=0 && pos < (m_SizeX*m_SizeY) ){
+   // WRONG : if( pos>=0 && pos < (m_SizeX*m_SizeY) ){
+   if( x>=0 && y>=0 && x<m_SizeX && y<m_SizeY ){
       return data_char[pos];      
    }
    
-   return -1;
+   // was -1 , but it does not make sense as it is perfectly valid value NaN is better    
+   return (0.00/0.00); // NaN is more robust way of returning None/NULL like value, checked with isnan or fpclassify(val) == FP_NAN , test code /home/msok/bighorns/software/analysis/test/nan.cpp
 }
 
 float CBgFits::valXY_auto( int x, int y )
@@ -1270,7 +1272,8 @@ float CBgFits::valXY_auto( int x, int y )
    
    if( image_type == TBYTE ){
       char* data_char = (char*)data;
-      if( pos>=0 && pos < (m_SizeX*m_SizeY) ){
+      // WRONG : if( pos>=0 && pos < (m_SizeX*m_SizeY) ){ - it can allow x>m_SizeX !!!
+      if( x>=0 && y>=0 && x<m_SizeX && y<m_SizeY ){
          return (float)(data_char[pos]);
       }
    }else{
@@ -1278,10 +1281,9 @@ float CBgFits::valXY_auto( int x, int y )
          return data[pos];      
       }
    }
-   
-   
-   return -1;
-   
+      
+   // was -1 , but it does not make sense as it is perfectly valid value NaN is better    
+   return (0.00/0.00); // NaN is more robust way of returning None/NULL like value, checked with isnan or fpclassify(val) == FP_NAN , test code /home/msok/bighorns/software/analysis/test/nan.cpp
 }
 
 int CBgFits::setY( int y, float value )
@@ -1298,23 +1300,27 @@ int CBgFits::setY( int y, float value )
 float CBgFits::addXY( int x, int y, float value )
 {
    int pos = y*m_SizeX + x;
-   if( pos>=0 && pos < (m_SizeX*m_SizeY) ){
+   // WRONG : if( pos>=0 && pos < (m_SizeX*m_SizeY) ){ - it can allow x>m_SizeX !!!
+   if( x>=0 && y>=0 && x<m_SizeX && y<m_SizeY ){
       data[pos] += value;
       return data[pos];
    }
-   
-   return -1;
+
+   // was -1 , but it does not make sense as it is perfectly valid value NaN is better    
+   return (0.00/0.00); // NaN is more robust way of returning None/NULL like value, checked with isnan or fpclassify(val) == FP_NAN , test code /home/msok/bighorns/software/analysis/test/nan.cpp
 }
 
 float CBgFits::setXY( int x, int y, float value )
 {
    int pos = y*m_SizeX + x;
-   if( pos>=0 && pos < (m_SizeX*m_SizeY) ){
+   // WRONG : if( pos>=0 && pos < (m_SizeX*m_SizeY) ){  - it can allow x>m_SizeX !!!
+   if( x>=0 && y>=0 && x<m_SizeX && y<m_SizeY ){
       data[pos] = value;
       return data[pos];
    }
-   
-   return -1;
+
+   // was -1 , but it does not make sense as it is perfectly valid value NaN is better    
+   return (0.00/0.00); // NaN is more robust way of returning None/NULL like value, checked with isnan or fpclassify(val) == FP_NAN , test code /home/msok/bighorns/software/analysis/test/nan.cpp
 }
 
 float* CBgFits::set_line( int y, float* buffer )
@@ -1408,17 +1414,19 @@ float* CBgFits::set_reim_line( int y, vector<double>& line_re, vector<double>& l
 float CBgFits::value( int y, int x )
 {
    int pos = y*m_SizeX + x;
-   if( pos>=0 && pos < (m_SizeX*m_SizeY) ){
+   // WRONG : if( pos>=0 && pos < (m_SizeX*m_SizeY) ){
+   if( x>=0 && y>=0 && x<m_SizeX && y<m_SizeY ){
       return data[pos];      
    }
    
-   return -1;
+   // was -1 , but it does not make sense as it is perfectly valid value NaN is better    
+   return (0.00/0.00); // NaN is more robust way of returning None/NULL like value, checked with isnan or fpclassify(val) == FP_NAN , test code /home/msok/bighorns/software/analysis/test/nan.cpp
 }
 
 float* CBgFits::get_line( int y )
 {
-   if( y >= GetYSize() ){
-      printf("ERROR : requested line %d >= size = %d\n",y,GetYSize());
+   if( y<0 || y >= m_SizeY ){
+      printf("ERROR : requested line %d >= size = %d\n",y,m_SizeY);
       return NULL;
    }
 
@@ -1437,6 +1445,11 @@ float* CBgFits::get_line( int y, CBgArray& buffer )
 }
 
 float* CBgFits::get_line( int y, float* buffer ){
+   if( y<0 || y >= m_SizeY ){
+      printf("ERROR : requested line %d >= size = %d\n",y,m_SizeY);
+      return NULL;
+   }
+
    int pos = y*m_SizeX;
    if( buffer ){
       if( image_type == TBYTE ){
@@ -3177,8 +3190,8 @@ void CBgFits::MeanLines( CBgArray& mean_lines, CBgArray& rms_lines )
 
 void CBgFits::Transpose( CBgFits& out_fits_t )
 {
-   for(int ch=0;ch<GetXSize();ch++){
-      for(int t=0;t<GetYSize();t++){
+   for(int ch=0;ch<m_SizeX;ch++){
+      for(int t=0;t<m_SizeY;t++){
          double val = getXY( ch, t );
          out_fits_t.setXY( t, ch, val );
       }
