@@ -99,7 +99,8 @@ prepend_path('MSFITSLIB_DIR', root_dir )
 prepend_path('PATH', root_dir .. '/bin')
 prepend_path('PATH', root_dir .. '/scripts')
 prepend_path('CPATH', root_dir .. '/include')
-prepend_path('LD_LIBRARY_PATH', root_dir .. '/$LIBDIR')
+prepend_path('LD_LIBRARY_PATH', root_dir .. '/lib')
+prepend_path('LD_LIBRARY_PATH', root_dir .. '/lib64')
 end
 
 " > $MODULEFILE_DIR/devel.lua
