@@ -8,7 +8,7 @@ builddir = meson.project_build_root()
 
 comp_flags = ['-D_UNIX','-D_ENABLE_PROFILER_', '-D_ENABLE_TRACING_', 
               '-D_ENABLE_VISUALIZATION_', '-D_MONTE_CARLO_', '-D_NO_ROOT_']
-add_global_arguments(comp_flags, language : 'cpp')
+add_project_arguments(comp_flags, language : 'cpp')
 
 # Load list of files to compile into shared object
 # Note: Meson does not allow * wildcard (deliberately)
