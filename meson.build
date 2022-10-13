@@ -42,6 +42,9 @@ install_headers('src/array_config_common.h', 'src/basestring.h', 'src/cvalue_vec
 pkg = import('pkgconfig')
 pkg.generate(msfitslib)
 
+# Create a dependency - needed so it can be used as a subproject
+# https://mesonbuild.com/Dependencies.html#building-dependencies-as-subprojects
+msfitslib_dep = declare_dependency(link_with: msfitslib, include_directories: 'src')
 
 # Compile apps
 apps = [
@@ -66,5 +69,7 @@ foreach app : apps
                 install: true
                 )
 endforeach
+
+
 
 
