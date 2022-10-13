@@ -34,9 +34,10 @@ sudo make install
 Can now be built with the [Meson](https://mesonbuild.com/Quick-guide.html) build system
 
 ```
-meson setup build
+meson setup build --prefix=/path/to/install
 cd build
 meson compile
+meson install     # optional, will install to --prefix
 ```
 
 # possible problems :

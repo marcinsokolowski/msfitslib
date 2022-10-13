@@ -3,7 +3,7 @@ project('msfitslib', 'cpp', version: '1.0.1',
          default_options : ['cpp_std=c++11',])
 
 # Basic setup
-cc = meson.get_compiler('cpp')
+cc  = meson.get_compiler('cpp')
 builddir = meson.project_build_root()
 
 comp_flags = ['-D_UNIX','-D_ENABLE_PROFILER_', '-D_ENABLE_TRACING_', 
@@ -26,8 +26,22 @@ lpthread_dep = cc.find_library('pthread')
 # Compile shared object
 msfitslib = library('msfitslib', srcs,              
                      include_directories: 'src',
-                     dependencies: [fftw3_dep, cfitsio_dep, libnova_dep, ldl_dep, lpthread_dep]
+                     dependencies: [fftw3_dep, cfitsio_dep, libnova_dep, ldl_dep, lpthread_dep],
+                     install: true
                     )
+
+# Install headers
+install_headers('src/array_config_common.h', 'src/basestring.h', 'src/cvalue_vector.h',
+                'src/libnova_interface.h',
+                'src/bg_fits.h', 'src/bg_array.h','src/bg_globals.h', 'src/bg_date.h', 
+                'src/bg_defines.h', 'src/bg_total_power.h', 
+                'src/mystring.h', 'src/myfile.h', 'src/mytypes.h', 'src/basedefines.h',
+                'src/mystrtable.h', 'src/mylock.h', 'src/mypipe.h', 'src/mydate.h')
+
+# Create pkg-config file                    
+pkg = import('pkgconfig')
+pkg.generate(msfitslib)
+
 
 # Compile apps
 apps = [
@@ -48,6 +62,9 @@ foreach app : apps
   exe = executable(app, 'apps'/app+'.cpp',
                 include_directories: 'src',
                 dependencies: [fftw3_dep, cfitsio_dep, libnova_dep, ldl_dep, lpthread_dep],
-                link_with: msfitslib
+                link_with: msfitslib,
+                install: true
                 )
 endforeach
+
+
