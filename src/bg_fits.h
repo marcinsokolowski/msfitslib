@@ -11,7 +11,7 @@
 #define BG_FITS_DATA_TYPE float
 
 // enum eBgFitsAction {eBgAct_None=0,eBgAct_Log10,eBgAct_DivideByConst,eBgAct_Sqrt,eBgAct_AstroRootImage};
-enum eCalcFitsAction_T  {eNone=0,eAdd,eSubtract,eMultiply,eDivide,eSubtractLines,eCompare,eGetStat,eDivideConst, eLog10File, eSqrtFile, eAstroRootImage, eDivideLines,eTimesConst, eNormalizeByMedian, eFindValue, eDumpForHisto, eAvgChannels, eSubtractSpectrum, eDivbySpectrum, eDBFile, eAddConst, eSubtractMedian, eFindZeroInt, eLin2DB, ePrintPixelValue, eComplexMag, eAvgImages, eInvert, eABS, eSEFD_XX_YY, eSEFD_TO_AOT };
+enum eCalcFitsAction_T  {eNone=0,eAdd,eSubtract,eMultiply,eDivide,eSubtractLines,eCompare,eGetStat,eDivideConst, eLog10File, eSqrtFile, eAstroRootImage, eDivideLines,eTimesConst, eNormalizeByMedian, eFindValue, eDumpForHisto, eAvgChannels, eSubtractSpectrum, eDivbySpectrum, eDBFile, eAddConst, eSubtractMedian, eFindZeroInt, eLin2DB, ePrintPixelValue, eComplexMag, eAvgImages, eInvert, eABS, eSEFD_XX_YY, eSEFD_TO_AOT , eTranspose };
 enum eFindValueType_T   {eFindValueExact=0,eFindValueSmaller,eFindValueLarger};
 
 
@@ -108,6 +108,15 @@ public :
   double delta_freq;
   vector<string> m_AverList;
   vector<cWCSInfo> m_WCSInfo;
+  
+  // WCS coordinates / CRVALUES 
+  double crval1;   // CRVAL1
+  double cdelt1;  // CDELT1
+  double crpix1;   // CRPIX1
+  double crval2;   // CRVAL2
+  double cdelt2;  // CDELT2
+  double crpix2;   // CRPIX2
+
 
   // just for some data problems :
   static int gFitsUnixTimeError;
@@ -295,6 +304,12 @@ public :
   
   // managing output files :
   CBgFits* AllocOutFits( const char* fname, int _y_size, int bAddStates=TRUE );
+  
+  // WCS coordintes / phyiscal values :
+  double get_x_physical_value( int x ){ double ret =  crval1 + double(x)*cdelt1; printf("%.8f + %.1f*%.8f = %.8f\n",crval1,double(x),cdelt1,ret); return ret; }
+  double get_y_physical_value( int y ){ return crval2 + double(y)*cdelt2; }
+
+  void ReadCRValues();
 };
 
 #endif

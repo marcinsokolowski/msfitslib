@@ -1255,10 +1255,11 @@ float CBgFits::valXY( int x, int y )
 
 char CBgFits::valXY_char( int x, int y )
 {
-   int pos = y*m_SizeX + x;
-   char* data_char = (char*)data;
    // WRONG : if( pos>=0 && pos < (m_SizeX*m_SizeY) ){
    if( x>=0 && y>=0 && x<m_SizeX && y<m_SizeY ){
+      int pos = y*m_SizeX + x;
+      char* data_char = (char*)data;
+
       return data_char[pos];      
    }
    
@@ -1268,16 +1269,16 @@ char CBgFits::valXY_char( int x, int y )
 
 float CBgFits::valXY_auto( int x, int y )
 {
-   int pos = y*m_SizeX + x;
-   
    if( image_type == TBYTE ){
-      char* data_char = (char*)data;
       // WRONG : if( pos>=0 && pos < (m_SizeX*m_SizeY) ){ - it can allow x>m_SizeX !!!
       if( x>=0 && y>=0 && x<m_SizeX && y<m_SizeY ){
+         char* data_char = (char*)data;
+         int pos = y*m_SizeX + x;      
          return (float)(data_char[pos]);
       }
    }else{
-      if( pos>=0 && pos < (m_SizeX*m_SizeY) ){
+      if( x>=0 && y>=0 && x<m_SizeX && y<m_SizeY ){
+         int pos = y*m_SizeX + x;      
          return data[pos];      
       }
    }
@@ -1299,9 +1300,9 @@ int CBgFits::setY( int y, float value )
 
 float CBgFits::addXY( int x, int y, float value )
 {
-   int pos = y*m_SizeX + x;
    // WRONG : if( pos>=0 && pos < (m_SizeX*m_SizeY) ){ - it can allow x>m_SizeX !!!
    if( x>=0 && y>=0 && x<m_SizeX && y<m_SizeY ){
+      int pos = y*m_SizeX + x;
       data[pos] += value;
       return data[pos];
    }
@@ -1312,9 +1313,9 @@ float CBgFits::addXY( int x, int y, float value )
 
 float CBgFits::setXY( int x, int y, float value )
 {
-   int pos = y*m_SizeX + x;
    // WRONG : if( pos>=0 && pos < (m_SizeX*m_SizeY) ){  - it can allow x>m_SizeX !!!
    if( x>=0 && y>=0 && x<m_SizeX && y<m_SizeY ){
+      int pos = y*m_SizeX + x;
       data[pos] = value;
       return data[pos];
    }
@@ -1413,9 +1414,9 @@ float* CBgFits::set_reim_line( int y, vector<double>& line_re, vector<double>& l
 
 float CBgFits::value( int y, int x )
 {
-   int pos = y*m_SizeX + x;
    // WRONG : if( pos>=0 && pos < (m_SizeX*m_SizeY) ){
    if( x>=0 && y>=0 && x<m_SizeX && y<m_SizeY ){
+      int pos = y*m_SizeX + x;
       return data[pos];      
    }
    
@@ -1749,7 +1750,8 @@ int CBgFits::Compare( CBgFits& right, float min_diff, int verb )
       
       if( fabs_diff > min_diff ){
          if( verb >= 1 && gBGPrintfLevel >= BG_INFO_LEVEL ){
-            printf("%e != %e at (%d,%d) - %.2f [MHz]\n",data[i],right.data[i],(i % m_SizeX),(i / m_SizeX),freq);
+            // printf("%e != %e at (%d,%d) - %.2f [MHz]\n",data[i],right.data[i],(i % m_SizeX),(i / m_SizeX),freq);
+            printf("%.12f != %.12f at (%d,%d) - %.2f [MHz]\n",data[i],right.data[i],(i % m_SizeX),(i / m_SizeX),freq);
          }
          ret++;
       }
@@ -3194,6 +3196,60 @@ void CBgFits::Transpose( CBgFits& out_fits_t )
       for(int t=0;t<m_SizeY;t++){
          double val = getXY( ch, t );
          out_fits_t.setXY( t, ch, val );
-      }
+      }      
+   }
+   
+   // void CBgFits::PrepareBigHornsHeaderTransposed( double ux_start, double _inttime, double freq_start, double delta_freq_mhz )
+   // PrepareBigHornsHeaderTransposed( 
+   out_fits_t.SetKeyword("CRPIX2",1); // or 0.5-(1,1)=0.059MHz, 1->(1,1)=0Mhz-CORRECT, 0->(1,1)->0.117MHz
+   out_fits_t.SetKeyword("CTYPE2","Frequency");
+   out_fits_t.SetKeyword("CUNIT2","MHz");
+   out_fits_t.SetKeywordFloat("CRVAL2",start_freq);
+   out_fits_t.SetKeywordFloat("CDELT2",delta_freq);
+
+   out_fits_t.SetKeyword("CRPIX1",1); // or 0.5-(1,1)=0.059MHz, 1->(1,1)=0Mhz-CORRECT, 0->(1,1)->0.117MHz
+   out_fits_t.SetKeyword("CTYPE1","Time");
+   out_fits_t.SetKeyword("CUNIT1","sec");
+   out_fits_t.SetKeywordFloat("CDELT1",inttime);
+
+}
+
+void CBgFits::ReadCRValues()
+{
+   crval1 = 0.00;   // start physical value
+   cdelt1 = 1.00; // delta of physical value
+   crpix1 = 1.00; // which pixel is the start 
+   crval2 = 0.00;   // start physical value
+   cdelt2 = 1.00; // delta of physical value
+   crpix2 = 1.00; // which pixel is the start 
+   // HeaderRecord* CBgFits::GetKeyword(const char *keyword)
+   HeaderRecord* pKey = NULL;
+   pKey = GetKeyword( "CRVAL1" );
+   if( pKey ){
+     crval1 = atof( pKey->Value.c_str() );
+   }
+   pKey = GetKeyword( "CDELT1" );
+   if( pKey ){
+     cdelt1 = atof( pKey->Value.c_str() );
+   }
+
+   pKey = GetKeyword( "CRPIX1" );
+   if( pKey ){
+     crpix1 = atof( pKey->Value.c_str() );
+   }
+
+   pKey = GetKeyword( "CRVAL2" );
+   if( pKey ){
+     crval2 = atof( pKey->Value.c_str() );
+   }
+
+   pKey = GetKeyword( "CDELT2" );
+   if( pKey ){
+     cdelt2 = atof( pKey->Value.c_str() );
+   }
+
+   pKey = GetKeyword( "CRPIX2" );
+   if( pKey ){
+     crpix2 = atof( pKey->Value.c_str() );
    }
 }
