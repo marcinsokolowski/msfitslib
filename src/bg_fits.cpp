@@ -1742,29 +1742,48 @@ int CBgFits::Compare( CBgFits& right, float min_diff, int verb )
    int size = m_SizeX*m_SizeY;
    double max_diff = -1e20;
    int max_diff_x=-1,max_diff_y=-1;
+   int count_left_nans=0,count_right_nans=0;
    
    for(int i=0;i<size;i++){
       int channel = (i % m_SizeX);
       double freq = ch2freq(channel);
-      double fabs_diff = fabs(data[i]-right.data[i]);
       
-      if( fabs_diff > min_diff ){
-         if( verb >= 1 && gBGPrintfLevel >= BG_INFO_LEVEL ){
-            // printf("%e != %e at (%d,%d) - %.2f [MHz]\n",data[i],right.data[i],(i % m_SizeX),(i / m_SizeX),freq);
-            printf("%.12f != %.12f at (%d,%d) - %.2f [MHz]\n",data[i],right.data[i],(i % m_SizeX),(i / m_SizeX),freq);
+      if( isnan(data[i]) || isnan(right.data[i]) ){
+         if( isnan(data[i]) ){
+            count_left_nans++;
          }
+         if( isnan(right.data[i]) ){
+            count_right_nans++;
+         }      
          ret++;
-      }
+      }else{      
+         double fabs_diff = fabs(data[i]-right.data[i]);
       
-      if( fabs_diff > max_diff ){
-         max_diff = fabs_diff;
-         max_diff_x = channel;
-         max_diff_y = (i / m_SizeX);
+      
+         if( fabs_diff > min_diff ){
+            if( verb >= 1 && gBGPrintfLevel >= BG_INFO_LEVEL ){
+               // printf("%e != %e at (%d,%d) - %.2f [MHz]\n",data[i],right.data[i],(i % m_SizeX),(i / m_SizeX),freq);
+               printf("%.12f != %.12f at (%d,%d) - %.2f [MHz]\n",data[i],right.data[i],(i % m_SizeX),(i / m_SizeX),freq);
+            }
+            ret++;
+         }
+      
+         if( fabs_diff > max_diff ){
+            max_diff = fabs_diff;
+            max_diff_x = channel;
+            max_diff_y = (i / m_SizeX);
+         }
       }
    }
 
+   if( count_left_nans>0 || count_right_nans>0 ){
+      printf("NaNs detected in one or both images!\n");
+      printf("\tLeft image has %d\n",count_left_nans);
+      printf("\tRight image has %d\n",count_right_nans);
+   }
+
    if( ret ){
-      printf("RESULT : images have %d different pixels (maximum difference = %e at (%d,%d)) !\n",ret,max_diff,max_diff_x,max_diff_y);
+      printf("RESULT : images have %d different pixels (maximum difference = %e at (%d,%d)). This includes NaNs !\n",ret,max_diff,max_diff_x,max_diff_y);
    }
    
    return ret;
