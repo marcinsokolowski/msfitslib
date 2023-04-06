@@ -9,8 +9,8 @@ class InputMapping
 {
 public :
    int input;
-   int antenna;
-   string szAntName;
+   int antenna;      // same as tile in cotter 
+   string szAntName; // same as name in cotter
    char pol;
    int delta;
    int flag;  

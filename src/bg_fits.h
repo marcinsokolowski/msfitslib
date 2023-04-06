@@ -144,7 +144,8 @@ public :
   int get_lines_counter() { return m_lines_counter; }
   void reset_lines_counter(){ m_lines_counter = 0; }
   void inc_lines_counter(){ m_lines_counter++; }
-  void SetData( BG_FITS_DATA_TYPE* ptr ){ data = ptr; m_bExternalData=true; }
+  void SetData( BG_FITS_DATA_TYPE* ptr );
+  void SetData( int xSize, int ySize, BG_FITS_DATA_TYPE* ptr );
   
 
   int ReadFits( const char* fits_file=NULL, int bAutoDetect=0, int bReadImage=1, int bIgnoreHeaderErrors=0, bool transposed=false );  

@@ -124,6 +124,26 @@ void CBgFits::Realloc( int sizeX, int sizeY, int bKeepOldData )
    }
 }
 
+void CBgFits::SetData( BG_FITS_DATA_TYPE* ptr ){ 
+   if( data && !m_bExternalData ){
+      // remove existing data, otherwise memory leak :
+      // but remove only if NOT EXTERNAL DATA YET !!!
+      // !!! WARNING : if there are problems with this line (segmentation fault or simialr crash) -> just comment it out !!!
+      delete [] data;
+      // !!! WARNING : if there are problems with this line (segmentation fault or simialr crash) -> just comment it out !!!
+   }
+
+   data = ptr; 
+   m_bExternalData=true; 
+}
+
+void CBgFits::SetData( int xSize, int ySize, BG_FITS_DATA_TYPE* ptr )
+{
+   SetData( ptr );
+   m_SizeX = xSize;
+   m_SizeY = ySize;
+}
+
 
 void CBgFits::Clean()
 {
