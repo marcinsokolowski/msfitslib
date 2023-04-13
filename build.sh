@@ -6,7 +6,7 @@ if [ $PAWSEY_CLUSTER = "setonix" ]; then
    echo "Loading modules for PAWSEY_CLUSTER = $PAWSEY_CLUSTER"
    
    module load cfitsio/4.0.0
-   module load libnova/0.15.0-pfj3ef7
+   module load libnova/0.15.0-l354muq
    module load fftw/3.3.9
 else
    echo "Loading modules for PAWSEY_CLUSTER = $PAWSEY_CLUSTER (!= setonix)"
