@@ -50,6 +50,9 @@ target_link_libraries(eda_spectrometer msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} $
 add_executable(avg_images  apps/avg_images.cpp)
 target_link_libraries(avg_images msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl -lpthread)
 
+add_executable(homeopatic_avg  apps/homeopatic_avg.cpp)
+target_link_libraries(homeopatic_avg msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl -lpthread)
+
 add_executable(calcfits_bg  apps/calcfits_bg.cpp)
 target_link_libraries(calcfits_bg msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl -lpthread)
 
@@ -57,4 +60,4 @@ add_executable(dump_lc  apps/dump_lc/main.cpp apps/dump_lc/lc_table.cpp)
 target_link_libraries(dump_lc msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl -lpthread)
 
 # INSTALLATION:
-install(TARGETS calcfits_bg dump_lc avg_images ux2sid_file ux2sid sid2ux radec2azh RUNTIME DESTINATION bin)
+install(TARGETS calcfits_bg dump_lc avg_images homeopatic_avg ux2sid_file ux2sid sid2ux radec2azh RUNTIME DESTINATION bin)
