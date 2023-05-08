@@ -259,6 +259,15 @@ public :
                   CBgArray* min_spectrum=NULL, CBgArray* max_spectrum=NULL,
                   double min_acceptable_value=-1e20, int* out_number_of_used_integrations=NULL,
                   CBgFits* rfi_flag_fits_file=NULL );
+
+  bool MapNoise( CBgFits& noise_mean, CBgFits& noise_rms, 
+                 int iDebugLevel=0, // debug level [default lowest]
+                 int fRadius=10, // radius to calculate RMS in around every pixel 
+                 int fFiducialRadiusAroundCenter=1000000000, // if >0 -> will calculate RMS/MEAN (or RMS_IQR/MEAN_IQR) in this distance from the image centre
+                 bool bIQR=false, // calculate RMS_IQR instead of normal RMS
+                 CBgFits* noise_median=NULL, CBgFits* noise_rmsiqr=NULL // output variables for MEDIAN and RMS_IQR
+               );                  
+                  
   void Divide( double value );
   int Recalc( eCalcFitsAction_T action, double value=0.00 );
   int GetMedianInt( CBgArray& median_int, CBgArray& rms_iqr_int );

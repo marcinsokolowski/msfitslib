@@ -1883,6 +1883,59 @@ double CBgFits::MeanColumn( int x , double* out_rms )
     return mean;
 }
 
+bool CBgFits::MapNoise( CBgFits& noise_mean, CBgFits& noise_rms, 
+                        int iDebugLevel /*=0*/,
+                        int fRadius /*=10*/,
+                        int fFiducialRadiusAroundCenter /* = 1000000000*/,
+                        bool bIQR /*=false*/, // calculate RMS_IQR instead of normal RMS
+                        CBgFits* noise_median /*= NULL*/, CBgFits* noise_rmsiqr /*= NULL*/ )
+{
+  int xSize = GetXSize();
+  int ySize = GetYSize();
+  int x_center = xSize / 2;
+  int y_center = ySize / 2;
+
+  int all_count = 0 , not_nan = 0;  
+  for(int y=0;y<ySize;y++){
+     for(int x=0;x<xSize;x++){
+         double dist = sqrt( (x-x_center)*(x-x_center) + (y-y_center)*(y-y_center) );
+
+         if( dist < fFiducialRadiusAroundCenter || fFiducialRadiusAroundCenter <= 0 ){
+            double mean, rms, minval, maxval, median, iqr, rms_iqr;
+            int    count_points=0;
+
+            double val = getXY(x,y);
+//            printf("isnan(%.8f) = %d\n",val,isnan(val));
+            if( isnan(val) == 0 && isinf(val) == 0 ){
+//               printf("isnan(%.8f) = %d\n",val,isnan(val));
+               GetStatRadiusAll( mean, rms, minval, maxval, median, iqr, rms_iqr, count_points, fRadius, bIQR, x, y, iDebugLevel );
+
+//               printf("DEBUG : radius = %d : %.4f , %.4f , %.4f , %.4f , %.4f , %.4f\n", gRadius, mean, rms, minval, maxval, median, rms_iqr);
+
+               noise_rms.setXY( x, y, rms );
+               noise_mean.setXY( x, y, mean );
+
+               if( noise_median ){
+                  noise_median->setXY( x, y, median );
+               }
+               if( noise_rmsiqr ){
+                  noise_rmsiqr->setXY( x, y, rms_iqr );
+               }
+
+               not_nan++;
+            }
+         }
+
+         all_count++;
+     }
+     printf("y = %d\n",y);
+  }
+
+  printf("Not-NaN count = %d / %d\n",not_nan,all_count);
+  
+  return true;   
+}
+
 double CBgFits::GetStatBorder( double& mean, double& rms, double& minval, double& maxval, int border )
 {
     return GetStat( mean, rms, minval, maxval, border, border, m_SizeX-border, m_SizeY-border );

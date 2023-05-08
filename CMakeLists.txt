@@ -62,5 +62,10 @@ target_link_libraries(calcfits_bg msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT
 add_executable(dump_lc  apps/dump_lc/main.cpp apps/dump_lc/lc_table.cpp)
 target_link_libraries(dump_lc msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl -lpthread)
 
+add_executable(noise_mapper  apps/noise_mapper.cpp)
+target_link_libraries(noise_mapper msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl -lpthread)
+
+
+
 # INSTALLATION:
-install(TARGETS calcfits_bg dump_lc avg_images homeopatic_avg image_differencer ux2sid_file ux2sid sid2ux radec2azh RUNTIME DESTINATION bin)
+install(TARGETS noise_mapper calcfits_bg dump_lc avg_images homeopatic_avg image_differencer ux2sid_file ux2sid sid2ux radec2azh RUNTIME DESTINATION bin)
