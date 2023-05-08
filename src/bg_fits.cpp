@@ -1569,6 +1569,14 @@ void CBgFits::SEFD2AOT()
 }
 
 
+void CBgFits::Subtract( CBgFits& right, CBgFits& diff )
+{
+   int size = m_SizeX*m_SizeY;
+   
+   for(int i=0;i<size;i++){
+      diff.data[i] = (data[i] - right.data[i]);
+   }
+}
 
 void CBgFits::Subtract( CBgFits& right )
 {

@@ -235,6 +235,7 @@ public :
   void Divide( CBgFits& right );
   void Multiply( CBgFits& right );
   void Subtract( CBgFits& right );
+  void Subtract( CBgFits& right, CBgFits& diff );
   void SEFD_XX_YY( CBgFits& right );
   void SEFD2AOT();
   void AddImages( CBgFits& right , double mult_const=1.00 );
