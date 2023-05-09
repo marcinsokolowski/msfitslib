@@ -63,7 +63,7 @@ void usage()
 }
 
 void parse_cmdline(int argc, char * argv[]) {
-   char optstring[] = "hixr:w:c:C:S:E:B:W:o:Hs";
+   char optstring[] = "hixr:w:c:C:S:E:B:W:o:Hst:";
    int opt;
         
    while ((opt = getopt(argc, argv, optstring)) != -1) {
@@ -131,9 +131,7 @@ void parse_cmdline(int argc, char * argv[]) {
             break;
 
          case 's' :
-            if( optarg ){
-               gSaveDiffImages = (atol( optarg ) > 0);
-            }
+            gSaveDiffImages = true;
             break;
             
          // subtraction of homeopatic (running) average with a specified weight for the new image:
@@ -181,6 +179,7 @@ void print_parameters()
     printf("Subtract running average = %d\n",gSubtractHomeopatic);
     printf("Output directory = %s\n",out_dir.c_str());
     printf("Find transient candidates exceeding threshold : %.3f sigma above mean\n",gThresholdInSigma);
+    printf("Save difference images = %d\n",gSaveDiffImages);
     printf("############################################################################################\n");
 }
 
@@ -289,9 +288,13 @@ int main(int argc,char* argv[])
      }
      
      if( gThresholdInSigma > 0 ){
-        if( transient_finder.FindTransientCandidates( &diff_fits, szFitsBaseName.c_str(), gThresholdInSigma ) > 0 ){
+        int cand_count = transient_finder.FindTransientCandidates( &diff_fits, szFitsBaseName.c_str(), gThresholdInSigma );
+        if( cand_count > 0 ){
             // save list of candidates using the same format as in eda2tv library :
-            transient_finder.SaveCandidates( szFitsBaseName.c_str() , gThresholdInSigma );
+            transient_finder.SaveCandidates( szFitsBaseName.c_str() , gThresholdInSigma, out_dir.c_str() );
+            printf("TRANSIENTS : %d transients candidates found in FITS file %s\n",cand_count,szFitsBaseName.c_str());
+        }else{
+            printf("TRANSIENTS : no transient candidates found in FITS file %s\n",szFitsBaseName.c_str());
         }
      }
      

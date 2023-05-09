@@ -63,6 +63,7 @@ int CTransientFinder::FindTransientCandidates( CBgFits* pDiffImage, const char* 
        int border=20; // ignore 20 pixels border
        // TODO : enable usage of local RMS by calculating an RMS map:
        pDiffImage->GetStatBorder( mean, rms, minval, maxval, border );
+       printf("STAT ( %s ) : ( mean , rms , minval , maxval , maxval_snr ) = ( %.6f , %.6f , %.6f , %.6f , %.6f )\n",szFitsBaseName,mean, rms, minval, maxval, maxval/rms );
        
        int xSize = pDiffImage->GetXSize();
        int ySize = pDiffImage->GetYSize();
