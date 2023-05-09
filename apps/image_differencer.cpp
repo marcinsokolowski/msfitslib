@@ -5,8 +5,9 @@
 #include <string>
 #include <math.h>
 
-#include <bg_globals.h>
-#include "bg_fits.h"
+#include "../src/bg_globals.h"
+#include "../src/bg_fits.h"
+#include "../src/transient_finder.h"
 #include <mystring.h>
 
 #include <vector>
@@ -35,12 +36,18 @@ int gStartFitsIndex = 0;
 int gEndFitsIndex   = 1000000;
 double gWeigthOfNew=0.5;
 bool gSubtractHomeopatic=false;
+bool gSaveDiffImages=false;
+
+double gThresholdInSigma=-1;
 
 void usage()
 {
    printf("image_differencer fits_list OUT_TEMPLATE\n\n\n");
    printf("\t-W WEIGHT_OF_NEW : weight of a new image [default %.6f]\n",gWeigthOfNew);
    printf("\t-H : subtract homeopatic (weighted/running) average (weight specified with -W , default %.3f)\n",gWeigthOfNew);
+   printf("\t-t THRESHOLD_IN_SIGMA : find transients above threshold in sigma [default %.3f x sigma], <0 -> do not look for transients at all\n",gThresholdInSigma);
+   printf("\t-s SAVE_DIFF_IMAGES [default %d]\n",gSaveDiffImages);
+   
    printf("\t-x : enable calculation of max.fits [default %d]\n",gCalcMax);
     printf("\t-r MAX_RMS_ALLOWED\n");   
    printf("\t-w (x_start,y_start)-(x_end,y_end) - do dump dynamic spectra of all pixels in this window\n");
@@ -56,7 +63,7 @@ void usage()
 }
 
 void parse_cmdline(int argc, char * argv[]) {
-   char optstring[] = "hixr:w:c:C:S:E:B:W:o:H";
+   char optstring[] = "hixr:w:c:C:S:E:B:W:o:Hs";
    int opt;
         
    while ((opt = getopt(argc, argv, optstring)) != -1) {
@@ -116,6 +123,18 @@ void parse_cmdline(int argc, char * argv[]) {
                out_dir = optarg;
             }
             break;
+
+         case 't' :
+            if( optarg ){
+               gThresholdInSigma = atof( optarg );
+            }
+            break;
+
+         case 's' :
+            if( optarg ){
+               gSaveDiffImages = (atol( optarg ) > 0);
+            }
+            break;
             
          // subtraction of homeopatic (running) average with a specified weight for the new image:
          case 'W' :
@@ -161,6 +180,7 @@ void print_parameters()
     printf("Weight of the new image = %.6f\n",gWeigthOfNew);
     printf("Subtract running average = %d\n",gSubtractHomeopatic);
     printf("Output directory = %s\n",out_dir.c_str());
+    printf("Find transient candidates exceeding threshold : %.3f sigma above mean\n",gThresholdInSigma);
     printf("############################################################################################\n");
 }
 
@@ -215,6 +235,7 @@ int main(int argc,char* argv[])
   int xSize = prev_fits.GetXSize();
   int ySize = prev_fits.GetYSize();
     
+  CTransientFinder transient_finder;    
   for(int i=start_fits;i<last_fits;i++){ // 2019-07-11 - start from the 2nd (1st or 0-based) image 
      if( fits.ReadFits( fits_list[i].c_str() , 0, 1, 1 ) ){
         if( gIgnoreMissingFITS ){
@@ -227,6 +248,11 @@ int main(int argc,char* argv[])
      }else{
         printf("OK : fits file %s read ok\n",fits_list[i].c_str());
      }     
+     
+     // basename of FITS file will be used in a couple of places :
+     string szFitsBaseName;
+     getbasename_new( fits_list[i].c_str(), szFitsBaseName );
+
      
      
      if( gSubtractHomeopatic ){
@@ -252,14 +278,21 @@ int main(int argc,char* argv[])
      
      // saving temporary files
      // const char* getbasename_new(const char* name,string& out)
-     string szFitsBaseName;
-     getbasename_new( fits_list[i].c_str(), szFitsBaseName );
-     char szTmpFits[128];
-     sprintf(szTmpFits,"%s/%s_diff.fits",out_dir.c_str(), szFitsBaseName.c_str() );
-     if( diff_fits.WriteFits(szTmpFits) ){
-        printf("ERROR : could not save FITS file %s\n",szTmpFits);        
-     }else{ 
-        printf("OK : saved FITS file %s\n",szTmpFits);       
+     if( gSaveDiffImages ){
+        char szTmpFits[128];
+        sprintf(szTmpFits,"%s/%s_diff.fits",out_dir.c_str(), szFitsBaseName.c_str() );
+        if( diff_fits.WriteFits(szTmpFits) ){
+           printf("ERROR : could not save FITS file %s\n",szTmpFits);        
+        }else{ 
+           printf("OK : saved FITS file %s\n",szTmpFits);       
+        }
+     }
+     
+     if( gThresholdInSigma > 0 ){
+        if( transient_finder.FindTransientCandidates( &diff_fits, szFitsBaseName.c_str(), gThresholdInSigma ) > 0 ){
+            // save list of candidates using the same format as in eda2tv library :
+            transient_finder.SaveCandidates( szFitsBaseName.c_str() , gThresholdInSigma );
+        }
      }
      
      /*sprintf(szTmpFits,"homeo/%05d.fits",i);
