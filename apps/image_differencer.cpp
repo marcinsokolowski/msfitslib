@@ -14,7 +14,7 @@
 using namespace std;
 
 string list="fits_list";
-string out_fits="homeopatic_avg.fits";
+string out_fits="homeopatic_avg";
 string out_rms_fits="out_rms.fits";
 string beam_fits_file;
 string out_dir="diff/";
@@ -25,6 +25,7 @@ double gMaxRMSOnSingle  = 4.00; // maximum allowed RMS on
 int gCalcMax=0;
 
 // WINDOW :
+int gIgnoreBorder=10;
 int gBorderStartX=-1;
 int gBorderStartY=-1;
 int gBorderEndX=-1;
@@ -35,7 +36,8 @@ bool gIgnoreMissingFITS = false;
 int gStartFitsIndex = 0;
 int gEndFitsIndex   = 1000000;
 double gWeigthOfNew=0.5;
-bool gSubtractHomeopatic=false;
+int gSubtractHomeopaticSaveEveryNImages=-1;
+double gValNewLimitInSigma=-1;
 bool gSaveDiffImages=false;
 
 double gThresholdInSigma=-1;
@@ -44,7 +46,8 @@ void usage()
 {
    printf("image_differencer fits_list OUT_TEMPLATE\n\n\n");
    printf("\t-W WEIGHT_OF_NEW : weight of a new image [default %.6f]\n",gWeigthOfNew);
-   printf("\t-H : subtract homeopatic (weighted/running) average (weight specified with -W , default %.3f)\n",gWeigthOfNew);
+   printf("\t-H : subtract homeopatic (weighted/running) average (weight specified with -W , default %.3f). Save every %d-th average image\n",gWeigthOfNew,gSubtractHomeopaticSaveEveryNImages);
+   printf("\t-L LIMIT_IN_SIGMA : limiting range for pixels in the normal difference image to be used to calculate homeopatic average (to exclude bright objects) [default %.2f], negative means all pixels are accapted\n",gValNewLimitInSigma);
    printf("\t-t THRESHOLD_IN_SIGMA : find transients above threshold in sigma [default %.3f x sigma], <0 -> do not look for transients at all\n",gThresholdInSigma);
    printf("\t-s SAVE_DIFF_IMAGES [default %d]\n",gSaveDiffImages);
    
@@ -63,7 +66,7 @@ void usage()
 }
 
 void parse_cmdline(int argc, char * argv[]) {
-   char optstring[] = "hixr:w:c:C:S:E:B:W:o:Hst:";
+   char optstring[] = "hixr:w:c:C:S:E:B:W:o:H:st:L:";
    int opt;
         
    while ((opt = getopt(argc, argv, optstring)) != -1) {
@@ -142,7 +145,15 @@ void parse_cmdline(int argc, char * argv[]) {
             break;
 
          case 'H' :
-            gSubtractHomeopatic = true;
+            if( optarg ){
+               gSubtractHomeopaticSaveEveryNImages = atol( optarg );
+            }
+            break;
+            
+         case 'L' :
+            if( optarg ){
+               gValNewLimitInSigma = atof( optarg );
+            }
             break;
             
          case 'w':
@@ -176,7 +187,8 @@ void print_parameters()
     printf("############################################################################################\n");
     printf("List file    = %s\n",list.c_str());
     printf("Weight of the new image = %.6f\n",gWeigthOfNew);
-    printf("Subtract running average = %d\n",gSubtractHomeopatic);
+    printf("Subtract running average = %d (save every %d-th image)\n",(gSubtractHomeopaticSaveEveryNImages>0),gSubtractHomeopaticSaveEveryNImages);
+    printf("Limit for values in difference image : %.2f (<0 -> not used)\n",gValNewLimitInSigma);
     printf("Output directory = %s\n",out_dir.c_str());
     printf("Find transient candidates exceeding threshold : %.3f sigma above mean\n",gThresholdInSigma);
     printf("Save difference images = %d\n",gSaveDiffImages);
@@ -217,6 +229,12 @@ int main(int argc,char* argv[])
   CBgFits fits( prev_fits.GetXSize(), prev_fits.GetYSize() ), diff_fits( prev_fits.GetXSize(), prev_fits.GetYSize() );
   CBgFits homeopatic_avg( prev_fits.GetXSize(), prev_fits.GetYSize() );
 
+  // this is only for homeopatic/weighted average with cleaning based on true difference image (NEW-PREV not NEW-HOMEO_AVG)  
+  CBgFits* p_diff_prev_fits = NULL;
+  if( gValNewLimitInSigma > 0 ){
+     p_diff_prev_fits = new CBgFits( prev_fits.GetXSize(), prev_fits.GetYSize() );
+  }
+
   // starting with the same as the first image
   homeopatic_avg = prev_fits;
   
@@ -234,7 +252,9 @@ int main(int argc,char* argv[])
   int xSize = prev_fits.GetXSize();
   int ySize = prev_fits.GetYSize();
     
-  CTransientFinder transient_finder;    
+  CTransientFinder transient_finder;
+  char szOutHomeFitsName[512];
+      
   for(int i=start_fits;i<last_fits;i++){ // 2019-07-11 - start from the 2nd (1st or 0-based) image 
      if( fits.ReadFits( fits_list[i].c_str() , 0, 1, 1 ) ){
         if( gIgnoreMissingFITS ){
@@ -254,21 +274,49 @@ int main(int argc,char* argv[])
 
      
      
-     if( gSubtractHomeopatic ){
+     if( gSubtractHomeopaticSaveEveryNImages > 0  ){
         fits.Subtract( homeopatic_avg, diff_fits );
+        
+        if( ((i-start_fits) % gSubtractHomeopaticSaveEveryNImages) == 0 ){
+           // save every gSubtractHomeopaticSaveEveryNImages - th image :
+           sprintf(szOutHomeFitsName,"%s/%s_%05d.fits",out_dir.c_str(),out_fits.c_str(),i);
+           homeopatic_avg.WriteFits( szOutHomeFitsName );           
+           printf("Saved %s file\n",szOutHomeFitsName);
+        }
+        if( gValNewLimitInSigma > 0 && p_diff_prev_fits ){
+           fits.Subtract( prev_fits, (*p_diff_prev_fits) );
+        }
      }else{
         fits.Subtract( prev_fits, diff_fits );
      }
-     prev_fits = fits;        
+     prev_fits = fits;
      
+     // get statistics of the difference image (TODO : check if it should just be a normal difference image or difference from running/homeo variable is ok) :
+     double mean_diff, rms_diff, minval_diff, maxval_diff;
+     diff_fits.GetStatBorder( mean_diff, rms_diff, minval_diff, maxval_diff, gIgnoreBorder );
+
      // add new image :
      // BUT BE CAREFUL : it should be done after the subtraction to avoid removing fraction of the current image from itself !!!
      for(int y=0;y<ySize;y++){
         for(int x=0;x<xSize;x++){
            double val = homeopatic_avg.getXY(x,y);
            double val_new = fits.getXY(x,y);
+           bool pixel_ok = true;
+           
+           if( gValNewLimitInSigma > 0 && p_diff_prev_fits ){
+               // this part is supposed to exclude some bright objects popping on a new image (i.e. diffference image)
+               // TODO : check if it works ok with difference of new image - running average or I should just use normal average (NEW_image - PREV_image)
+               double diff_value = p_diff_prev_fits->getXY(x,y);
+               
+               if( fabs(diff_value) > gValNewLimitInSigma*rms_diff ){
+                  pixel_ok = false;
+               }
+           }
 
-           val = val*(1-gWeigthOfNew)  + val_new*gWeigthOfNew;
+           if( pixel_ok ){
+              // update pixel only if there is nothing bright in difference image at this position 
+              val = val*(1-gWeigthOfNew)  + val_new*gWeigthOfNew;
+           }
 
            homeopatic_avg.setXY(x,y,val);
         }
@@ -302,8 +350,13 @@ int main(int argc,char* argv[])
      homeopatic_avg.WriteFits(szTmpFits);
      printf("Saved homeopatic average %d to %s\n",i,szTmpFits);*/
   }
-  
-  homeopatic_avg.WriteFits( out_fits.c_str() );
-  printf("Saved final homeopatic average to %s\n",out_fits.c_str() );
+
+  sprintf(szOutHomeFitsName,"%s/%s_final.fits",out_dir.c_str(),out_fits.c_str());  
+  homeopatic_avg.WriteFits( szOutHomeFitsName );
+  printf("Saved final homeopatic average to %s\n",szOutHomeFitsName);
+    
+  if( p_diff_prev_fits ){
+     delete p_diff_prev_fits;
+  }
 }
 

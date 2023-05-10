@@ -106,7 +106,16 @@ int CTransientFinder::SaveCandidates( const char* szBaseName,
    sprintf(szOutRegFile,"%s/%s_cand.reg",szOutDir,szBaseName);
    
    FILE* out_txt_f = fopen( szOutTxtFile, "w" );
+   if( !out_txt_f ){
+      printf("ERROR : could not open output file %s\n",szOutTxtFile);
+      return -1;
+   }
+   
    FILE* out_reg_f = fopen( szOutRegFile, "w" );
+   if( !out_reg_f ){
+      printf("ERROR : could not open output file %s\n",szOutRegFile);
+      return -1;
+   }
    
    fprintf(out_reg_f,"global color=white width=5 font=\"times 10 normal\"\n");
    fprintf(out_txt_f,"# FITSNAME X Y FLUX[Jy] SNR ThreshInSigma RMS RA[deg] DEC[deg] AZIM[deg] ELEV[deg] UXTIME IMAGE_MIN IMAGE_MAX\n");
@@ -120,6 +129,9 @@ int CTransientFinder::SaveCandidates( const char* szBaseName,
                                                                                                                                                                                 
       fprintf( out_txt_f, "%s %d %d %.2f %.2f %.2f %.2f %.6f %.6f %.6f %.6f %.2f %.4f %.4f\n",szBaseName,int(pCand->x),int(pCand->y),pCand->flux,(pCand->flux/pCand->rms),threshold_in_sigma,pCand->rms,pCand->ra,pCand->dec,pCand->azim,pCand->elev,pCand->uxtime,pCand->min_value_image,pCand->max_value_image ) ;
    }
+   
+   fclose( out_txt_f );
+   fclose( out_reg_f );
 }  
 
 
