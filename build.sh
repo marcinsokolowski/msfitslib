@@ -84,7 +84,7 @@ make INSTALL_DIR=$INSTALL_DIR install
 LOAD_MODULES="load('cascadelake');load('slurm/20.02.3');load('gcc/8.3.0');load('fftw/3.3.8');load('libnova/0.15.0');load('cfitsio/3.48')"
 LIBDIR=lib
 if [ $PAWSEY_CLUSTER = "setonix" ]; then
-   LOAD_MODULES="load('cfitsio/4.0.0');load('libnova/0.15.0-pfj3ef7');load('fftw/3.3.9')"
+   LOAD_MODULES="load('cfitsio/4.0.0');load('libnova/0.15.0-l354muq');load('fftw/3.3.9')"
    LIBDIR=lib64
 fi   
 
