@@ -748,6 +748,13 @@ int CBgFits::ReadFits( const char* fits_file, int bAutoDetect /*=0*/, int bReadI
      printf("DEBUG : ReadFits( %s , %d , %d , %d , %d )\n",fits_file,bAutoDetect,bReadImage,bIgnoreHeaderErrors,transposed);
   }
 
+  // split path :
+  //void mystring::splitpath(BaseString& drv,BaseString& dir,
+  //                                           BaseString& fname,BaseString& ext) const
+  mystring szFullPathFits = fits_file;
+  mystring fits_drv,fits_dir,fits_fname,fits_ext;
+  szFullPathFits.splitpath( fits_drv, fits_dir, fits_fname, fits_ext );
+
   fitsfile *fp=0;
   int status = 0;
   string szFreqKeyword = "CRVAL1", szFreqDelta = "CDELT1", szTimeDelta = "CDELT2";
@@ -1032,8 +1039,26 @@ int CBgFits::ReadFits( const char* fits_file, int bAutoDetect /*=0*/, int bReadI
               printf("ERROR : could not parse UT date/time from string %s\n",szDateTime.c_str());
            }*/
         }else{
-           if( bIgnoreHeaderErrors <= 0 ){
-               printf("WARNING : cannot get start UT time of the image %s !\n",fits_file);
+           const char* fits_fname_ptr = fits_fname.c_str();
+           if( strncmp(fits_fname_ptr,"dirty_image_",12)==0 ){
+              // read UTC from FITS file name :
+              char szDATE_UT[64];
+              memset(szDATE_UT,'\0',64);
+              strncpy(szDATE_UT,fits_fname_ptr+12,18);   
+      
+              printf("DEBUG : szDATE_UT = |%s|\n",szDATE_UT);
+      
+              struct tm _tm;
+              memset( &_tm,'\0',sizeof(struct tm));
+              strptime(szDATE_UT, "%Y%m%dT%H%M%S", &_tm);
+              dtime_fs = (int)timegm( &_tm );
+              dtime_fu = atol(szDATE_UT+15)*1000; // ms -> us 
+      
+              printf("DEBUG : %s (%s) -> unixtime = %d sec and %d usec\n",fits_file,fits_fname_ptr,(int)dtime_fs,dtime_fu);      
+           }else{          
+              if( bIgnoreHeaderErrors <= 0 ){
+                  printf("WARNING : cannot get start UT time of the image %s !\n",fits_file);
+              }
            }
         }
      }
@@ -1516,6 +1541,19 @@ void CBgFits::Multiply( CBgFits& right )
    }
 }
 
+double CBgFits::Sum(int y)
+{
+   double sum = 0.00;
+   
+   for(int x=0;x<m_SizeX;x++){
+      int pos = y*m_SizeX + x;
+      
+      sum += data[pos];
+   }
+   
+   return sum;
+}
+
 double CBgFits::Sum()
 {
    double sum = 0.00;
@@ -1694,6 +1732,16 @@ void CBgFits::Divide( CBgFits& right )
       if ( right.data[i] != 0.00 ){
          data[i] = (data[i] / right.data[i]);
       }
+   }
+}
+
+
+void CBgFits::Divide( int y, double value )
+{
+   for(int x=0;x<m_SizeX;x++){
+      int pos = y*m_SizeX + x;
+      
+      data[pos] = data[pos] / value;
    }
 }
 

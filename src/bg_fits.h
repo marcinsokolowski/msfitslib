@@ -246,6 +246,7 @@ public :
   bool Offset( double dx, double dy, CBgFits& out_fits, double multiplier=1.00 );
   void Transpose( CBgFits& out_fits_t );
   double Sum(); // calculates sum of pixel values in the image
+  double Sum(int y); // calculates a sum of pixels values in a specified row y  
   
   double GetStatBorder( double& mean, double& rms, double& minval, double& maxval, int border );
   double GetStat( double& mean, double& rms, double& minval, double& maxval, int x_start=0, int y_start=0, int x_end=-1, int y_end=-1 );
@@ -269,6 +270,7 @@ public :
                );                  
                   
   void Divide( double value );
+  void Divide( int y, double value );
   int Recalc( eCalcFitsAction_T action, double value=0.00 );
   int GetMedianInt( CBgArray& median_int, CBgArray& rms_iqr_int );
   int GetMedianInt( vector<cIntRange>& int_ranges, CBgArray& median_int, CBgArray& rms_iqr_int );
