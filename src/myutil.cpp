@@ -223,7 +223,7 @@ BOOL_T check_sort( LONG_T* tab, LONG_T size )
 	for(int i=0;i<size;i++){
 		if(tab[i]<prev){
 			printf("Table sorted incorrectly !!!\n");	
-			printf("tab[%d]=%d < tab[%d]=%d\n",i,tab[i],i-1,prev);
+			printf("tab[%d]=%d < tab[%d]=%d\n",i,int(tab[i]),i-1,int(prev));
 			return FALSE;
 		}
 		prev = tab[i];
@@ -576,7 +576,7 @@ void print_line()
 void dump_table( LONG_T* tab ,int cnt )
 {
    for(int i=0;i<cnt;i++){
-      printf("%d ",tab[i]);
+      printf("%d ",int(tab[i]));
    }
    printf("\n");
 }

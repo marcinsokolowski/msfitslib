@@ -35,7 +35,7 @@ int CMyPipe::WriteData( char c )
 	int ret = write( m_Writer, &c, 1 );
 	fflush( pipe_write );
 	if( ret < 1 ){
-		printf("ERROR in CMyPipe::WriteData at unix_time=%d: could not write char to m_Writer pipe errno=%d!!!!\n",get_dttm(),errno);
+		printf("ERROR in CMyPipe::WriteData at unix_time=%d: could not write char to m_Writer pipe errno=%d!!!!\n",int(get_dttm()),errno);
 	}
 
 

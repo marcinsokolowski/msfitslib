@@ -529,7 +529,7 @@ int main(int argc,char* argv[])
           if( strcmp(gInttypeKeyword.c_str(),"ANT")==0 ){
              printf("Using only ANT integrations for median !\n");
              left.GetAntRanges( int_ranges );
-             printf("%d ANT ranges detected\n",int_ranges.size());
+             printf("%d ANT ranges detected\n",int(int_ranges.size()));
           }else{
              int_ranges.push_back( cIntRange(0,(left.GetYSize()-1)) );
           }                     
@@ -627,7 +627,7 @@ int main(int argc,char* argv[])
              if( strcmp(gInttypeKeyword.c_str(),"ANT")==0 ){
                 printf("Using only ANT integrations for median !\n");
                 left.GetAntRanges( int_ranges );
-                printf("%d ANT ranges detected\n",int_ranges.size());
+                printf("%d ANT ranges detected\n",int(int_ranges.size()));
              }else{
                 int_ranges.push_back( cIntRange(0,(left.GetYSize()-1)) );
              }           

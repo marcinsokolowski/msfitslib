@@ -359,7 +359,7 @@ int main(int argc,char* argv[])
 //     first_fits += fits;     
   }
 
-  printf("STAT_INFO : averaged %d good images of %d all\n",good_image_count,fits_list.size());    
+  printf("STAT_INFO : averaged %d good images of %d all\n",good_image_count,int(fits_list.size()));    
   for (int pos=0;pos<size;pos++){       
      double mean = ( sum_tab[pos] / good_image_count );
      

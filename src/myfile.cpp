@@ -231,7 +231,7 @@ void MyFile::Close()
 
 void MyFile::DumpBuffer()
 {
-	fprintf(m_pFile,m_szOutBuffer);
+	fprintf(m_pFile,"%s",m_szOutBuffer);
 	m_nBuffUsed = 0;
 }
 
