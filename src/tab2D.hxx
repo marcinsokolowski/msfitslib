@@ -1282,7 +1282,7 @@ BOOL_T Table2D<ARG_TYPE>::GetVariableMeanAndSigma( eLaplaceType_T laplaceType,
 			printf("Bad ranges ! %.2f , %.2f\n",minVal, maxVal);
 
 			if( fabs(mean_lap)<0.1 && fabs(sigma_lap)<0.1 ){
-				printf("WARNING : all values in window (%d,%d)-(%d,%d) are 0 ???!!!\n",start_x,start_y,end_x,end_y);
+				printf("WARNING : all values in window (%d,%d)-(%d,%d) are 0 !?\n",start_x,start_y,end_x,end_y);
 
 				if( bUseMeanOnFitFailed ){
 					printf("WARNING : setting large value sigma=1000.00 ADU\n");
