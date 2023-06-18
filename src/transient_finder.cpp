@@ -132,6 +132,8 @@ int CTransientFinder::SaveCandidates( const char* szBaseName,
    
    fclose( out_txt_f );
    fclose( out_reg_f );
+   
+   return size();
 }  
 
 
