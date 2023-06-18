@@ -1799,7 +1799,7 @@ void Table2D<ARG_TYPE>::Subtract( Table2D<ARG_TYPE>& right,Table2D<ARG_TYPE>& re
 
 	int size = (m_SizeX*m_SizeY);
 	for(int i=0;i<size;i++){
-		register ARG_TYPE original = m_pData[i];
+		ARG_TYPE original = m_pData[i];
 		result.m_pData[i] = original - right.m_pData[i];
 		if(bZero){
 			if(original < right.m_pData[i])
@@ -2113,8 +2113,8 @@ template<class ARG_TYPE>
 void Table2D<ARG_TYPE>::ShiftFrame( LONG_T FrameCounter, double frame_dx, 
 												double frame_dy, BOOL_T bUseTotal/*=TRUE*/ )
 {
-	register LONG_T newStepX = 0;
-	register LONG_T newStepY = 0;	
+	LONG_T newStepX = 0;
+	LONG_T newStepY = 0;	
 
 	if(bUseTotal){
 		LONG_T nSteps = (FrameCounter - 1);
