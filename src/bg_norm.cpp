@@ -54,6 +54,8 @@ int parse_non_unique_file( CMyStrTable& items, cIntInfo& tmp, int bFixUT )
       }else{
          printf("WARNING : no extra info provided in timestamp file\n");
       }
+      
+      return 1;
 }
 
 
@@ -80,6 +82,8 @@ int parse_unique_file( CMyStrTable& items, cIntInfo& tmp, int bFixUT )
       }else{
          printf("WARNING : no extra info provided in timestamp file\n");
       }
+      
+      return 1;
 }
 
 int parse_unique_flag_file( CMyStrTable& items, cIntInfo& tmp )
