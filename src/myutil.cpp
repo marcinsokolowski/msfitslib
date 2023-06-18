@@ -67,10 +67,10 @@ int get_no_stars_median( LONG_T* tab, LONG_T cnt )
 // to sort table call : my_qsort( tab, 10, 10 )
 void my_qsort( LONG_T* tab, LONG_T cnt )
 {
-	register LONG_T divider = tab[0];
+	LONG_T divider = tab[0];
 	
-	register int beg = 1;
-	register int end = cnt-1;
+	int beg = 1;
+	int end = cnt-1;
 	LONG_T tmp;
 
 	if(cnt){	
@@ -101,10 +101,10 @@ void my_qsort( LONG_T* tab, LONG_T cnt )
 // to sort table call : my_qsort( tab, 10, 10 )
 void my_qsort_int( int* tab, LONG_T cnt )
 {
-	register LONG_T divider = tab[0];
+	LONG_T divider = tab[0];
 	
-	register int beg = 1;
-	register int end = cnt-1;
+	int beg = 1;
+	int end = cnt-1;
 	LONG_T tmp;
 
 	if(cnt){	
@@ -200,7 +200,7 @@ BOOL_T my_table_overlap_check( LONG_T* tab1, LONG_T cnt1,
 LONG_T my_find_max_value_long( LONG_T* table, LONG_T cnt )
 {
 	LONG_T max=-100000;
-	for(register int i=0;i<cnt;i++){
+	for(int i=0;i<cnt;i++){
 		if(table[i]>max)
 			max = table[i];
 	}
@@ -242,9 +242,9 @@ void DumpTable( LONG_T* tab, LONG_T size )
 
 /*LONG_T my_round(double x)
 {
-	register int x_l = (int)floor(x);
+	int x_l = (int)floor(x);
 
-	register double h = (x-x_l);
+	double h = (x-x_l);
 	if(h>0.5)
 		return (x_l+1);
 	else
@@ -254,8 +254,8 @@ void DumpTable( LONG_T* tab, LONG_T size )
 
 LONG_T long_sum( LONG_T* tab, LONG_T cnt, LONG_T start_from /*=0*/ )
 {
-	register long sum=0;
-	for(register long i=start_from;i<cnt;i++){
+	long sum=0;
+	for(long i=start_from;i<cnt;i++){
 		sum += tab[i];
 	}	
 	return sum;
@@ -263,7 +263,7 @@ LONG_T long_sum( LONG_T* tab, LONG_T cnt, LONG_T start_from /*=0*/ )
 
 int find_value( LONG_T* tab, int tab_size, LONG_T val )
 {
-	for(register int i=0;i<tab_size;i++){
+	for(int i=0;i<tab_size;i++){
 		if(tab[i] == val)
 			return i;
 	}
@@ -272,8 +272,8 @@ int find_value( LONG_T* tab, int tab_size, LONG_T val )
 
 int qfind_value( LONG_T* tab, int tab_size, LONG_T val )
 {
-	register int pos0=0;
-	register int pos1=(tab_size-1);
+	int pos0=0;
+	int pos1=(tab_size-1);
 	while( pos1>pos0 && pos1>=0 && pos0>=0 ){
 		int pos_new = (pos1+pos0)/2;
 		if( tab[pos_new]==val ){
@@ -314,8 +314,8 @@ int find_value( vector<int>& tab, int value )
 int qfind_value( vector<int>& tab, int val )
 {
 	int tab_size=tab.size();
-	register int pos0=0;
-	register int pos1=(tab_size-1);
+	int pos0=0;
+	int pos1=(tab_size-1);
 	while( pos1>pos0 && pos1>=0 && pos0>=0 ){
 		int pos_new = (pos1+pos0)/2;
 		if( tab[pos_new]==val ){
@@ -360,7 +360,7 @@ int is_default( const char* param )
 
 int find_string( const char** tab, const char* szValue )
 {
-	register int i=0;
+	int i=0;
 	while(tab[i]){
 		if(strcmp(tab[i],szValue)==0)
 			return i;
@@ -380,9 +380,9 @@ mystring get_uname()
 
 int find_min_value( int* tab, int count, int& min_pos )
 {
-	register int min_value=5000000;
+	int min_value=5000000;
 	min_pos=-1;
-	for(register int i=0;i<count;i++){
+	for(int i=0;i<count;i++){
 		if(tab[i]<min_value){
 			min_value=tab[i];
 			min_pos = i;
@@ -509,7 +509,7 @@ const char* GetOK( BOOL_T bOK )
 double find_max_value( double* values, int cnt, int& pos )
 {
 	double ret=-1000000.00;
-	for(register int i=0;i<cnt;i++){
+	for(int i=0;i<cnt;i++){
 		if(values[i]>ret){
 			ret = values[i];
 			pos = i;
@@ -522,7 +522,7 @@ double calc_average_rms( double* values, int cnt, double& rms )
 {
 	double sum =0.00;
 	double avg2=0.00;
-	for(register int i=0;i<cnt;i++){
+	for(int i=0;i<cnt;i++){
 		sum += values[i];
 		avg2 += (values[i]*values[i]);
 	}
@@ -534,7 +534,7 @@ double calc_average_rms( double* values, int cnt, double& rms )
 double calc_rms( int mean, LONG_T* values, int cnt )
 {
 	double sum=0.00;
-	for(register int i=0;i<cnt;i++){
+	for(int i=0;i<cnt;i++){
 		sum += (values[i]-mean)*(values[i]-mean);
 	}
 	double ret = sqrt(sum/cnt);
@@ -563,7 +563,7 @@ const char* my_stristr( const char* in_string, const char* substr )
 
 void CopyCluster( LONG_T* tab_out, LONG_T* tab_in, int cnt )
 {
-	for(register int i=0;i<cnt;i++){
+	for(int i=0;i<cnt;i++){
 		tab_out[i] = tab_in[i];
 	}
 }

@@ -51,7 +51,7 @@ void CMatrix::Init( int n, int m )
 
 void CMatrix::InitZeroMatrix()
 {
-	for(register int i=0;i<m_Size;i++){
+	for(int i=0;i<m_Size;i++){
       m_pElements[i]=0;
    }
 }
@@ -59,11 +59,11 @@ void CMatrix::InitZeroMatrix()
 
 void CMatrix::InitUnitMatrix()
 {
-	for(register int i=0;i<m_Size;i++){
+	for(int i=0;i<m_Size;i++){
 		m_pElements[i]=0;		
 	}
 	if(m_SizeN == m_SizeM){
-		for(register int i=0;i<m_SizeN;i++){
+		for(int i=0;i<m_SizeN;i++){
 			m_pElements[i+m_SizeN*i] = 1;
 		}
 	}
@@ -137,10 +137,10 @@ BOOL_T CMatrix::TimesVec( double* pVec, int nSize, double* outVec )
 	if(nSize != m_SizeN)
 		return FALSE;
 
-	for(register int row=0;row<m_SizeM;row++){
+	for(int row=0;row<m_SizeM;row++){
 		double sum=0;
-		register int rowPos = row*m_SizeN;
-		for(register int i=0;i<m_SizeN;i++){		
+		int rowPos = row*m_SizeN;
+		for(int i=0;i<m_SizeN;i++){		
 			sum += m_pElements[ rowPos + i ]*pVec[ i ];
 		}
 		outVec[row] = sum;

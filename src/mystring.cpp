@@ -154,8 +154,8 @@ const char* mystring::env2str()
 mystring& mystring::SkipChar( char z )
 {
 	mystring ret;
-   register int len = length();
-   for(register int i=0;i<len;i++){
+   int len = length();
+   for(int i=0;i<len;i++){
 		if( (*this)[i]!=z ){
 			ret << (*this)[i];
 		}
@@ -169,8 +169,8 @@ mystring& mystring::SkipChar( char z )
 mystring& mystring::SkipApostrophs()
 {
 	mystring ret;
-   register int len = length();
-   for(register int i=0;i<len;i++){
+   int len = length();
+   for(int i=0;i<len;i++){
 		if( (*this)[i]!='\'' ){
 			ret << (*this)[i];
 		}
@@ -184,7 +184,7 @@ mystring mystring::getupper() const
 	mystring ret;
 	ret = (*this);
 	int len=ret.length();
-	for(register int i=0;i<len;i++)
+	for(int i=0;i<len;i++)
 		ret[i] = toupper(ret[i]);
 	return ret;
 }
@@ -258,9 +258,9 @@ mystring mystring::get_number( mystring& szStr )
 
 char mystring::get_first_non_white( const char* szString )
 {
-	register int len = strlen(szString);
+	int len = strlen(szString);
 	if(len>0){
-		for(register int i=0;i<len;i++){
+		for(int i=0;i<len;i++){
 			if(szString[i]!=' ' && szString[i]!='\t'){
 				return szString[i];
 			}		
@@ -272,9 +272,9 @@ char mystring::get_first_non_white( const char* szString )
 
 char mystring::get_last_non_white( const char* szString )
 {
-	register int len = strlen(szString);
+	int len = strlen(szString);
 	if(len>0){
-		for(register int i=(len-1);i>=0;i--){
+		for(int i=(len-1);i>=0;i--){
 			if(szString[i]!=' ' && szString[i]!='\t'){
 				return szString[i];
 			}		

@@ -80,7 +80,7 @@ double CMyHisto::GetMaxValue()
 { 
 	double max_val = -10000.000;
 	int max_pos = -1;
-	for(register int i=0;i<m_BinNo;i++){
+	for(int i=0;i<m_BinNo;i++){
 		if(m_pCountTab[i]>max_val){
 			max_val = m_pCountTab[i];
 			max_pos = i;
@@ -217,7 +217,7 @@ void CMyHisto::DumpToFile( const char* szFileName )
 	}
 	
 	char szBufTmp[128];
-	for(register int i=0;i<m_BinNo;i++){
+	for(int i=0;i<m_BinNo;i++){
 		sprintf(szBufTmp,"%.4f\t%d\n",GetBinCenter( i ),m_pCountTab[i]);
 		szBuf << szBufTmp;
 		// szBuf << GetBinCenter( i ) << "\t" << m_pCountTab[i] << "\n"; 	 	
@@ -233,7 +233,7 @@ int CMyHisto::get_values( double* x_values, double* y_values, int max_count )
 	if( m_BinNo>max_count ){
 		return 0;
 	}
-	for(register int i=0;i<m_BinNo;i++){
+	for(int i=0;i<m_BinNo;i++){
 		x_values[i] = GetBinCenter( i );
 		y_values[i] = m_pCountTab[i];
 	}
@@ -551,14 +551,14 @@ void CMyHisto::CalcValues( double typicalSigma )
 {
 	double mean_sum=0;
 	double all_count=0;
-	for(register int i=0;i<m_BinNo;i++){
+	for(int i=0;i<m_BinNo;i++){
 		mean_sum += GetBinCenter( i )*m_pCountTab[i];
 		all_count += m_pCountTab[i];
 	}		
 	m_MeanValue = (mean_sum/all_count);
 
 	double disp=0;
-	for(register int i=0;i<m_BinNo;i++){
+	for(int i=0;i<m_BinNo;i++){
 		disp += m_pCountTab[i]*CMyMathFunc::mysqr(GetBinCenter( i ) - m_MeanValue);
 	}
 	m_RMSValue = sqrt(disp/all_count);
@@ -581,7 +581,7 @@ double CMyHisto::GetRMS( double& mean_val, int first_bin, int bin_no )
 	double all_count=0;
 
 	int last_bin=MIN( (first_bin+bin_no) , m_BinNo );
-	for(register int i=first_bin;i<last_bin;i++){
+	for(int i=first_bin;i<last_bin;i++){
 		mean_sum += GetBinCenter( i )*m_pCountTab[i];
 		all_count += m_pCountTab[i];
 	}		
@@ -589,7 +589,7 @@ double CMyHisto::GetRMS( double& mean_val, int first_bin, int bin_no )
 
 
 	double disp=0;
-	for(register int i=first_bin;i<last_bin;i++){
+	for(int i=first_bin;i<last_bin;i++){
 		disp += m_pCountTab[i]*CMyMathFunc::mysqr(GetBinCenter( i ) - mean_val);		
 	}
 	double ret = sqrt(disp/all_count);
@@ -602,7 +602,7 @@ int CMyHisto::GetMaxBin()
 {
 	int ret=0;
 	int max_count=m_pCountTab[0];
-	for(register int i=1;i<m_BinNo;i++){
+	for(int i=1;i<m_BinNo;i++){
 		if( m_pCountTab[i] > max_count )
 		{
 			max_count = m_pCountTab[i];
