@@ -113,7 +113,7 @@ char DecodeU2( char u2_value )
 	ret = - (CheckBit( u2_value, 7 )*128);
 
 	char ret2 =0;
-	for(register int i=6;i>=0;i--){
+	for(int i=6;i>=0;i--){
 		ret2 *= 2;
 		ret2 += CheckBit( u2_value, i );
 	}	
