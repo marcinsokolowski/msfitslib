@@ -20,6 +20,12 @@ else
    module load cmake/3.18.0
 fi
 
+#
+cmake_options=""
+if [[ -n "$4" && "$4" != "-" ]]; then
+   cmake_options="$4"
+fi
+
 if [ $PAWSEY_CLUSTER = "mwa" ]; then
     echo "Building cotter_wsclean on Garrawarla..."
 
@@ -76,7 +82,7 @@ fi
 
 mkdir -p build/ 
 cd build
-cmake ..  -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR}
+cmake ..  -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} ${cmake_options}
 make VERBOSE=1
 make INSTALL_DIR=$INSTALL_DIR install
 
