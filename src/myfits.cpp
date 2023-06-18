@@ -248,7 +248,7 @@ int gMaxFrameDistFor3PointSeed=-1;
 
 static void get_xy( sEventDesc* list, int cnt, double* x, double* y )
 {
-	for( register int i=0;i<cnt;i++){
+	for( int i=0;i<cnt;i++){
 		x[i] = list[i].x;
 		y[i] = list[i].y;
 	}
@@ -256,10 +256,10 @@ static void get_xy( sEventDesc* list, int cnt, double* x, double* y )
 
 void sort_event_list( sEventDesc* list, int cnt )
 {
-	for( register int i=0;i<cnt-1;i++ ){
-		register int min_value=list[i].timeUT;
-		register int min_pos=i;
-		for( register int j=i+1;j<cnt;j++){
+	for( int i=0;i<cnt-1;i++ ){
+		int min_value=list[i].timeUT;
+		int min_pos=i;
+		for( int j=i+1;j<cnt;j++){
 			if( list[j].timeUT < min_value ){
 				min_value = list[j].timeUT;
 				min_pos = j;
@@ -276,7 +276,7 @@ void sort_event_list( sEventDesc* list, int cnt )
 
 static int find_frame( sEventDesc* list, int cnt, int frame )
 {
-	for( register int i=0;i<cnt;i++){
+	for( int i=0;i<cnt;i++){
 		if( list[i].frame == frame )
 			return i;
 	}
@@ -324,7 +324,7 @@ BOOL_T CMyFit::FitLine( double* x_values, double* y_values, int cnt,
 	register double y_sum  = 0; 	
 
 	int usedCount=0;
-	for(register int i=0;i<cnt;i++){
+	for(int i=0;i<cnt;i++){
 		if(exceptPos<0 || i!=exceptPos){
 			xy_sum += x_values[i]*y_values[i];
 			x_sum  += x_values[i];
@@ -371,7 +371,7 @@ double CMyFit::CalcChi2( double* x_values, double* y_values, int cnt,
                          double a, double b, int exceptPos/*=-1*/ )
 {
 	double sum = 0;
-	for(register int i=0;i<cnt;i++){
+	for(int i=0;i<cnt;i++){
 		if(exceptPos<0 || exceptPos!=i){
 			sum += getLineChi2( x_values[i], y_values[i], a, -1, b );
 		}
@@ -384,7 +384,7 @@ double CMyFit::CalcChi2_Dist( double* x_values, double* y_values, int cnt,
                          int exceptPos/*=-1*/ )
 {
 	double sum = 0;
-	for(register int i=0;i<cnt;i++){
+	for(int i=0;i<cnt;i++){
 		if(exceptPos<0 || exceptPos!=i){
 			sum += CalcDist2FromLine( a, b , c , x_values[i], y_values[i] );
 		}
@@ -399,7 +399,7 @@ double CMyFit::CalcMaxChi2( double* x_values, double* y_values, int cnt,
 	double max_chi2 = -1000;
 	
 	pos = -1;
-	for(register int i=0;i<cnt;i++){
+	for(int i=0;i<cnt;i++){
 		double chi2 = getLineChi2( x_values[i], y_values[i], a, -1, b );
 		if(chi2 > max_chi2){
 			max_chi2 = chi2;
@@ -509,7 +509,7 @@ BOOL_T CMyFit::FindPointsOnLine2( double* x_values, double* y_values, int cnt,
 		double minChi2 = 10000000.00;		
 		int minPos=-1;
 		double bestA,bestB;
-		for(register int i=0;i<cnt_on_line;i++){
+		for(int i=0;i<cnt_on_line;i++){
 			FitLine( wrk_x, wrk_y, cnt_on_line, aa, bb, cc, i );
 			chi2[i] = CalcChi2_Dist( wrk_x, wrk_y, cnt_on_line, aa, bb, cc, i );	
 			if(chi2[i]<minChi2){
@@ -546,8 +546,8 @@ BOOL_T CMyFit::FindPointsOnLine2( double* x_values, double* y_values, int cnt,
 double CMyFit::CalcMaxDist( sEventDesc* events, int cnt )
 {
 	double maxDist=-1;
-	for(register int i=0;i<cnt;i++){
-		for(register int j=(i+1);j<cnt;j++){
+	for(int i=0;i<cnt;i++){
+		for(int j=(i+1);j<cnt;j++){
 			double dist2 = ( (events[j].x-events[i].x)*(events[j].x-events[i].x)+
 								  (events[j].y-events[i].y)*(events[j].y-events[i].y) );
 			double dist = sqrt(dist2);
@@ -589,7 +589,7 @@ BOOL_T CMyFit::CheckVelocity( sEventDesc* events, int cnt,
 		if( abs(dt0)>maxTimeDiff )
 			return FALSE;
 
-		for(register int i=1;i<(cnt-1);i++){	
+		for(int i=1;i<(cnt-1);i++){	
 			int dt = (events[i+1].timeUT-events[i].timeUT);
 
 			if( dt!=0 ){
@@ -657,7 +657,7 @@ BOOL_T CMyFit::CheckVelocity( sEventDesc* events, int cnt,
 	time_t beforeDT=1000000;
 	time_t  afterDT=1000000;
 
-	for(register int i=0;i<cnt;i++){
+	for(int i=0;i<cnt;i++){
 		if(events[i].timeUT<startTime){
 			startTime = events[i].timeUT;
 			pStart = &(events[i]);
@@ -1048,11 +1048,11 @@ int CMyFit::FindBest3Points( sEventDesc* events, int cnt,
 	int nOK=0;
 	double rx_min, ry_min;
 
-	for(register int i=0;i<=cnt-3;i++){
+	for(int i=0;i<=cnt-3;i++){
 		pointsX[0]=events[i].x;
 		pointsY[0]=events[i].y;
 
-		for(register int j=(i+1);j<=(cnt-2);j++){
+		for(int j=(i+1);j<=(cnt-2);j++){
 			if( events[j].frame==events[i].frame ){
 			   if( !bAddFromSame ){
     				// same frame 
@@ -1073,7 +1073,7 @@ int CMyFit::FindBest3Points( sEventDesc* events, int cnt,
 
 			pointsX[1]=events[j].x;
 	      pointsY[1]=events[j].y;
-			for(register int k=j+1;k<=(cnt-1);k++){
+			for(int k=j+1;k<=(cnt-1);k++){
 				if( (events[j].frame==events[k].frame ||
 					  events[j].frame==events[i].frame ) && !bAddFromSame ){
 					// same frame
@@ -1255,7 +1255,7 @@ BOOL_T CMyFit::FindPointsOnLine3New( sEventDesc* events, int cnt,
       }
       
 		// now use 3 points as seed and add next :
-		for(register int ii=0;ii<3;ii++){
+		for(int ii=0;ii<3;ii++){
 			int bestpos=best3[ii];
 			events_on_line[ii] = wrk[ bestpos ];
 		}
@@ -1377,7 +1377,7 @@ BOOL_T CMyFit::FindPointsOnLine3( double* x_values, double* y_values,
 
 
 	//printf("POTENTIAL TRACK POINTS :\n");
-	//for(register int i=0;i<cnt;i++){
+	//for(int i=0;i<cnt;i++){
 	//	printf("%d %d\n",(int)wrk_x[i],(int)wrk_y[i]);
 	//}    	
 	//printf("\n");
@@ -1386,7 +1386,7 @@ BOOL_T CMyFit::FindPointsOnLine3( double* x_values, double* y_values,
    double minChi2_for3=10000000000.00;
 	// FindBest3Points( wrk_x, wrk_y, frames, cnt, a, b, best3pos, minChi2_for3 );
 		
-	for(register int i=0;i<=cnt-3;i++){
+	for(int i=0;i<=cnt-3;i++){
 		double a3,b3,c3;
 		FitLine( wrk_x+i, wrk_y+i, 3, a3, b3, c3 );
 		double chi2_3 = CalcChi2_Dist( wrk_x+i, wrk_y+i, 3, a3, b3, c3 );
@@ -1417,7 +1417,7 @@ BOOL_T CMyFit::FindPointsOnLine3( double* x_values, double* y_values,
 		if(numToCopy>0){
 			//memcpy( wrk_x+best3pos, wrk_x+best3pos+3, numToCopy*sizeof(double) );
 			//memcpy( wrk_y+best3pos, wrk_y+best3pos+3, numToCopy*sizeof(double) );
-			for(register int cc=-0;cc<numToCopy;cc++){
+			for(int cc=-0;cc<numToCopy;cc++){
 				wrk_x[best3pos+cc] = wrk_x[best3pos+3+cc];
 				wrk_y[best3pos+cc] = wrk_y[best3pos+3+cc];
 			}
@@ -1461,7 +1461,7 @@ BOOL_T CMyFit::FindPointsOnLine3( double* x_values, double* y_values,
 
 	/*if(cnt_on_line>2){
 		printf("POINTS ON TRACK :\n");
-		for(register int i=0;i<cnt_on_line;i++){
+		for(int i=0;i<cnt_on_line;i++){
 			printf("%d %d\n",(int)line_x[i],(int)line_y[i]);
 		}
 		printf("line = %.5f * x + %.5f\n",a,b);
@@ -1499,7 +1499,7 @@ double CMyFit::CalcDist2FromLine2Par( double a, double b,
                                       double* x, double* y, int cnt )
 {
 	double sum=0;
-	for(register int i=0;i<cnt;i++){
+	for(int i=0;i<cnt;i++){
 		sum += CalcDist2FromLine2Par( a, b, x[i], y[i] );
 	}
 	return sum;
@@ -1710,21 +1710,21 @@ BOOL_T CMyFit::FitGauss( double minValue, double& rms, double& center,
 	
 	X[0]=max; X[1]=center; X[2]=rms;	// Initial fit values
 	
-	for(register int i=0;i<9;i++){
+	for(int i=0;i<9;i++){
 		scrat[i] = 0;
 		cx[i] = 0;
 	}
-	for(register int i=0;i<100;i++){
+	for(int i=0;i<100;i++){
 		T[i]=0;
 		Y[i]=0;
 		DELTAY[i]=0;
 	}
-	for(register int i=0;i<300;i++){
+	for(int i=0;i<300;i++){
 		a[i] = 0;			
 	}
 
 	double delta=binWidth*0.5;
-	for(register int ii=first_bin; ii<(first_bin+binNo); ii++)	// Generating histogram points
+	for(int ii=first_bin; ii<(first_bin+binNo); ii++)	// Generating histogram points
 	{
 		int i = (ii-first_bin);
 
