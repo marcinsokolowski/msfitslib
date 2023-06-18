@@ -72,7 +72,8 @@ double CValueVector::interpolate_both( double x, double& out_val1, double& out_v
    
    out_val1 = ::interpolate( x, prev.x, prev.y, after.x, after.y );
    out_val2 = ::interpolate( x, prev.x, prev.z, after.x, after.z );
-   
+
+   return 0.00;   
 }
 
 int CValueVector::get_list_around_radius( CValueVector& out_list, double x, double radius )

@@ -318,10 +318,10 @@ BOOL_T CMyFit::FitLine( double* x_values, double* y_values, int cnt,
                         double& a, double& b, double& c,
                         int exceptPos/*=-1*/ )
 {
-	register double xy_sum = 0;
-	register double x_sum  = 0;
-	register double x2_sum = 0;
-	register double y_sum  = 0; 	
+	double xy_sum = 0;
+	double x_sum  = 0;
+	double x2_sum = 0;
+	double y_sum  = 0; 	
 
 	int usedCount=0;
 	for(int i=0;i<cnt;i++){
