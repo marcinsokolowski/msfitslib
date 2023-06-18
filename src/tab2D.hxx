@@ -406,8 +406,8 @@ LONG_T Table2D<ARG_TYPE>::GetMaxValueAndPos( long start_x, long start_y,
 	long y1 = MIN(end_y,m_SizeY);
 
 	long max=-10000;
-	for(register long y=y0;y<y1;y++){
-		for(register long x=x0;x<x1;x++){
+	for(long y=y0;y<y1;y++){
+		for(long x=x0;x<x1;x++){
 			if(m_pFastData[y][x]>max){
 				max_x = x;
 				max_y = y;
@@ -983,7 +983,7 @@ void Table2D<ARG_TYPE>::GetVariableSigma( eLaplaceType_T laplaceType,double* typ
 		int up_y = ySize-4;		
 		int low_x = 4;
 		int up_x = xSize-4;		
-		register double count=0.00;
+		double count=0.00;
 
 		sigma = 0.00;
 		count = 0;
@@ -1129,7 +1129,7 @@ void Table2D<ARG_TYPE>::FillHistoFromData( eLaplaceType_T laplaceType,
 	if( laplaceType!=eRawS ){
 		for(int y=low_y;y<=up_y;y++){
 			for(int x=low_x;x<=up_x;x++){
-				register double laplace = p_data[y][x];
+				double laplace = p_data[y][x];
 				if(pHisto->IsInHisto( laplace )){
 					rms += (laplace-mean)*(laplace-mean);
 					count++;
@@ -1139,7 +1139,7 @@ void Table2D<ARG_TYPE>::FillHistoFromData( eLaplaceType_T laplaceType,
 	}else{
 		for(int y=low_y;y<=up_y;y++){
 			for(int x=low_x;x<=up_x;x++){
-				register double laplace = p_data[y][x];
+				double laplace = p_data[y][x];
 				if(pHisto->IsInHisto( laplace )){
 					rms += (laplace-mean)*(laplace-mean);
 					count++;
@@ -1335,7 +1335,7 @@ BOOL_T Table2D<ARG_TYPE>::GetVariableMeanAndSigma( eLaplaceType_T laplaceType,
 	int up_y = end_y-4;
 	int low_x = start_x + 4;
 	int up_x = end_x - 4;
-	register double count=0.00;
+	double count=0.00;
 
 	double norm;
 	if( p_lap_data ){
@@ -1742,7 +1742,7 @@ BOOL_T Table2D<ARG_TYPE>::Compare( const Table2D<ARG_TYPE>& right )
 template<class ARG_TYPE>
 Table2D<ARG_TYPE>& Table2D<ARG_TYPE>::operator-=(const Table2D<ARG_TYPE>& right)
 {
-	for(register long pos=0;pos<m_Size;pos++){
+	for(long pos=0;pos<m_Size;pos++){
 		m_pData[pos] -= right.m_pData[pos];
 	}	
 	return (*this);
@@ -1753,7 +1753,7 @@ void  Table2D<ARG_TYPE>::SubtractBacgroundInFrame( long nFrameSize )
 {
 	long border_sum=0;
 	long count=0;
-	for(register long pos=0;pos<m_Size;pos++){
+	for(long pos=0;pos<m_Size;pos++){
 		long x,y;
 		GetXY_FromPos( pos , x , y );
 		if( (x<nFrameSize) || (y<nFrameSize) || (x>(m_SizeX-1-nFrameSize)) || (y>(m_SizeY-1-nFrameSize)) ){
@@ -1847,8 +1847,8 @@ BOOL_T Table2D<ARG_TYPE>::GetImageWithZeros( long x0, long y0,long len_x, long l
 	Image.Alloc( len_x, len_y );
 
 	ARG_TYPE** p_out = Image.get_data_buffer_fast();
-	for(register long y=y0;y<=y1;y++){
-		for(register long x=x0;x<=x1;x++){
+	for(long y=y0;y<=y1;y++){
+		for(long x=x0;x<=x1;x++){
 			if(y>=0 && y<m_SizeY && x>=0 && x<m_SizeX)
 				p_out[y-y0][x-x0] = m_pFastData[y][x];
 			else{
@@ -2040,8 +2040,8 @@ void Table2D<ARG_TYPE>::ShiftFrameWeighted( LONG_T FrameCounter, double frame_dx
 	_TRACE_PRINTF_5("Shift values : steps=%d,totalX=%f,totalY=%f,prevX=%d,prevY=%d,StepX=%d,StepY=%d\n",
 			nSteps,m_totalShiftX,m_totalShiftY,m_PrevShiftX,m_PrevShiftY,newStepX,newStepY);	
 	
-	register long new_x=0;
-	register long new_y=0;
+	long new_x=0;
+	long new_y=0;
 	double real_new_x = 0; 
 	double real_new_y = 0; 
 
@@ -2074,10 +2074,10 @@ template<class ARG_TYPE>
 void Table2D<ARG_TYPE>::RotateFrame( LONG_T FrameCounter, double dAlpha, double rotCenterX, double rotCenterY ) 
 {
 
-	/*for(register long y0=0;y0<m_SizeY;y0++){
+	/*for(long y0=0;y0<m_SizeY;y0++){
 		double y0_prim = y0-rotCenterY;
 		double y0_prim_sq = (y0_prim*y0_prim);
-		for(register long x0=0;x0<m_SizeX;x0++){
+		for(long x0=0;x0<m_SizeX;x0++){
 			double x0_prim = x0-rotCenterX;
 		   double r = sqrt(x0_prim*x0_prim + y0_prim_sq);
 
@@ -2134,8 +2134,8 @@ void Table2D<ARG_TYPE>::ShiftFrame( LONG_T FrameCounter, double frame_dx,
 	}
 
 	
-	register long new_x=0;
-	register long new_y=0;
+	long new_x=0;
+	long new_y=0;
 	double real_new_x = 0; 
 	double real_new_y = 0; 
 
@@ -2284,14 +2284,14 @@ LONG_T Table2D<ARG_TYPE>::CalcLaplaceSumOLD( LONG_T x, LONG_T y, LONG_T xSize,
                                  ARG_TYPE** p_data, eLaplaceType_T laplaceType,
 											LONG_T& plus_sum, LONG_T& minus_sum )
 {
-	register long x_1 = x-1;
-	register long y_1 = y-1;
-	register long xp1 = x+1;
-	register long yp1 = y+1;
-	register long x_2 = x-2;
-	register long y_2 = y-2;
-	register long xp2 = x+2;
-	register long yp2 = y+2;
+	long x_1 = x-1;
+	long y_1 = y-1;
+	long xp1 = x+1;
+	long yp1 = y+1;
+	long x_2 = x-2;
+	long y_2 = y-2;
+	long xp2 = x+2;
+	long yp2 = y+2;
 
 	int laplace = 0;
 	plus_sum = 0;
@@ -2405,14 +2405,14 @@ LONG_T Table2D<ARG_TYPE>::CalcLaplaceSumBigOLD( LONG_T x, LONG_T y, LONG_T xSize
                                  BIG_ELEM_TYPE** p_data, eLaplaceType_T laplaceType,
 											LONG_T& plus_sum, LONG_T& minus_sum )
 {
-	register long x_1 = x-1;
-	register long y_1 = y-1;
-	register long xp1 = x+1;
-	register long yp1 = y+1;
-	register long x_2 = x-2;
-	register long y_2 = y-2;
-	register long xp2 = x+2;
-	register long yp2 = y+2;
+	long x_1 = x-1;
+	long y_1 = y-1;
+	long xp1 = x+1;
+	long yp1 = y+1;
+	long x_2 = x-2;
+	long y_2 = y-2;
+	long xp2 = x+2;
+	long yp2 = y+2;
 
 	int laplace = 0;
 	plus_sum = 0;
@@ -3056,8 +3056,8 @@ template<class ARG_TYPE>
 void Table2D<ARG_TYPE>::Laplace( BIG_ELEM_TYPE** p_laplace_fast, eLaplaceType_T laplaceType,
 											long x0, long y0, long x1, long y1 )
 {
-	for(register long y=y0;y<=y1;y++){
-		for(register long x=x0;x<=x1;x++){
+	for(long y=y0;y<=y1;y++){
+		for(long x=x0;x<=x1;x++){
 			p_laplace_fast[y][x] = CalcLaplaceSum( x, y, m_SizeX, m_pFastData, 
 																laplaceType );
 		}
@@ -3070,8 +3070,8 @@ void Table2D<ARG_TYPE>::LaplaceSafe( BIG_ELEM_TYPE** p_laplace_fast,
 												 CLongPoint* LaplaceMinusList, int LaplaceMinusCount,
 												 long x0, long y0, long x1, long y1 )
 {
-	for(register long y=y0;y<=y1;y++){
-		for(register long x=x0;x<=x1;x++){
+	for(long y=y0;y<=y1;y++){
+		for(long x=x0;x<=x1;x++){
 			// p_laplace_fast[y][x] = CBaseAnal::CalcLaplaceSumSafe( x, y, m_SizeX, m_pFastData );
 			p_laplace_fast[y][x] = CalcLaplaceSumEstimateOnEdge( x, y,
                                             m_SizeX, m_SizeY,
@@ -3116,8 +3116,8 @@ void Table2D<ARG_TYPE>::Laplace( Table2D<ARG_TYPE>& out, eLaplaceType_T laplaceT
 	}
 		
 
-	for(register long y=bottomY;y<upY;y++){
-		for(register long x=bottomX;x<upX;x++){
+	for(long y=bottomY;y<upY;y++){
+		for(long x=bottomX;x<upX;x++){
 			long laplace = CalcLaplaceSum(	x, y, m_SizeX, m_pFastData, laplaceType );
 			p_laplace_fast[y][x] = laplace;
 		}
