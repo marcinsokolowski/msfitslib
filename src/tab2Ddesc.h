@@ -116,8 +116,8 @@ public:
 	
 	inline Area2DInfo& GetAreaDesc( LONG_T x, LONG_T y )
 	{
-		register int x_elem = (x/m_dX);
-		register int y_elem = (y/m_dY);		
+		int x_elem = (x/m_dX);
+		int y_elem = (y/m_dY);		
 		return m_pTable2DMap[y_elem][x_elem];
 	}
 

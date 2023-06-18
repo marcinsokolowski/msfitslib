@@ -255,8 +255,8 @@ InfoTable2D::~InfoTable2D()
 
 void InfoTable2D::Dump()
 {
-	for(register int y=0;y<m_Y_count;y++){
-		for(register int x=0;x<m_X_count;x++){
+	for(int y=0;y<m_Y_count;y++){
+		for(int x=0;x<m_X_count;x++){
 			int count = (int)m_pTable2DMap[y][x].m_DataInfo[0].m_Average;
 			double aver_mag=0;
 			if( count > 0 )
