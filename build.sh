@@ -82,6 +82,8 @@ fi
 
 mkdir -p build/ 
 cd build
+echo "cmake ..  -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} ${cmake_options}"
+sleep 1
 cmake ..  -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} ${cmake_options}
 make VERBOSE=1
 make INSTALL_DIR=$INSTALL_DIR install
