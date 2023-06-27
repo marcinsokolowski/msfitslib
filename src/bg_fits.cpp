@@ -98,7 +98,7 @@ CBgFits& CBgFits::operator=(const CBgFits& right)
    return (*this);
 }
 
-void CBgFits::Realloc( int sizeX, int sizeY, int bKeepOldData )
+void CBgFits::Realloc( int sizeX, int sizeY, int bKeepOldData, bool bInitToZeros /*=false*/ )
 {   
    if( sizeX>0 && sizeY>0 ){
       float* new_data = NULL;
@@ -121,6 +121,10 @@ void CBgFits::Realloc( int sizeX, int sizeY, int bKeepOldData )
       data = new_data;   
       m_SizeX = sizeX;
       m_SizeY = sizeY;         
+      
+      if( bInitToZeros ){
+         memset(data,'\0',sizeof(float)*size);
+      }
    }
 }
 
@@ -825,12 +829,12 @@ int CBgFits::ReadFits( const char* fits_file, int bAutoDetect /*=0*/, int bReadI
          }
          
 //         int sizeXY = m_SizeX*m_SizeY;
-         fits_read_pix(fp, image_type, firstpixel, sizeXY, NULL, data, NULL, &status);
+         int fits_read_ret = fits_read_pix(fp, image_type, firstpixel, sizeXY, NULL, data, NULL, &status);
          if( status ){ 
              printf("ERROR : could not read data from FITS file %s, due to error %d\n",m_FileName.c_str(),status);
              return status;
          }
-         
+         printf("DEBUG : fits_read_pix returned %d\n",fits_read_ret);         
          delete [] firstpixel;
      }
 

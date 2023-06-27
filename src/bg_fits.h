@@ -131,7 +131,7 @@ public :
   void Clean();
   
   // memory allocation :
-  void Realloc( int sizeX, int sizeY, int bKeepOldData=TRUE );
+  void Realloc( int sizeX, int sizeY, int bKeepOldData=TRUE, bool bInitToZeros=false );
 
   // writing fits files piece by piece :
   int Create( const char* fits_file );
