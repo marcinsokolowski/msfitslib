@@ -22,6 +22,9 @@ public :
    double local_x;
    double local_y;
    double local_z;
+   
+   // cable length :
+   double cableLenDelta;
  
    // constructor and definition in .cpp file
    InputMapping();
