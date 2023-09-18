@@ -5,9 +5,9 @@ PROGRAM_NAME=msfitslib
 if [ $PAWSEY_CLUSTER = "setonix" ]; then
    echo "Loading modules for PAWSEY_CLUSTER = $PAWSEY_CLUSTER"
    
-   module load cfitsio/4.0.0
-   module load libnova/0.15.0-l354muq
-   module load fftw/3.3.9
+   module load cfitsio/4.1.0
+   module load libnova/0.15.0-hpvrrfr
+   module load fftw/3.3.10
 else
    echo "Loading modules for PAWSEY_CLUSTER = $PAWSEY_CLUSTER (!= setonix)"
 
