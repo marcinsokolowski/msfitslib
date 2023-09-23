@@ -1811,7 +1811,7 @@ bool CBgFits::Offset( double dx, double dy, CBgFits& out_fits, double multiplier
    return true;
 }
 
-int CBgFits::Compare( CBgFits& right, float min_diff, int verb )
+int CBgFits::Compare( CBgFits& right, float min_diff, int verb, bool bIgnoreNans /*=false*/ )
 {
    if( m_SizeX!=right.m_SizeX || m_SizeY!=right.m_SizeY ){
       printf("RESULT : image sizes differ %dx%d != %dx%d\n",m_SizeX,m_SizeY,right.m_SizeX,right.m_SizeY);
@@ -1835,7 +1835,10 @@ int CBgFits::Compare( CBgFits& right, float min_diff, int verb )
          if( isnan(right.data[i]) ){
             count_right_nans++;
          }      
-         ret++;
+         
+         if( bIgnoreNans ){
+            ret++;
+         }
       }else{      
          double fabs_diff = fabs(data[i]-right.data[i]);
       
