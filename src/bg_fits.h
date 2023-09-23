@@ -242,7 +242,7 @@ public :
   void ComplexMag( CBgFits& right );
   void SubtractLines( int y1, int y0, const char* outfile="diff.txt");
   void DivideLines( int y1, int y0, const char* outfile="ratio.txt");
-  int Compare( CBgFits& right, float min_diff=0.00001, int verb=0, bool bIgnoreNans=false );
+  int Compare( CBgFits& right, float min_diff=0.00001, int verb=0, bool bCountNaNs=true );
   bool Offset( double dx, double dy, CBgFits& out_fits, double multiplier=1.00 );
   void Transpose( CBgFits& out_fits_t );
   double Sum(); // calculates sum of pixel values in the image
