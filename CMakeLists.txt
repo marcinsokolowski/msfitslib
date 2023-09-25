@@ -83,8 +83,8 @@ if(FRB_SEARCH)
    target_link_libraries(calcstat msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl -lpthread)
 
    # INSTALLATION:
-   install(TARGETS noise_mapper calcfits_bg dump_lc avg_images homeopatic_avg image_differencer ux2sid_file ux2sid sid2ux radec2azh date2date create_dynaspec dynaspec_search RUNTIME DESTINATION bin)
+   install(TARGETS noise_mapper calcfits_bg dump_lc avg_images homeopatic_avg image_differencer ux2sid_file ux2sid sid2ux radec2azh date2date print_sun create_dynaspec dynaspec_search RUNTIME DESTINATION bin)
 else()
    # INSTALLATION:
-   install(TARGETS noise_mapper calcfits_bg dump_lc avg_images homeopatic_avg image_differencer ux2sid_file ux2sid sid2ux radec2azh date2date RUNTIME DESTINATION bin)
+   install(TARGETS noise_mapper calcfits_bg dump_lc avg_images homeopatic_avg image_differencer ux2sid_file ux2sid sid2ux radec2azh date2date print_sun RUNTIME DESTINATION bin)
 endif()
