@@ -65,7 +65,26 @@ target_link_libraries(dump_lc msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIB
 add_executable(noise_mapper  apps/noise_mapper.cpp)
 target_link_libraries(noise_mapper msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl -lpthread)
 
+add_executable(date2date  apps/date2date.cpp)
+target_link_libraries(date2date msfitslib ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl -lpthread)
+
+add_executable(print_sun  apps/print_sun.cpp)
+target_link_libraries(print_sun msfitslib ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl -lpthread)
 
 
-# INSTALLATION:
-install(TARGETS noise_mapper calcfits_bg dump_lc avg_images homeopatic_avg image_differencer ux2sid_file ux2sid sid2ux radec2azh RUNTIME DESTINATION bin)
+if(FRB_SEARCH)
+   add_executable(create_dynaspec apps/frb_search/main_dynaspec.cpp apps/frb_search/mwa_fits.cpp apps/frb_search/sources.cpp apps/frb_search/dedisp_search.cpp apps/frb_search/myprogress.cpp)
+   target_link_libraries(create_dynaspec msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl -lpthread)
+
+   add_executable(dynaspec_search apps/frb_search/main_test_dynaspec.cpp apps/frb_search/dedisp_search.cpp apps/frb_search/mwa_fits.cpp apps/frb_search/sources.cpp)
+   target_link_libraries(dynaspec_search msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl -lpthread)
+
+   add_executable(calcstat apps/frb_search/calcstat.cpp apps/frb_search/dedisp_search.cpp apps/frb_search/mwa_fits.cpp apps/frb_search/sources.cpp)
+   target_link_libraries(calcstat msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl -lpthread)
+
+   # INSTALLATION:
+   install(TARGETS noise_mapper calcfits_bg dump_lc avg_images homeopatic_avg image_differencer ux2sid_file ux2sid sid2ux radec2azh date2date create_dynaspec dynaspec_search RUNTIME DESTINATION bin)
+else()
+   # INSTALLATION:
+   install(TARGETS noise_mapper calcfits_bg dump_lc avg_images homeopatic_avg image_differencer ux2sid_file ux2sid sid2ux radec2azh date2date RUNTIME DESTINATION bin)
+endif()
