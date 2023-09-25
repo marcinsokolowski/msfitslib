@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10.0)
+cmake_minimum_required(VERSION 3.5.1)
 project(msfitslib VERSION 1.0.1)
 include(GNUInstallDirs)
 
