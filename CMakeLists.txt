@@ -71,6 +71,8 @@ target_link_libraries(date2date msfitslib ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFT
 add_executable(print_sun  apps/print_sun.cpp)
 target_link_libraries(print_sun msfitslib ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl -lpthread)
 
+add_executable(flip_vertical apps/flip_vertical.cpp)
+target_link_libraries(flip_vertical msfitslib ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl -lpthread)
 
 if(FRB_SEARCH)
    add_executable(create_dynaspec apps/frb_search/main_dynaspec.cpp apps/frb_search/mwa_fits.cpp apps/frb_search/sources.cpp apps/frb_search/dedisp_search.cpp apps/frb_search/myprogress.cpp)
