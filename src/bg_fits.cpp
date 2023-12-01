@@ -1714,6 +1714,24 @@ void CBgFits::RMS( int n_count, CBgFits& right )
    }
 }
 
+
+void CBgFits::VertFlip()
+{
+    // TODO : can be done in-place :
+    CBgFits tmp( GetXSize(), GetYSize() );    
+    CBgArray buffer;
+    
+    for(int y=0;y<GetYSize();y++){
+       get_line(y,buffer);
+       
+       int y_out = GetYSize() - 1 - y;
+       set_line(y_out,buffer);
+    }
+    
+    int size = GetXSize()*GetYSize();
+    memcpy( data, tmp.data, size*sizeof(BG_FITS_DATA_TYPE));
+}
+
 void CBgFits::HorFlip()
 {
    CBgArray buffer;
