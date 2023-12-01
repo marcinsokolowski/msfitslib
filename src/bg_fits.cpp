@@ -1725,7 +1725,7 @@ void CBgFits::VertFlip()
        get_line(y,buffer);
        
        int y_out = GetYSize() - 1 - y;
-       set_line(y_out,buffer);
+       tmp.set_line(y_out,buffer);
     }
     
     int size = GetXSize()*GetYSize();
