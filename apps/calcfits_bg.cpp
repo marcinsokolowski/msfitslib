@@ -13,6 +13,10 @@
 #include <vector>
 using namespace std;
 
+// to check maximum stack limits:
+#include <sys/time.h>
+#include <sys/resource.h>
+
 // enum eCalcFitsAction_T  {eNone=0,eAdd,eSubtract,eMultiply,eDivide,eSubtractLines,eCompare,eGetStat,eDivideConst, eLog10File, eSqrtFile, eAstroRootImage };
 
 string fits_left="left.fits";
@@ -347,12 +351,21 @@ int main(int argc,char* argv[])
   print_parameters();
   
   CBgFits left(fits_left.c_str());
-  CBgFits right(fits_right.c_str());  
+  CBgFits right(fits_right.c_str());      
   
   printf("Reading file %s ...\n",fits_left.c_str());
   if( left.ReadFits( NULL, 0, 1, 1) ){
      printf("ERROR : error reading fits file %s\n",fits_left.c_str());
      exit(-1);
+  }
+  
+  struct rlimit rlim;
+  getrlimit( RLIMIT_STACK, &rlim);
+  printf("SYSTEM INFO : maximum stack size = %ld bytes (soft limit) and %ld bytes of hard limit\n",rlim.rlim_cur,rlim.rlim_max);
+  if( left.GetXSize() >= 4000 ){
+     rlim.rlim_cur = 33554432;
+     setrlimit( RLIMIT_STACK, &rlim);
+     printf("SYSTEM INFO : maximum stack size set to %ld bytes\n",rlim.rlim_cur);
   }
 
   CBgFits* pRFI_FlagsFits = NULL;
