@@ -2029,6 +2029,8 @@ double CBgFits::GetStat( double& mean, double& rms, double& minval, double& maxv
    if( x_end < 0 ){
       x_end = m_SizeX;
    }
+
+   int min_val_x = -1, min_val_y = -1, max_val_x = -1, max_val_y = -1;
   
    int nan_count = 0, total_count = 0;   
    int non_zero_count=0;
@@ -2048,9 +2050,13 @@ double CBgFits::GetStat( double& mean, double& rms, double& minval, double& maxv
            
            if( val > maxval ){
                maxval = val;
+               max_val_x = x;
+               max_val_y = y;
            }
            if( val < minval ){
                minval = val;
+               min_val_x = x;
+               min_val_y = y;
            }
            if( fabs(val) > 0.0000000001 ){
               non_zero_count++;
@@ -2065,6 +2071,10 @@ double CBgFits::GetStat( double& mean, double& rms, double& minval, double& maxv
       if( gBGPrintfLevel >= BG_WARNING_LEVEL ){
          printf("WARNING : %d / %d are NaN values found and ignored\n",nan_count,total_count);
       }
+   }
+   
+   if( gBGPrintfLevel >= 1 ){
+      printf("MIN_VAL = %.8f at (%d,%d), MAX_VAL = %.8f at (%d,%d)\n",minval,min_val_x,min_val_y,maxval,max_val_x,max_val_y);
    }
    
 //   printf("Non-zero count = %d\n",non_zero_count);
@@ -2102,7 +2112,8 @@ double CBgFits::GetStatRadiusAll( double& mean, double& rms, double& minval, dou
    
    int x_end   = (center_x + radius);
    int y_end   = (center_y + radius);
-   
+
+   int min_val_x = -1, min_val_y = -1, max_val_x = -1, max_val_y = -1;   
    int max_count = (y_end - y_start + 1)*(x_end - x_start + 1);
    double* values = NULL;
    if ( do_iqr ){
@@ -2140,9 +2151,13 @@ double CBgFits::GetStatRadiusAll( double& mean, double& rms, double& minval, dou
            
                  if( val > maxval ){
                      maxval = val;
+                     max_val_x = x;
+                     max_val_y = y;
                  }
                  if( val < minval ){
                      minval = val;
+                     min_val_x = x;
+                     min_val_y = y;
                  }
               }
            }
@@ -2170,6 +2185,11 @@ double CBgFits::GetStatRadiusAll( double& mean, double& rms, double& minval, dou
    
       delete [] values;
    }
+
+   if( gBGPrintfLevel >= 1 ){
+      printf("MIN_VAL = %.8f at (%d,%d), MAX_VAL = %.8f at (%d,%d)\n",minval,min_val_x,min_val_y,maxval,max_val_x,max_val_y);
+   }
+
    
    return 0.00;
 }

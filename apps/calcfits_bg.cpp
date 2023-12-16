@@ -517,7 +517,7 @@ int main(int argc,char* argv[])
              stat_y = atol( szFitsOut.c_str() );
           }
           inttime = left.GetStatRadiusAll( avg_val, rms_val, min_val, max_val, median, iqr, rms_iqr, pixel_count, gRadius, true, stat_x, stat_y );
-          printf("%s : MEDIAN = %.8f, RMS_IQR = %.8f , MEAN = %.8f , RMS = %.8f , N_PIXELS = %d around pixel (%d,%d)\n",left.GetFileName(), avg_val, rms_val, median, rms_iqr, pixel_count, stat_x, stat_y );
+          printf("%s : MEDIAN = %.8f, RMS_IQR = %.8f , MEAN = %.8f , RMS = %.8f , MIN_VAL = %.8f , MAX_VAL = %.8f in N_PIXELS = %d around pixel (%d,%d)\n",left.GetFileName(), avg_val, rms_val, median, rms_iqr, min_val, max_val, pixel_count, stat_x, stat_y );
        }else{
           // full image
           inttime = left.GetStat( avg, rms, gStartInt, gEndInt, gInttypeKeyword.c_str(), &min_spec, &max_spec, -1e20, NULL, pRFI_FlagsFits );
