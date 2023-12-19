@@ -545,6 +545,21 @@ mystring get_clock_in_sec_string( long cl)
 	return szStr;
 }
 
+mystring get_chrono_in_sec_string( double r )
+{
+   // r are seconds, so clock can be calculated back as below:
+   long cl = (long)(r*double(CLOCKS_PER_SEC));
+  
+   long msec = (long)(r*100.00);
+   long sec = (msec/100);
+   long l_msec = (msec%100);
+
+   char szMsg[128];
+   sprintf(szMsg,"%ld ticks ( = %.8f sec )",cl,r);
+   mystring szStr;
+   szStr << szMsg;
+   return szStr;
+}
 
 CTimer::CTimer()
 {

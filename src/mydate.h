@@ -81,7 +81,11 @@ time_t get_midday_ut( time_t ut_time );
 time_t get_gmmidnight_ut( time_t ut_time );
 
 
+// format output string using CLOCK 
 BASELIB_EI mystring get_clock_in_sec_string( long cl);
+
+// format output string using seconds (from std::chrono)
+BASELIB_EI mystring get_chrono_in_sec_string( double r );
 
 mystring get_gmtime_string( time_t ut_time );
 mystring get_gmtime_string();
