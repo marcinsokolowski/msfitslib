@@ -18,7 +18,7 @@ string out_rms_fits="out_rms.fits";
 string beam_fits_file;
 
 double gMinRMSOnSingle  = 0.00001;
-double gMaxRMSOnSingle  = 4.00; // maximum allowed RMS on 
+double gMaxRMSOnSingle  = 1e20; // default was 4.00, 2023-12-22 -> changed to ~INFINITY to avoid skipping noisy images ; // maximum allowed RMS on 
 
 int gCalcMax=0;
 
