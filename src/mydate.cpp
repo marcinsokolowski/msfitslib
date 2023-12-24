@@ -549,13 +549,14 @@ mystring get_chrono_in_sec_string( double r )
 {
    // r are seconds, so clock can be calculated back as below:
    long cl = (long)(r*double(CLOCKS_PER_SEC));
+   double r_ms = (r*1000.00);
   
    long msec = (long)(r*100.00);
    long sec = (msec/100);
    long l_msec = (msec%100);
 
    char szMsg[128];
-   sprintf(szMsg,"%ld ticks ( = %.8f sec )",cl,r);
+   sprintf(szMsg,"%ld ticks ( = %.8f sec ~= %.1f ms )",cl,r,r_ms);
    mystring szStr;
    szStr << szMsg;
    return szStr;
