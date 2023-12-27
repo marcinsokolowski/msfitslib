@@ -29,7 +29,7 @@ fi
 if [ $PAWSEY_CLUSTER = "mwa" ]; then
     echo "Building msfitslib on Garrawarla..."
     module use /software/projects/mwavcs/msok/modulefiles/
-    module load cascadelake/1.0 slurm/20.11.9 gcc/8.3.0 cfitsio/4.3.1 libnova/devel
+    module load cascadelake/1.0 slurm/20.11.9 gcc/8.3.0 cfitsio/4.3.1 libnova/devel fftw/3.3.8
 
     
     if [[ -n "$1" && $1 = 'group' ]]; then
@@ -93,7 +93,11 @@ make VERBOSE=1
 make INSTALL_DIR=$INSTALL_DIR install
 
 # create modulefile
-LOAD_MODULES="load('cascadelake');load('slurm/20.02.3');load('gcc/8.3.0');load('fftw/3.3.8');load('libnova/0.15.0');load('cfitsio/3.48')"
+if [ $PAWSEY_CLUSTER = "setonix" ]; then
+   LOAD_MODULES="load('cascadelake');load('slurm/20.02.3');load('gcc/8.3.0');load('fftw/3.3.8');load('libnova/0.15.0');load('cfitsio/3.48')"
+else
+   LOAD_MODULES="load('cascadelake/1.0');load('slurm/20.11.9');load('gcc/8.3.0');load('fftw/3.3.8');load('libnova/devel');load('cfitsio/4.3.1')"
+fi   
 LIBDIR=lib
 if [ $PAWSEY_CLUSTER = "setonix" ]; then
    LOAD_MODULES="load('cfitsio/4.0.0');load('libnova/0.15.0-l354muq');load('fftw/3.3.9')"
