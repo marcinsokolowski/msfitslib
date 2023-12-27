@@ -31,14 +31,16 @@ if [ $PAWSEY_CLUSTER = "mwa" ]; then
 
     
     if [[ -n "$1" && $1 = 'group' ]]; then
-        MODULEFILE_DIR=/astro/mwavcs/pacer_blink/software/sles12sp5/modulefiles/$PROGRAM_NAME
-        INSTALL_DIR=/astro/mwavcs/pacer_blink/software/sles12sp5/development/$PROGRAM_NAME
+#        MODULEFILE_DIR=/astro/mwavcs/pacer_blink/software/sles12sp5/modulefiles/$PROGRAM_NAME
+#        INSTALL_DIR=/astro/mwavcs/pacer_blink/software/sles12sp5/development/$PROGRAM_NAME
+        INSTALL_DIR=/software/projects/mwavcs/$USER/$PROGRAM_NAME
+        MODULEFILE_DIR=/software/projects/mwavcs/$USER/modulefiles/$PROGRAM_NAME
     elif [[ -n "$1" && $1 = 'test' ]]; then
         INSTALL_DIR=`pwd`/build
         MODULEFILE_DIR=$INSTALL_DIR/modulefiles/$PROGRAM_NAME
     else
-        INSTALL_DIR=/astro/mwavcs/pacer_blink/$USER/software/$PROGRAM_NAME
-        MODULEFILE_DIR=/astro/mwavcs/pacer_blink/$USER/software/modulefiles/$PROGRAM_NAME
+        INSTALL_DIR=/software/projects/mwavcs/$USER/$PROGRAM_NAME
+        MODULEFILE_DIR=/software/projects/mwavcs/$USER/modulefiles/$PROGRAM_NAME
         
         if [[ -n "$2" && "$2" != "-" ]]; then
             INSTALL_DIR=$2
