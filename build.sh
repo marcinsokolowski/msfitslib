@@ -27,7 +27,9 @@ if [[ -n "$4" && "$4" != "-" ]]; then
 fi
 
 if [ $PAWSEY_CLUSTER = "mwa" ]; then
-    echo "Building cotter_wsclean on Garrawarla..."
+    echo "Building msfitslib on Garrawarla..."
+    module use /software/projects/mwavcs/msok/modulefiles/
+    module load cascadelake/1.0 slurm/20.11.9 gcc/8.3.0 cfitsio/4.3.1 libnova/devel
 
     
     if [[ -n "$1" && $1 = 'group' ]]; then
