@@ -12,12 +12,17 @@ else
    echo "Loading modules for PAWSEY_CLUSTER = $PAWSEY_CLUSTER (!= setonix)"
 
    module purge   
-   module load cascadelake
+   
+   # currently only modules compiled by msok exist:
+   module use /software/projects/mwavcs/msok/modulefiles/
+   
+   module load cascadelake/1.0
    module load gcc/8.3.0
    module load fftw/3.3.8 
-   module load libnova/0.15.0
-   module load cfitsio/3.48
+   module load libnova/devel
+   module load cfitsio/4.3.1
    module load cmake/3.18.0
+   module load slurm/20.11.9
 fi
 
 #
@@ -28,8 +33,6 @@ fi
 
 if [ $PAWSEY_CLUSTER = "mwa" ]; then
     echo "Building msfitslib on Garrawarla..."
-    module use /software/projects/mwavcs/msok/modulefiles/
-    module load cascadelake/1.0 slurm/20.11.9 gcc/8.3.0 cfitsio/4.3.1 libnova/devel fftw/3.3.8
 
     
     if [[ -n "$1" && $1 = 'group' ]]; then
