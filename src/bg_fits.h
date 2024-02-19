@@ -324,6 +324,9 @@ public :
   double get_y_physical_value( int y ){ return crval2 + double(y)*cdelt2; }
 
   void ReadCRValues();
+  
+  // Gridding/oversmapling:
+  void Oversample( CBgFits& oversampled, int iOverSamplingRatio );
 };
 
 #endif

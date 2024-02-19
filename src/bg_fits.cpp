@@ -3446,3 +3446,52 @@ void CBgFits::ReadCRValues()
      crpix2 = atof( pKey->Value.c_str() );
    }
 }
+
+void CBgFits::Oversample( CBgFits& oversampled, int iOverSamplingRatio )
+{
+   int xSize = GetXSize(); 
+   int ySize = GetYSize(); 
+   int xSizeOversampled = iOverSamplingRatio * xSize;
+   int ySizeOversampled = iOverSamplingRatio * ySize;
+   printf("Creating oversampled file of size %d x %d\n",xSizeOversampled,ySizeOversampled);
+   oversampled.Realloc( xSizeOversampled , ySizeOversampled );
+   SetKeys( oversampled.GetKeys() );
+
+   HeaderRecord* pKeyword = GetKeyword( "CDELT1" );
+   if ( pKeyword ){
+      double value = atof( pKeyword->Value.c_str() );
+      oversampled.SetKeywordFloat( "CDELT1", value/double(iOverSamplingRatio) );
+   }
+   pKeyword = GetKeyword( "CDELT2" );
+   if ( pKeyword ){
+      double value = atof( pKeyword->Value.c_str() );
+      oversampled.SetKeywordFloat( "CDELT2", value/double(iOverSamplingRatio) );
+   }
+   // CRPIX1
+   pKeyword = GetKeyword( "CRPIX1" );
+   if ( pKeyword ){
+      int value = atol( pKeyword->Value.c_str() );
+      oversampled.SetKeywordFloat( "CRPIX1", value*iOverSamplingRatio );
+   }
+   pKeyword = GetKeyword( "CRPIX2" );
+   if ( pKeyword ){
+      int value = atol( pKeyword->Value.c_str() );
+      oversampled.SetKeywordFloat( "CRPIX2", value*iOverSamplingRatio );
+   }
+   
+   for(int y=0;y<ySizeOversampled;y++){
+      for(int x=0;x<xSizeOversampled;x++){
+         int x_old = ( x / iOverSamplingRatio );
+         int y_old = ( y / iOverSamplingRatio );
+
+         double val = value( y_old, x_old );
+         oversampled.setXY( x , y , val );
+
+         if( true ){
+            if( ( x % 100 ) == 0 && (y % 100) == 0  ){
+               printf("(%d,%d) = %.8f (from (%d,%d))\n",x,y,val,x_old,y_old);
+            }
+         }
+      }
+   }
+}
