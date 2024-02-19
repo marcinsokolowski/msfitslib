@@ -26,6 +26,7 @@ int CFramesList::UpdateList( const char* listname, BOOL_T bCheck )
 		printf("File : %s does not exist\n",listname);
 	}
 
+   return 1;
 }
                                                                                 
 int CFramesList::ReadList( const char* listname )

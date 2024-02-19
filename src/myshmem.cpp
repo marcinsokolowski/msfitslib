@@ -78,7 +78,7 @@ BOOL_T CMyShMem::Init( key_t& key, BOOL_T bAssert/*=TRUE*/,
 
 	if(bCheckName){
 		if(strcmp(m_pMemInfo->shMemName,shName)){
-			_TRACE_PRINTF_2("Module %s error : Segment with key %d already used by another module %s ",m_MemKey,shName,m_pMemInfo->shMemName);
+			_TRACE_PRINTF_2("Module %d error : Segment with key %s already used by another module %s ",m_MemKey,shName,m_pMemInfo->shMemName);
 			return FALSE;
 		}
 	}else{
@@ -166,7 +166,9 @@ sSharedMemoryInfo* CMyShMem::GetMemInfo()
 void CMyShMem::UnLock()
 {
 	if(m_pQueue){
-		m_pQueue->SendMsg("x",1);
+	        char szMsg[16];
+	        sprintf(szMsg,"x");
+		m_pQueue->SendMsg(szMsg,1);
 	}
 }
 

@@ -8,14 +8,14 @@
 
 #include "mytypes.h"
 
-#define BUFF_SIZE 2048
+#define MYQUEUE_BUFF_SIZE 2048
 
 class mystring;
 
 struct cMessageBuffer
 {
 	long int message_type;
-	char buffer[BUFF_SIZE];
+	char buffer[MYQUEUE_BUFF_SIZE];
 };
 
 class CMyMsgQueue

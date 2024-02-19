@@ -137,7 +137,7 @@ void Table2D<ARG_TYPE>::ReCreateIndex()
       m_pFastData = NULL;
    }	
 	m_pFastData = new ARG_TYPE*[m_SizeY];
-printf("DEBUG : ::ReCreateIndex m_SizeY=%d (ptr = %x)\n",m_SizeY,m_pFastData);
+printf("DEBUG : ::ReCreateIndex m_SizeY=%ld (ptr = %p)\n",m_SizeY,m_pFastData); // was %x
 	ReCalcIndex();		
 }
 
@@ -288,7 +288,7 @@ Table2D<ARG_TYPE>& Table2D<ARG_TYPE>::Assign(const Table2D<ARG_TYPE>& right)
 
 	if( m_pData != right.m_pData ){
 		if( m_bAllocHere ){
-			printf("DEBUG : Table2D<ARG_TYPE>::Assign : memcpy( 0x%x , 0x%x )\n",m_pData,right.m_pData);
+			printf("DEBUG : Table2D<ARG_TYPE>::Assign : memcpy( 0x%p , 0x%p )\n",m_pData,right.m_pData); // was %x
 			memcpy(m_pData,right.m_pData,m_SizeX*m_SizeY*sizeof(ARG_TYPE));
 		}else{
 			// MS : 2009-09-28 due to bug found that after GetData was done
@@ -298,18 +298,18 @@ Table2D<ARG_TYPE>& Table2D<ARG_TYPE>::Assign(const Table2D<ARG_TYPE>& right)
 			// which made a copy of previous image to memory already containing 
 			// new image from GetData !!!
 			// This is unacceptable !!!
-			printf("DEBUG : Table2D<ARG_TYPE>::Assign m_pData(= 0x%x ) := SetDataPtr( 0x%x )\n",m_pData,right.m_pData);
+			printf("DEBUG : Table2D<ARG_TYPE>::Assign m_pData(= 0x%p ) := SetDataPtr( 0x%p )\n",m_pData,right.m_pData); // was %x
 			SetDataPtr( right.m_pData );
 		}
 
 		// TEMPORARY - to be commented out - corresponds to ccd_controller.cpp / GetData
-		printf("OLD ( 0x%x ) : ",tmp_ptr);
+		printf("OLD ( 0x%p ) : ",tmp_ptr); // was %x
 		for(int ii=(2062*100+1000);(ii<=(2062*100+1005) && ii<m_Size);ii++){
-			printf("%d ",tmp_ptr[ii]);
+			printf("%.2f ",float(tmp_ptr[ii]));
 		}
-		printf("\nNEW ( 0x%x ) : ",m_pData);
+		printf("\nNEW ( 0x%p ) : ",m_pData); // was %x
 		for(int ii=(2062*100+1000);(ii<=(2062*100+1005) && ii<m_Size);ii++){
-			printf("%d ",m_pData[ii]);
+			printf("%.2f ",float(m_pData[ii]));
 		}
 		printf("\n");
 	}
@@ -1282,7 +1282,7 @@ BOOL_T Table2D<ARG_TYPE>::GetVariableMeanAndSigma( eLaplaceType_T laplaceType,
 			printf("Bad ranges ! %.2f , %.2f\n",minVal, maxVal);
 
 			if( fabs(mean_lap)<0.1 && fabs(sigma_lap)<0.1 ){
-				printf("WARNING : all values in window (%d,%d)-(%d,%d) are 0 !?\n",start_x,start_y,end_x,end_y);
+				printf("WARNING : all values in window (%ld,%ld)-(%ld,%ld) are 0 !?\n",start_x,start_y,end_x,end_y);
 
 				if( bUseMeanOnFitFailed ){
 					printf("WARNING : setting large value sigma=1000.00 ADU\n");
@@ -1418,7 +1418,7 @@ BOOL_T Table2D<ARG_TYPE>::GetVariableMeanAndSigma( eLaplaceType_T laplaceType,
 
 				if( TRUE ){
 					char szPrefix[128];
-			      sprintf(szPrefix,"refitted_%.5d_%.5d",start_x,start_y);   
+                                        sprintf(szPrefix,"refitted_%.5d_%.5d",int(start_x),int(start_y));   
 					mystring szName;
 			      szName = pHisto->DumpToFile( frame_index, szPrefix );
 					printf("DEBUG : refitted histogram dumped to file %s\n",szName.c_str());
@@ -1435,7 +1435,7 @@ BOOL_T Table2D<ARG_TYPE>::GetVariableMeanAndSigma( eLaplaceType_T laplaceType,
 	mystring szName;
 	if((!bFitGaussResult && gDoDumpBadFit) || gDoDumpAllHisto){
 		char szPrefix[128];
-      sprintf(szPrefix,"err_%.5d_%.5d",start_x,start_y);
+      sprintf(szPrefix,"err_%.5d_%.5d",int(start_x),int(start_y));
       szName = pHisto->DumpToFile( frame_index, szPrefix );
 	}
 
@@ -1695,7 +1695,7 @@ void Table2D<ARG_TYPE>::Dump( long _x0, long _y0, long _x1, long _y1 )
 
 	for(int y=y1;y>=y0;y--){
 		for(int x=x0;x<=x1;x++){
-			_TRACE_PRINTF_6("(%d,%d)=%d ",y,x,m_pFastData[y][x]);
+			_TRACE_PRINTF_6("(%d,%d)=%.1f ",y,x,float(m_pFastData[y][x]));
 		}
 		_TRACE_PRINTF_6("\n");
 	}
@@ -1706,7 +1706,7 @@ void Table2D<ARG_TYPE>::Dump()
 {
 	for(int y=0;y<m_SizeY;y++){
 		for(int x=0;x<m_SizeX;x++){
-			printf("%d ",getval(x,y));
+			printf("%.1f ",float(getval(x,y)));
 		}
 		printf("\n");
 	}
@@ -1732,7 +1732,7 @@ BOOL_T Table2D<ARG_TYPE>::Compare( const Table2D<ARG_TYPE>& right )
 	long size = (m_SizeX*m_SizeY);
 	for(int i=0;i<size;i++){
 		if(m_pData[i] != right.m_pData[i]){
-			printf("Difference at (%d,%d) %d!=%d\n",(i % m_SizeX),(i / m_SizeX),m_pData[i],right.m_pData[i]);fflush(0);
+			printf("Difference at (%ld,%ld) %.2f!=%.2f\n",(i % m_SizeX),(i / m_SizeX),float(m_pData[i]),float(right.m_pData[i]));fflush(0);
 			bRes=FALSE;
 		}
 	}
@@ -2037,7 +2037,7 @@ void Table2D<ARG_TYPE>::ShiftFrameWeighted( LONG_T FrameCounter, double frame_dx
 	LONG_T newStepY = my_round( realStepY );
 	Table2D<ARG_TYPE> WrkTable( m_SizeX,m_SizeY );
 
-	_TRACE_PRINTF_5("Shift values : steps=%d,totalX=%f,totalY=%f,prevX=%d,prevY=%d,StepX=%d,StepY=%d\n",
+	_TRACE_PRINTF_5("Shift values : steps=%ld,totalX=%f,totalY=%f,prevX=%ld,prevY=%ld,StepX=%ld,StepY=%ld\n",
 			nSteps,m_totalShiftX,m_totalShiftY,m_PrevShiftX,m_PrevShiftY,newStepX,newStepY);	
 	
 	long new_x=0;
@@ -2124,13 +2124,13 @@ void Table2D<ARG_TYPE>::ShiftFrame( LONG_T FrameCounter, double frame_dx,
 		double realStepY = m_totalShiftY-(double)m_PrevShiftY;
 		newStepX = my_round( realStepX );
 		newStepY = my_round( realStepY );
-		_TRACE_PRINTF_5("Shift values : steps=%d,totalX=%f,totalY=%f,prevX=%d,prevY=%d,StepX=%d,StepY=%d\n",
+		_TRACE_PRINTF_5("Shift values : steps=%ld,totalX=%f,totalY=%f,prevX=%ld,prevY=%ld,StepX=%ld,StepY=%ld\n",
 				nSteps,m_totalShiftX,m_totalShiftY,m_PrevShiftX,m_PrevShiftY,newStepX,newStepY);	
 
 	}else{
 		newStepX = my_round( frame_dx );
 		newStepY = my_round( frame_dy );
-		_TRACE_PRINTF_3("Shift values : StepX=%d,StepY=%d\n",newStepX,newStepY);
+		_TRACE_PRINTF_3("Shift values : StepX=%ld,StepY=%ld\n",newStepX,newStepY);
 	}
 
 	
@@ -3272,7 +3272,7 @@ void Table2D<ARG_TYPE>::Laplace( Table2D<BIG_ELEM_TYPE>* pFrameLaplace,
 template<class ARG_TYPE>
 void Table2D<ARG_TYPE>::GenEmptyImage( double sigma, double mean )
 {
-	printf("Generating image using mean=%.2f, sigma=%.2f, (image size=%d)\n",mean,sigma,m_Size);fflush(stdout);
+	printf("Generating image using mean=%.2f, sigma=%.2f, (image size=%ld)\n",mean,sigma,m_Size);fflush(stdout);
 	CMyProgressBar bar(0,m_Size);
 	for(int i=0;i<m_Size;i++){
 		// without root use :
@@ -3302,7 +3302,7 @@ void Table2D<ARG_TYPE>::CutBorderBase( int left, int up, int right, int bottom, 
        
        
    char savearea[50];
-   sprintf(savearea,"%d %d %d %d",left,bottom,(m_SizeX-right),(m_SizeY-up));
+   sprintf(savearea,"%d %d %ld %ld",left,bottom,(m_SizeX-right),(m_SizeY-up));
 //   out_image.GetKeyTab().Set( SAVEAREA , savearea );
 //   out_image.GetKeyTab().Set( ASTTHIS , 0 );
 }

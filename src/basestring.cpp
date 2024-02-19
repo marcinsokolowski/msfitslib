@@ -60,7 +60,7 @@ BaseString::BaseString(long number)
 :m_Size(-1), m_Length(0), m_pchData(NULL)
 {
 	char buffer[BUFF_SIZE];
-	if (sprintf(buffer,"%d",number)>=BUFF_SIZE)
+	if (sprintf(buffer,"%d",int(number))>=BUFF_SIZE)
 		AssertNULL(NULL);
 	(*this) << buffer;
 }
@@ -352,7 +352,7 @@ BaseString& BaseString::operator<<(const char z)
 BaseString& BaseString::operator<<(LONGLONG_T num)
 {
 	char buf[100];
-	sprintf(buf,"%ld",num);
+	sprintf(buf,"%ld",(long int)num);
 	(*this) << buf;
 	return (*this);
 }

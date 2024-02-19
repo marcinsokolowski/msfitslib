@@ -48,7 +48,7 @@ BOOL_T CManyTab2D<ARG_TYPE>::Init( long xSize, long ySize,long nCCD )
 			if (!bOK){
 				printf("Memory alloction problem occured, when allocating memory for CCD number %d\n",i);
 				printf("Errno = %d\n",errno);
-				printf("Size  = %dMB\n",(m_SizeX*m_SizeY)*sizeof(ARG_TYPE)/1000000);
+				printf("Size  = %ldMB\n",(m_SizeX*m_SizeY)*sizeof(ARG_TYPE)/1000000);
 				printf("Desc  = %s\n",strerror(errno));
 				exit(-1);
 			}

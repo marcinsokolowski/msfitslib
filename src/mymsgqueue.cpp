@@ -22,12 +22,12 @@ CMyMsgQueue::~CMyMsgQueue()
 
 BOOL_T CMyMsgQueue::SendMsg( char* msg, int size )
 {		
-	if(size>=BUFF_SIZE)
+	if(size>=MYQUEUE_BUFF_SIZE)
 		return FALSE;
 	cMessageBuffer message;
 	message.message_type = 1;
 	strcpy(message.buffer,msg);
-	if(msgsnd(m_QueueID,(void*)&message,BUFF_SIZE,0)==-1){
+	if(msgsnd(m_QueueID,(void*)&message,MYQUEUE_BUFF_SIZE,0)==-1){
 		return FALSE;
 	}
 	return TRUE;	
@@ -37,7 +37,7 @@ BOOL_T CMyMsgQueue::GetMsgNoWait( mystring& szMessage )
 {
 	cMessageBuffer message;
    long int message_to_get = 0;
-	int nbytes = msgrcv(m_QueueID,(void*)&message,BUFF_SIZE,message_to_get, IPC_NOWAIT );
+	int nbytes = msgrcv(m_QueueID,(void*)&message,MYQUEUE_BUFF_SIZE,message_to_get, IPC_NOWAIT );
 	if(nbytes<=0){
 		return FALSE;
 	}
@@ -49,7 +49,7 @@ BOOL_T CMyMsgQueue::GetMsg( mystring& szMessage )
 {	
 	cMessageBuffer message;
 	long int message_to_get = 0;
-	int nbytes = msgrcv(m_QueueID,(void*)&message,BUFF_SIZE,message_to_get, 0 );
+	int nbytes = msgrcv(m_QueueID,(void*)&message,MYQUEUE_BUFF_SIZE,message_to_get, 0 );
 	if(nbytes<=0){
 		return FALSE;
 	}	

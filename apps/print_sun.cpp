@@ -135,7 +135,7 @@ int main(int argc,char* argv[])
      if( gTest > 0 ){
         time_t out_sun_rise_ux, out_sun_set_ux;
         get_sun_rise_set( gUnixTime , geo_long, geo_lat, out_sun_rise_ux, out_sun_set_ux, 10 );
-        printf("TEST : sun_rise = %d (%.2f minutes), sun set = %d (%.2f minutes)\n",out_sun_rise_ux,((out_sun_rise_ux-gUnixTime)/60.00),out_sun_set_ux,((out_sun_set_ux-gUnixTime)/60.00));
+        printf("TEST : sun_rise = %d (%.2f minutes), sun set = %d (%.2f minutes)\n",int(out_sun_rise_ux),((out_sun_rise_ux-gUnixTime)/60.00),int(out_sun_set_ux),((out_sun_set_ux-gUnixTime)/60.00));
      }
   }
   if( gPrintAZH ){    

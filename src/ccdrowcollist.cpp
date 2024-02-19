@@ -178,7 +178,7 @@ int CCDDefectList::ReadFromFile(const char* filename, int shift_dx, int shift_dy
 		
 	}
 
-	printf("CCDDefectList::ReadFromFile Statistics : total=%d, badarea=%d, hotpixels=%d, circlelike=%d\n",size(),n_badarea,n_hot,n_circle);
+	printf("CCDDefectList::ReadFromFile Statistics : total=%d, badarea=%d, hotpixels=%d, circlelike=%d\n",int(size()),n_badarea,n_hot,n_circle);
 	return size();		
 }
 
