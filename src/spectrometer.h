@@ -38,6 +38,9 @@ public :
    static double m_EDA_ElectricalLenM;
    static int    m_GeometryCorrection; // 0 , no correction, +1 / -1 is sign
 
+   static void fft_shift( std::complex<float>* in, int in_count, vector<std::complex<float>>& out );
+   static void fft_shift( double* in, int in_count, vector<double>& out );
+   static void fft_shift( vector<double> in, vector<double>& out );
    static int doFFT( unsigned char* data_fft, int in_count, double* spectrum, double* spectrum_re, double* spectrum_im, int& out_count, double norm );
    static int doFFT( double* in, int in_count, double* spectrum, double* spectrum_re, double* spectrum_im, int& out_count, double norm );
    static int doFFT( std::complex<float>* in, int in_count, double* spectrum, std::complex<float>* spectrum_reim, int& out_count, double norm );

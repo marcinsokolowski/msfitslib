@@ -23,7 +23,7 @@ int CSpectrometer::m_MaxBytesToProcess=-1;
 string CSpectrometer::m_szVoltageDumpFile;
 
 double CSpectrometer::m_EDA_ElectricalLenM=140.00; // 140m of EDA electrical length (assuming BIGHORNS=0m)
-int    CSpectrometer::m_GeometryCorrection=1;      // no geometry correction
+int    CSpectrometer::m_GeometryCorrection=0;      // no geometry correction
 
 CSpectrometer::CSpectrometer()
 {
@@ -46,6 +46,67 @@ int CSpectrometer::doFFT( unsigned char* data_fft, int in_count, double* spectru
    return ret;            
 }
 
+void CSpectrometer::fft_shift( std::complex<float>* in, int in_count, vector<std::complex<float>>& out )
+{
+   out.assign( in_count, 0 );
+   
+   int xSize = in_count;
+   int center_freq_x = int( xSize/2 );
+   
+   int is_odd = 0;
+   if ( (xSize%2) == 1 ){
+      is_odd = 1;
+   }
+   
+   for(int x=0;x<=center_freq_x;x++){ // check <= -> <
+      out[center_freq_x+x] = in[x];
+   }
+   for(int x=(center_freq_x+is_odd);x<xSize;x++){
+      out[x-(center_freq_x+is_odd)] = in[x];
+   }
+} 
+
+void CSpectrometer::fft_shift( double* in, int in_count, vector<double>& out )
+{
+   out.assign( in_count, 0 );
+   
+   int xSize = in_count;
+   int center_freq_x = int( xSize/2 );
+   
+   int is_odd = 0;
+   if ( (xSize%2) == 1 ){
+      is_odd = 1;
+   }
+   
+   for(int x=0;x<=center_freq_x;x++){ // check <= -> <
+      out[center_freq_x+x] = in[x];
+   }
+   for(int x=(center_freq_x+is_odd);x<xSize;x++){
+      out[x-(center_freq_x+is_odd)] = in[x];
+   }
+} 
+
+void CSpectrometer::fft_shift( vector<double> in, vector<double>& out )
+{
+   int xSize = in.size();
+   out.assign( xSize , 0.00 );
+   int center_freq_x = int( xSize/2 );
+   
+   int is_odd = 0;
+   if ( (xSize%2) == 1 ){
+      is_odd = 1;
+   }
+   
+   for(int x=0;x<=center_freq_x;x++){ // check <= -> <
+      out[center_freq_x+x] = in[x];
+   }
+   for(int x=(center_freq_x+is_odd);x<xSize;x++){
+      out[x-(center_freq_x+is_odd)] = in[x];
+   }
+} 
+
+
+
 int CSpectrometer::doFFT( std::complex<float>* in, int in_count, double* spectrum, std::complex<float>* spectrum_reim, int& out_count, double norm )    
 {
 /*
@@ -53,12 +114,16 @@ int CSpectrometer::doFFT( std::complex<float>* in, int in_count, double* spectru
     get a "plan", and execute the plan to transform the IN data to
     the OUT FFT coefficients.
              */
-    int nc = ( in_count / 2 ) + 1;
+
+    // WARNING : was as below 
+    int nc = in_count; // WAS : ( in_count / 2 ) + 1;
                 
     // fftw_plan fftw_plan_r2r_1d(int n, double *in, double *out,  fftw_r2r_kind kind, unsigned flags);         
 //    double* out = (double*)malloc ( sizeof ( double ) * in_count );
 //    memset(out,'\0',sizeof ( double ) * in_count );
-                      
+
+    // output array in complex to complex FFT is the same size as the input one
+    // don't believe check maths or example in https://people.sc.fsu.edu/~jburkardt/c_src/fftw_test/fftw_test.c
     fftw_complex* in_cx = (fftw_complex*)fftw_malloc( sizeof ( fftw_complex ) * in_count );                      
     fftw_complex* out_cx = (fftw_complex*)fftw_malloc( sizeof ( fftw_complex ) * in_count );
     memset(out_cx,'\0',sizeof ( fftw_complex ) * nc );
@@ -83,7 +148,7 @@ int CSpectrometer::doFFT( std::complex<float>* in, int in_count, double* spectru
        spectrum[i] = fabs(power);
        spectrum_reim[i] = std::complex<float>( re, im );
     }
-    out_count = nc -1 ;
+    out_count = nc; // was nc - 1
                    
           
    // cleaning :   
@@ -105,6 +170,7 @@ int CSpectrometer::doFFT( double* in, int in_count, double* spectrum, double* sp
     get a "plan", and execute the plan to transform the IN data to
     the OUT FFT coefficients.
              */
+    // printf("DEBUG : norm = %.8f, in_count = %d\n",norm,in_count);             
     int nc = ( in_count / 2 ) + 1;
                 
     // fftw_plan fftw_plan_r2r_1d(int n, double *in, double *out,  fftw_r2r_kind kind, unsigned flags);         
@@ -248,7 +314,7 @@ int CSpectrometer::fileFFT( const char* binfile, double* acc_spec, const char* o
       printf("INFO : writing channel %d power to file %s\n",m_DumpChannel,szCHANNEL_OUTFILE);
    }
 
-   printf("CSpectrometer::fileFFT : number of polarisations in file = %d , using polarisation = %d\n",m_PolsInFile,m_Pol);
+   printf("CSpectrometer::fileFFT : number of polarisations in file = %d , using polarisation = %d, n_samples_to_read = %d\n",m_PolsInFile,m_Pol,n_samples_to_read);
    int n_written=0;   
    int n_total_bytes_processed=0;
    FILE* samples_txt_file = NULL;
@@ -256,7 +322,8 @@ int CSpectrometer::fileFFT( const char* binfile, double* acc_spec, const char* o
       samples_txt_file = fopen(m_szVoltageDumpFile.c_str(),"w");
    }
    
-   while( (n = fread(buffer, sizeof(unsigned char), n_samples_to_read, f)) > 0 ){
+   while( (n = fread(buffer, sizeof(unsigned char), n_samples_to_read, f)) > 0 ){ // unsigned
+       // printf("DEBUG : %d %d %d\n",((char*)buffer)[0],((char*)buffer)[1],((char*)buffer)[2]);
        if( n == n_samples_to_read ){
           if( m_nBits != 8 ){
              if ( m_nBits != 4 ){
@@ -276,11 +343,15 @@ int CSpectrometer::fileFFT( const char* binfile, double* acc_spec, const char* o
                 }
              }
           }
-       
+ 
           if( m_PolsInFile <= 1 ){
              // just 1 polarisation in the binary file, not need to de-interleave etc
              for(int k=0;k<n_samples_to_read;k++){             
                  buffer_double[k] = (double)(buffer[k]) - 128; //  - 128 to shift from 0-255 -> -128 - +127
+                 
+                 // TEST for normal char 
+                 // buffer_double[k] = double(((char*)buffer)[k]);
+                 
 //               buffer_double[k] = (char)(buffer[k]);
 //             if( k ==0 && idx<=5 ){
 //                printf("%d : %.8f\n",k,buffer_double[k]);
@@ -304,7 +375,8 @@ int CSpectrometer::fileFFT( const char* binfile, double* acc_spec, const char* o
                 fprintf(samples_txt_file,"%.1f\n",buffer_double[i]);
              }
           }
-       
+          
+//          printf("DEBUG : %.2f , %.2f , %.2f\n",buffer_double[0],buffer_double[1],buffer_double[2]);          
           doFFT( buffer_double, N_SAMPLES, spectrum, spectrum_re, spectrum_im, n_channels, sqrt(n_channels)/2);
           
           for(int i=0;i<n_channels;i++){
@@ -312,6 +384,9 @@ int CSpectrometer::fileFFT( const char* binfile, double* acc_spec, const char* o
              acc_spec_re[i] += spectrum_re[i];
              acc_spec_im[i] += spectrum_im[i];             
           }
+          
+          // printf("DEBUG : %.1f %.1f %.1f ... %.1f -> %.8f %.8f ... %.8f -> %.8f\n",buffer_double[0],buffer_double[1],buffer_double[2],buffer_double[511],spectrum[0],spectrum[1],spectrum[256],acc_spec[100]);
+          
           n_integr++;
           
           if( outf_channel ){
