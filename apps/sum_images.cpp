@@ -126,30 +126,10 @@ int main(int argc,char* argv[])
   int size = first_fits.GetXSize()*first_fits.GetYSize();
   
   double* sum_tab = new double[size];
-  double* sum2_tab = NULL;
-  if( strlen(out_rms_fits.c_str()) > 0 ){
-      sum2_tab = new double[size];
-      printf("DEBUG : sum2_tab initialised\n");      
-  }
-
-  CBgFits* pBeamImage = NULL;
-  double* sum_beam = NULL;
-
-// 2021-11-06 : start with zeros to do everything in the loop (required after adding beam weighting) 
-  // initialise sum_tab and sum2_tab with values from the 1st image :
-//  float* first_fits_data_ptr = first_fits.get_data();
-  for (int pos=0;pos<size;pos++){
-//     double val = first_fits_data_ptr[pos];
-  
-     sum_tab[pos] = 0; // val;
-     if( sum2_tab ){
-         sum2_tab[pos] = 0; // val*val;
-     }
-  }
+  memset(sum_tab,'\0',sizeof(double)*size);
   int good_image_count = 1; // first image already included 
   
   CBgFits fits;
-  // 2014-08-20 was from 1 but I've changed to 0 to average all the files 
   int last_fits = fits_list.size();
   if( gEndFitsIndex < last_fits ){
      last_fits = gEndFitsIndex;
@@ -181,9 +161,5 @@ int main(int argc,char* argv[])
   printf("INFO : mean/rms calculated based on %d good images\n",good_image_count);
 
   delete [] sum_tab;
-  if( sum2_tab ){
-      delete [] sum2_tab;
-  }
-  
 }
 
