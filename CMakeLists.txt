@@ -50,6 +50,9 @@ target_link_libraries(eda_spectrometer msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} $
 add_executable(avg_images  apps/avg_images.cpp)
 target_link_libraries(avg_images msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl -lpthread)
 
+add_executable(sum_images  apps/sum_images.cpp)
+target_link_libraries(sum_images msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl -lpthread)
+
 add_executable(homeopatic_avg  apps/homeopatic_avg.cpp)
 target_link_libraries(homeopatic_avg msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl -lpthread)
 
@@ -88,8 +91,8 @@ if(FRB_SEARCH)
    target_link_libraries(calcstat msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl -lpthread)
 
    # INSTALLATION:
-   install(TARGETS noise_mapper calcfits_bg dump_lc avg_images homeopatic_avg image_differencer ux2sid_file ux2sid sid2ux radec2azh date2date print_sun flip_vertical flip_horizontal create_dynaspec dynaspec_search RUNTIME DESTINATION bin)
+   install(TARGETS noise_mapper calcfits_bg dump_lc avg_images sum_images homeopatic_avg image_differencer ux2sid_file ux2sid sid2ux radec2azh date2date print_sun flip_vertical flip_horizontal create_dynaspec dynaspec_search RUNTIME DESTINATION bin)
 else()
    # INSTALLATION:
-   install(TARGETS noise_mapper calcfits_bg dump_lc avg_images homeopatic_avg image_differencer ux2sid_file ux2sid sid2ux radec2azh date2date print_sun flip_vertical flip_horizontal RUNTIME DESTINATION bin)
+   install(TARGETS noise_mapper calcfits_bg dump_lc avg_images sum_images homeopatic_avg image_differencer ux2sid_file ux2sid sid2ux radec2azh date2date print_sun flip_vertical flip_horizontal RUNTIME DESTINATION bin)
 endif()
