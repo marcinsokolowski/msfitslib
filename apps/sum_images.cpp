@@ -153,6 +153,11 @@ int main(int argc,char* argv[])
      }
   }
 
+  float* out_data = first_fits.get_data();
+  for (int pos=0;pos<size;pos++){
+     out_data[pos] = sum_tab[pos];
+  }
+
   if( first_fits.WriteFits( out_fits.c_str() ) ){
      printf("ERROR : could not write average fits file %s\n",out_fits.c_str());
      exit(-1);
