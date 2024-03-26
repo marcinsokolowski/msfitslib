@@ -46,7 +46,7 @@ int CSpectrometer::doFFT( unsigned char* data_fft, int in_count, double* spectru
    return ret;            
 }
 
-void CSpectrometer::fft_shift( std::complex<float>* in, int in_count, vector<std::complex<float>>& out )
+void CSpectrometer::fft_shift( std::complex<float>* in, int in_count, vector< std::complex<float> >& out )
 {
    out.assign( in_count, 0 );
    
