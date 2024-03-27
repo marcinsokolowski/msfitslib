@@ -65,8 +65,11 @@ else
            MODULEFILE_DIR=/software/projects/director2183/setonix/modules/$PROGRAM_NAME
            echo "Group installation at $INSTALL_DIR" 
        else
-           INSTALL_DIR=/software/projects/director2183/msok/setonix/software/$PROGRAM_NAME
-           MODULEFILE_DIR=/software/projects/director2183/msok/setonix/modules/$PROGRAM_NAME
+           # /software/projects/director2183/msok/setonix/2023.08/development/
+           # Was : /software/projects/director2183/msok/setonix/software/ /software/projects/director2183/msok/setonix/modules/
+           # /software/projects/director2183/msok/setonix/2023.08/modules/zen3/gcc/12.2.0/
+           INSTALL_DIR=/software/projects/director2183/msok/setonix/2023.08/development/$PROGRAM_NAME
+           MODULEFILE_DIR=/software/projects/director2183/msok/setonix/2023.08/modules/zen3/gcc/12.2.0/$PROGRAM_NAME
            echo "User installation at $INSTALL_DIR"
        fi
 
