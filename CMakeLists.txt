@@ -83,6 +83,11 @@ target_link_libraries(flip_vertical msfitslib ${LIBNOVA_LIB} ${ROOT_LIBRARIES} $
 add_executable(flip_horizontal apps/flip_horizontal.cpp)
 target_link_libraries(flip_horizontal msfitslib ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl -lpthread)
 
+add_executable(setfitsvalue apps/setfitsvalue.cpp)
+target_link_libraries(setfitsvalue msfitslib ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl -lpthread)
+
+
+
 if(FRB_SEARCH)
    add_executable(create_dynaspec apps/frb_search/main_dynaspec.cpp apps/frb_search/mwa_fits.cpp apps/frb_search/sources.cpp apps/frb_search/dedisp_search.cpp apps/frb_search/myprogress.cpp)
    target_link_libraries(create_dynaspec msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl -lpthread)
@@ -94,8 +99,8 @@ if(FRB_SEARCH)
    target_link_libraries(calcstat msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl -lpthread)
 
    # INSTALLATION:
-   install(TARGETS noise_mapper calcfits_bg dump_lc avg_images sum_images fits2txt homeopatic_avg image_differencer ux2sid_file ux2sid sid2ux radec2azh date2date print_sun flip_vertical flip_horizontal create_dynaspec dynaspec_search RUNTIME DESTINATION bin)
+   install(TARGETS noise_mapper calcfits_bg dump_lc avg_images sum_images fits2txt homeopatic_avg image_differencer ux2sid_file ux2sid sid2ux radec2azh date2date print_sun flip_vertical flip_horizontal setfitsvalue create_dynaspec dynaspec_search RUNTIME DESTINATION bin)
 else()
    # INSTALLATION:
-   install(TARGETS noise_mapper calcfits_bg dump_lc avg_images sum_images fits2txt homeopatic_avg image_differencer ux2sid_file ux2sid sid2ux radec2azh date2date print_sun flip_vertical flip_horizontal RUNTIME DESTINATION bin)
+   install(TARGETS noise_mapper calcfits_bg dump_lc avg_images sum_images fits2txt homeopatic_avg image_differencer ux2sid_file ux2sid sid2ux radec2azh date2date print_sun flip_vertical flip_horizontal setfitsvalue RUNTIME DESTINATION bin)
 endif()
