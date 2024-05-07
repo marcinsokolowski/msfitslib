@@ -36,6 +36,6 @@ int main(int argc,char* argv[])
   }
 
   infits.VertFlip();
-  infits.WriteFits("out.fits");  
+  infits.WriteFits( out_fits.c_str() );
 }
   

@@ -39,6 +39,9 @@ int gRadius=-1000;
 
 double gSubtractConstAfter=0;
 
+// comparison options:
+bool gCountNaNs=true;
+
 void usage()
 {
    printf("calcfits_bg FITS_LEFT ACTION FITS_RIGHT OUTPUT_FILE[default out.fits] -s START_INT -e END_INT -k INTTYPE -o OUTDIR -d -p PARAM -r RFI_FLAGS_FITS_FILE(in ao-flagger format) -a SUBTRACT_CONST_AFTER -m\n");
@@ -46,6 +49,7 @@ void usage()
    printf("-m : uses median for statistics option (s)\n");
    printf("-p PARAM : parameter value\n");
    printf("-R RMS_RADIUS around center. For other positions put X and Y coordinates into FITS_RIGHT and OUTPUT_FILE (after action s, for example calcfits_bg test.fits s 1400 1500)\n");
+   printf("-X : exclude NaNs from comparison [by default their are treated as a difference]\n");
    printf("ACTION :\n");
    printf("Two fits files actions  : +,-,/,*,=,sefd_xx_yy,stokes_i,sefd2aot\n");   
    printf("Single fits file actions : \n");
@@ -81,11 +85,12 @@ void print_parameters()
    printf("Out channels = %d\n",gOutChannels);
    printf("Constant value = %.4f\n",constValue);
    printf("Radius       = %d\n",gRadius);
+   printf("Count NaNs in comparison = %d\n",gCountNaNs);
    printf("#####################################\n");   
 }
 
 void parse_cmdline(int argc, char * argv[]) {
-   char optstring[] = "mcdhs:e:k:o:p:r:a:v:R:";
+   char optstring[] = "mcdhs:e:k:o:p:r:a:v:R:X";
    int opt,opt_param,i;
         
    while ((opt = getopt(argc, argv, optstring)) != -1) {
@@ -151,6 +156,10 @@ void parse_cmdline(int argc, char * argv[]) {
 
          case 'v':
             constValue = atof(optarg);
+            break;
+            
+         case 'X':
+            gCountNaNs = false;
             break;
             
          case 'h':
@@ -415,7 +424,7 @@ int main(int argc,char* argv[])
         if( gParamValue >= 0 ){
            min_diff = gParamValue;
         }
-        int ret = left.Compare(right, min_diff, gBGPrintfLevel);
+        int ret = left.Compare(right, min_diff, gBGPrintfLevel, gCountNaNs );
         printf("\n\nCOMPARISON RESULT : ");
         if( ret ){
            printf("Images differ by %d pixels\n",ret);

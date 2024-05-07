@@ -66,7 +66,7 @@ int CBgFits::freq2ch(double freq)
    return ch;
 }
 
-CBgFits::CBgFits( const char* fits_file, int xSize, int ySize )
+CBgFits::CBgFits( const char* fits_file, long int xSize, long int ySize )
  : data(NULL),m_SizeX(xSize),m_SizeY(ySize),bitpix(-32),inttime(0), start_freq(0), stop_freq(480), m_fptr(NULL), total_counter(0),m_lines_counter(0),delta_freq(480.00/4096.00), m_pRFIMask(NULL), 
    image_type(TFLOAT), dtime_fs(0), dtime_fu(0), m_bExternalData(false)
 {
@@ -78,27 +78,27 @@ CBgFits::CBgFits( const char* fits_file, int xSize, int ySize )
   }
 }
 
-CBgFits::CBgFits( int xSize, int ySize )
+CBgFits::CBgFits( long int xSize, long int ySize )
 : data(NULL),m_SizeX(xSize),m_SizeY(ySize),bitpix(-32),inttime(0), start_freq(0), stop_freq(480), m_fptr(NULL), total_counter(0),m_lines_counter(0),delta_freq(480.00/4096.00), m_pRFIMask(NULL), image_type(TFLOAT), dtime_fs(0), dtime_fu(0), m_bExternalData(false)
 {
-   int size = m_SizeX*m_SizeY;
+   // long int size = m_SizeX*m_SizeY;
    Realloc( xSize, ySize, FALSE );   
 }
 
 CBgFits& CBgFits::operator=(const CBgFits& right)
 {
    if( GetXSize() != right.GetXSize() || GetYSize() != right.GetYSize() ){
-      printf("WARNING : size of the left is (%d,%d) != right (%d,%d) -> realloc called\n",GetXSize(),GetYSize(),right.GetXSize(),right.GetYSize());
+      printf("WARNING : size of the left is (%ld,%ld) != right (%ld,%ld) -> realloc called\n",GetXSize(),GetYSize(),right.GetXSize(),right.GetYSize());
       Realloc( right.GetXSize(), right.GetYSize() );
    }
    
-   int size=right.GetXSize()*right.GetYSize();
+   long int size=right.GetXSize()*right.GetYSize();
    memcpy( data, right.data, size*sizeof(BG_FITS_DATA_TYPE));
    
    return (*this);
 }
 
-void CBgFits::Realloc( int sizeX, int sizeY, int bKeepOldData, bool bInitToZeros /*=false*/ )
+void CBgFits::Realloc( long int sizeX, long int sizeY, int bKeepOldData, bool bInitToZeros /*=false*/ )
 {   
    if( sizeX>0 && sizeY>0 ){
       float* new_data = NULL;
@@ -141,7 +141,7 @@ void CBgFits::SetData( BG_FITS_DATA_TYPE* ptr ){
    m_bExternalData=true; 
 }
 
-void CBgFits::SetData( int xSize, int ySize, BG_FITS_DATA_TYPE* ptr )
+void CBgFits::SetData( long int xSize, long int ySize, BG_FITS_DATA_TYPE* ptr )
 {
    SetData( ptr );
    m_SizeX = xSize;
@@ -225,7 +225,7 @@ int CBgFits::DumpFitsLine( float* buffer, int size )
    return status;
 }
 
-void CBgFits::set_ysize( int lines_counter )
+void CBgFits::set_ysize( long int lines_counter )
 { 
    if( lines_counter > 0 ){
       m_lines_counter = lines_counter;
@@ -235,7 +235,7 @@ void CBgFits::set_ysize( int lines_counter )
       if( m_lines_counter <= m_SizeY ){
          m_SizeY = m_lines_counter;
       }else{
-         printf("ERROR : could not set Y size of array to value %d because allocated y-size is only %d\n",m_lines_counter,m_SizeY);
+         printf("ERROR : could not set Y size of array to value %ld because allocated y-size is only %ld\n",m_lines_counter,m_SizeY);
       }
    }
 }
@@ -247,15 +247,14 @@ int CBgFits::add_line( CBgArray& line )
          Realloc( m_SizeX, 2*m_SizeY );
       }
    
-      int pos = m_lines_counter*m_SizeX;
-      
-      for(int i=0;i<line.size();i++){
+      long int pos = m_lines_counter*m_SizeX;      
+      for(long int i=0;i<line.size();i++){
          data[pos+i] = line[i];
       }
       m_lines_counter++;
    }else{
       if( gBGPrintfLevel >= BG_INFO_LEVEL ){
-         printf("Line size = %d different than %d -> ignored\n",(int)line.size(),m_SizeX);
+         printf("Line size = %ld different than %ld -> ignored\n",(long int)line.size(),m_SizeX);
       }
    }
    
@@ -522,7 +521,7 @@ int CBgFits::UpdateImage(  const char* fits_file, const char* out_file )
            return( status );
         }*/
        
-        int nelements = naxes[0] * naxes[1];          /* number of pixels to write */
+        long int nelements = naxes[0] * naxes[1];          /* number of pixels to write */
         /* Write the array of long integers (after converting them to short) */
         if ( fits_write_img( outfptr, TFLOAT, fpixel, nelements, data, &status) )
            return( status );
@@ -816,7 +815,7 @@ int CBgFits::ReadFits( const char* fits_file, int bAutoDetect /*=0*/, int bReadI
          long int sizeXY = ((long int)m_SizeX)*((long int)m_SizeY);
          if( !data ){
             if( gBGPrintfLevel >= BG_DEBUG_LEVEL ){
-               printf("Allocating %d x %d = %ld image for naxis = %d \n",m_SizeX,m_SizeY,sizeXY,naxis);fflush(stdout);
+               printf("Allocating %ld x %ld = %ld image for naxis = %d \n",m_SizeX,m_SizeY,sizeXY,naxis);fflush(stdout);
             }
             data = new float[sizeXY];
          }
@@ -1183,12 +1182,11 @@ void CBgFits::SetKeyword(const char *keyword, const char* new_value, char keytyp
 CBgFits& CBgFits::add_squared(const CBgFits& right)
 {
     if( data && right.data && m_SizeX==right.m_SizeX && m_SizeY==right.m_SizeY ){
-        int sizeXY=m_SizeX*m_SizeY;
+        long int sizeXY=m_SizeX*m_SizeY;
       
-      for(int i=0;i<sizeXY;i++){
-         data[i] = data[i] + (right.data[i] * right.data[i]);
-      }
-
+        for(long int i=0;i<sizeXY;i++){
+           data[i] = data[i] + (right.data[i] * right.data[i]);
+        }
     }    
     return (*this);
 }
@@ -1196,9 +1194,8 @@ CBgFits& CBgFits::add_squared(const CBgFits& right)
 CBgFits& CBgFits::operator+=(const CBgFits& right)
 {
    if( data && right.data && m_SizeX==right.m_SizeX && m_SizeY==right.m_SizeY ){
-      int sizeXY=m_SizeX*m_SizeY;
-      
-      for(int i=0;i<sizeXY;i++){
+      long int sizeXY=m_SizeX*m_SizeY;      
+      for(long int i=0;i<sizeXY;i++){
          data[i] = data[i] + right.data[i];
       }
    } 
@@ -1283,15 +1280,15 @@ void CBgFits::NormalizeX()
 void CBgFits::Normalize(double norm_factor)
 {
    if( data ){
-      int sizeXY=m_SizeX*m_SizeY;
+      long int sizeXY=m_SizeX*m_SizeY;
       
-      for(int i=0;i<sizeXY;i++){
+      for(long int i=0;i<sizeXY;i++){
          data[i] = data[i] / norm_factor;
       }
    }
 }
 
-float CBgFits::valXY( int x, int y )
+float CBgFits::valXY( long int x, long int y )
 {
 /*   int pos = y*m_SizeX + x;
    if( pos>=0 && pos < (m_SizeX*m_SizeY) ){
@@ -1302,11 +1299,11 @@ float CBgFits::valXY( int x, int y )
    return valXY_auto(x,y);
 }
 
-char CBgFits::valXY_char( int x, int y )
+char CBgFits::valXY_char( long int x, long int y )
 {
    // WRONG : if( pos>=0 && pos < (m_SizeX*m_SizeY) ){
    if( x>=0 && y>=0 && x<m_SizeX && y<m_SizeY ){
-      int pos = y*m_SizeX + x;
+      long int pos = y*m_SizeX + x;
       char* data_char = (char*)data;
 
       return data_char[pos];      
@@ -1316,18 +1313,18 @@ char CBgFits::valXY_char( int x, int y )
    return (0.00/0.00); // NaN is more robust way of returning None/NULL like value, checked with isnan or fpclassify(val) == FP_NAN , test code /home/msok/bighorns/software/analysis/test/nan.cpp
 }
 
-float CBgFits::valXY_auto( int x, int y )
+float CBgFits::valXY_auto( long int x, long int y )
 {
    if( image_type == TBYTE ){
       // WRONG : if( pos>=0 && pos < (m_SizeX*m_SizeY) ){ - it can allow x>m_SizeX !!!
       if( x>=0 && y>=0 && x<m_SizeX && y<m_SizeY ){
          char* data_char = (char*)data;
-         int pos = y*m_SizeX + x;      
+         long int pos = y*m_SizeX + x;      
          return (float)(data_char[pos]);
       }
    }else{
       if( x>=0 && y>=0 && x<m_SizeX && y<m_SizeY ){
-         int pos = y*m_SizeX + x;      
+         long int pos = y*m_SizeX + x;      
          return data[pos];      
       }
    }
@@ -1336,10 +1333,10 @@ float CBgFits::valXY_auto( int x, int y )
    return (0.00/0.00); // NaN is more robust way of returning None/NULL like value, checked with isnan or fpclassify(val) == FP_NAN , test code /home/msok/bighorns/software/analysis/test/nan.cpp
 }
 
-int CBgFits::setY( int y, float value )
+int CBgFits::setY( long int y, float value )
 {
    int ret=0;
-   for(int x=0;x<m_SizeX;x++){
+   for(long int x=0;x<m_SizeX;x++){
       setXY(x,y,value);
       ret++;
    }
@@ -1347,11 +1344,11 @@ int CBgFits::setY( int y, float value )
    return ret;
 }
 
-float CBgFits::addXY( int x, int y, float value )
+float CBgFits::addXY( long int x, long int y, float value )
 {
    // WRONG : if( pos>=0 && pos < (m_SizeX*m_SizeY) ){ - it can allow x>m_SizeX !!!
    if( x>=0 && y>=0 && x<m_SizeX && y<m_SizeY ){
-      int pos = y*m_SizeX + x;
+      long int pos = y*m_SizeX + x;
       data[pos] += value;
       return data[pos];
    }
@@ -1360,11 +1357,11 @@ float CBgFits::addXY( int x, int y, float value )
    return (0.00/0.00); // NaN is more robust way of returning None/NULL like value, checked with isnan or fpclassify(val) == FP_NAN , test code /home/msok/bighorns/software/analysis/test/nan.cpp
 }
 
-float CBgFits::setXY( int x, int y, float value )
+float CBgFits::setXY( long int x, long int y, float value )
 {
    // WRONG : if( pos>=0 && pos < (m_SizeX*m_SizeY) ){  - it can allow x>m_SizeX !!!
    if( x>=0 && y>=0 && x<m_SizeX && y<m_SizeY ){
-      int pos = y*m_SizeX + x;
+      long int pos = y*m_SizeX + x;
       data[pos] = value;
       return data[pos];
    }
@@ -1373,14 +1370,14 @@ float CBgFits::setXY( int x, int y, float value )
    return (0.00/0.00); // NaN is more robust way of returning None/NULL like value, checked with isnan or fpclassify(val) == FP_NAN , test code /home/msok/bighorns/software/analysis/test/nan.cpp
 }
 
-float* CBgFits::set_line( int y, float* buffer )
+float* CBgFits::set_line( long int y, float* buffer )
 {
-   int pos = y*m_SizeX;
+   long int pos = y*m_SizeX;
    if( buffer ){
       if( y < m_SizeY ){
          memcpy(&(data[pos]),buffer,m_SizeX*sizeof(float));
       }else{
-         printf("ERROR : trying to write to line y=%d, file size is %d !\n",y,m_SizeY);
+         printf("ERROR : trying to write to line y=%ld, file size is %ld !\n",y,m_SizeY);
          return NULL;
       }
    }
@@ -1388,48 +1385,47 @@ float* CBgFits::set_line( int y, float* buffer )
    return &(data[pos]);
 }
 
-float* CBgFits::set_line( int y, CBgArray& line )
+float* CBgFits::set_line( long int y, CBgArray& line )
 {
-   int pos = y*m_SizeX;
-   
+   long int pos = y*m_SizeX;   
    if( m_SizeX != line.size() ){
-      printf("ERROR : cannot set line, array size = %d != image X size = %d\n",(int)line.size(),m_SizeX);
+      printf("ERROR : cannot set line, array size = %d != image X size = %ld\n",(int)line.size(),m_SizeX);
       return NULL;
    }
    
-   for(int x=0;x<m_SizeX;x++){
+   for(long int x=0;x<m_SizeX;x++){
       data[pos+x] = line[x];
    }
    
    return &(data[pos]);
 }
 
-float* CBgFits::set_line( int y, vector<cValue>& line )
+float* CBgFits::set_line( long int y, vector<cValue>& line )
 {
-   int pos = y*m_SizeX;
+   long int pos = y*m_SizeX;
    
    if( m_SizeX != line.size() ){
-      printf("ERROR : cannot set line, array size = %d != image X size = %d\n",(int)line.size(),m_SizeX);
+      printf("ERROR : cannot set line, array size = %d != image X size = %ld\n",(int)line.size(),m_SizeX);
       return NULL;
    }
    
-   for(int x=0;x<m_SizeX;x++){
+   for(long int x=0;x<m_SizeX;x++){
       data[pos+x] = line[x].y;
    }
    
    return &(data[pos]);
 }
 
-float* CBgFits::set_line( int y, vector<double>& line )
+float* CBgFits::set_line( long int y, vector<double>& line )
 {
-   int pos = y*m_SizeX;
+   long int pos = y*m_SizeX;
    
    if( m_SizeX != line.size() ){
-      printf("ERROR : cannot set line, array size = %d != image X size = %d\n",(int)line.size(),m_SizeX);
+      printf("ERROR : cannot set line, array size = %d != image X size = %ld\n",(int)line.size(),m_SizeX);
       return NULL;
    }
    
-   for(int x=0;x<m_SizeX;x++){
+   for(long int x=0;x<m_SizeX;x++){
       data[pos+x] = line[x];
    }
    
@@ -1437,12 +1433,12 @@ float* CBgFits::set_line( int y, vector<double>& line )
 
 }
 
-float* CBgFits::set_reim_line( int y, vector<double>& line_re, vector<double>& line_im )
+float* CBgFits::set_reim_line( long int y, vector<double>& line_re, vector<double>& line_im )
 {
-   int pos = y*m_SizeX;
+   long int pos = y*m_SizeX;
    
    if( m_SizeX != (line_re.size()*2) ){
-      printf("ERROR : cannot set line, array size = %d != image X size = %d\n",(int)(line_re.size()*2),m_SizeX);
+      printf("ERROR : cannot set line, array size = %d != image X size = %ld\n",(int)(line_re.size()*2),m_SizeX);
       return NULL;
    }
    
@@ -1451,7 +1447,7 @@ float* CBgFits::set_reim_line( int y, vector<double>& line_re, vector<double>& l
       return NULL;
    }   
    
-   for(int x=0;x<line_re.size();x++){
+   for(long int x=0;x<line_re.size();x++){
       // data[pos+x] = line[x];
       data[pos + x*2] = line_re[x];
       data[pos + x*2 + 1] = line_im[x];     
@@ -1461,11 +1457,11 @@ float* CBgFits::set_reim_line( int y, vector<double>& line_re, vector<double>& l
      
 }
 
-float CBgFits::value( int y, int x )
+float CBgFits::value( long int y, long int x )
 {
    // WRONG : if( pos>=0 && pos < (m_SizeX*m_SizeY) ){
    if( x>=0 && y>=0 && x<m_SizeX && y<m_SizeY ){
-      int pos = y*m_SizeX + x;
+      long int pos = y*m_SizeX + x;
       return data[pos];      
    }
    
@@ -1473,37 +1469,37 @@ float CBgFits::value( int y, int x )
    return (0.00/0.00); // NaN is more robust way of returning None/NULL like value, checked with isnan or fpclassify(val) == FP_NAN , test code /home/msok/bighorns/software/analysis/test/nan.cpp
 }
 
-float* CBgFits::get_line( int y )
+float* CBgFits::get_line( long int y )
 {
    if( y<0 || y >= m_SizeY ){
-      printf("ERROR : requested line %d >= size = %d\n",y,m_SizeY);
+      printf("ERROR : requested line %ld >= size = %ld\n",y,m_SizeY);
       return NULL;
    }
 
-   int pos = y*m_SizeX;         
+   long int pos = y*m_SizeX;         
    return &(data[pos]);
 }
 
-float* CBgFits::get_line( int y, CBgArray& buffer )
+float* CBgFits::get_line( long int y, CBgArray& buffer )
 {
    buffer.alloc( GetXSize() , 0 );
-   for(int x=0;x<GetXSize();x++){
+   for(long int x=0;x<GetXSize();x++){
       buffer[x] = getXY(x,y);
    }
    
    return get_line(y);
 }
 
-float* CBgFits::get_line( int y, float* buffer ){
+float* CBgFits::get_line( long int y, float* buffer ){
    if( y<0 || y >= m_SizeY ){
-      printf("ERROR : requested line %d >= size = %d\n",y,m_SizeY);
+      printf("ERROR : requested line %ld >= size = %ld\n",y,m_SizeY);
       return NULL;
    }
 
-   int pos = y*m_SizeX;
+   long int pos = y*m_SizeX;
    if( buffer ){
       if( image_type == TBYTE ){
-         for(int x=0;x<GetXSize();x++){
+         for(long int x=0;x<GetXSize();x++){
             buffer[x] = getXY(x,y);
          }
       }else{
@@ -1538,19 +1534,19 @@ double CBgFits::GetUnixTime(int y)
 
 void CBgFits::Multiply( CBgFits& right )
 {
-   int size = m_SizeX*m_SizeY;
+   long int size = m_SizeX*m_SizeY;
    
-   for(int i=0;i<size;i++){
+   for(long int i=0;i<size;i++){
       data[i] = (data[i] * right.data[i]);
    }
 }
 
-double CBgFits::Sum(int y)
+double CBgFits::Sum(long int y)
 {
    double sum = 0.00;
    
-   for(int x=0;x<m_SizeX;x++){
-      int pos = y*m_SizeX + x;
+   for(long int x=0;x<m_SizeX;x++){
+      long int pos = y*m_SizeX + x;
       
       sum += data[pos];
    }
@@ -1561,9 +1557,9 @@ double CBgFits::Sum(int y)
 double CBgFits::Sum()
 {
    double sum = 0.00;
-   int size = m_SizeX*m_SizeY;
+   long int size = m_SizeX*m_SizeY;
    
-   for(int i=0;i<size;i++){
+   for(long int i=0;i<size;i++){
       sum += data[i];
    }
    
@@ -1572,11 +1568,11 @@ double CBgFits::Sum()
 
 void CBgFits::AddImages( CBgFits& right, double mult_const )
 {
-   int size = m_SizeX*m_SizeY;
+   long int size = m_SizeX*m_SizeY;
    
    double val = getXY(82,101);
    
-   for(int i=0;i<size;i++){
+   for(long int i=0;i<size;i++){
       data[i] = (data[i] + right.data[i]) * mult_const;
    }
    
@@ -1587,9 +1583,9 @@ void CBgFits::AddImages( CBgFits& right, double mult_const )
 
 void CBgFits::SEFD_XX_YY( CBgFits& right )
 {
-   int size = m_SizeX*m_SizeY;
+   long int size = m_SizeX*m_SizeY;
    
-   for(int i=0;i<size;i++){
+   for(long int i=0;i<size;i++){
       double xx_val = data[i];
       double yy_val = right.data[i];
       
@@ -1600,9 +1596,9 @@ void CBgFits::SEFD_XX_YY( CBgFits& right )
 
 void CBgFits::SEFD2AOT()
 {
-   int size = m_SizeX*m_SizeY;
+   long int size = m_SizeX*m_SizeY;
    
-   for(int i=0;i<size;i++){
+   for(long int i=0;i<size;i++){
       double sefd = data[i];
       
       double aot = (2.00*1380.00)/sefd;
@@ -1613,27 +1609,27 @@ void CBgFits::SEFD2AOT()
 
 void CBgFits::Subtract( CBgFits& right, CBgFits& diff )
 {
-   int size = m_SizeX*m_SizeY;
+   long int size = m_SizeX*m_SizeY;
    
-   for(int i=0;i<size;i++){
+   for(long int i=0;i<size;i++){
       diff.data[i] = (data[i] - right.data[i]);
    }
 }
 
 void CBgFits::Subtract( CBgFits& right )
 {
-   int size = m_SizeX*m_SizeY;
+   long int size = m_SizeX*m_SizeY;
    
-   for(int i=0;i<size;i++){
+   for(long int i=0;i<size;i++){
       data[i] = (data[i] - right.data[i]);
    }
 }
 
 void CBgFits::ComplexMag( CBgFits& right )
 {
-   int size = m_SizeX*m_SizeY;
+   long int size = m_SizeX*m_SizeY;
    
-   for(int i=0;i<size;i++){
+   for(long int i=0;i<size;i++){
       data[i] = (data[i]*data[i] + right.data[i]*right.data[i]);
    }
 }
@@ -1641,7 +1637,7 @@ void CBgFits::ComplexMag( CBgFits& right )
 int CBgFits::SubtractColumn( CBgArray& column )
 {
    if( m_SizeY != column.size() ){
-      printf("ERROR : cannot subtract column of different size %d != %d\n",m_SizeY,(int)column.size());
+      printf("ERROR : cannot subtract column of different size %ld != %d\n",m_SizeY,(int)column.size());
       return 0;
    }
    
@@ -1660,7 +1656,7 @@ int CBgFits::SubtractColumn( CBgArray& column )
 int CBgFits::SubtractSpectrum( CBgArray& spectrum )
 {
    if( m_SizeX != spectrum.size() ){
-      printf("ERROR : cannot subtract spectrum of different size %d != %d\n",m_SizeX,(int)spectrum.size());
+      printf("ERROR : cannot subtract spectrum of different size %ld != %d\n",m_SizeX,(int)spectrum.size());
       return 0;
    }
    
@@ -1678,7 +1674,7 @@ int CBgFits::DivideBySpectrum( vector<cValue>& spectrum )
 {
    int bInterpol=0;
    if( m_SizeX != spectrum.size() ){
-      printf("WARNING in CBgFits::DivideBySpectrum : sizes of FITS file and spectrum different %d != %d\n",m_SizeX,(int)spectrum.size());
+      printf("WARNING in CBgFits::DivideBySpectrum : sizes of FITS file and spectrum different %ld != %d\n",m_SizeX,(int)spectrum.size());
       bInterpol=1;
    }
 
@@ -1705,9 +1701,9 @@ int CBgFits::DivideBySpectrum( vector<cValue>& spectrum )
 
 void CBgFits::RMS( int n_count, CBgFits& right )
 {
-   int size = m_SizeX*m_SizeY;
+   long int size = m_SizeX*m_SizeY;
    
-   for(int i=0;i<size;i++){
+   for(long int i=0;i<size;i++){
       data[i] = sqrt( (data[i] / n_count ) - (right.data[i]*right.data[i]) );      
    
 //      data[i] = (data[i] / right.data[i]);
@@ -1721,14 +1717,14 @@ void CBgFits::VertFlip()
     CBgFits tmp( GetXSize(), GetYSize() );    
     CBgArray buffer;
     
-    for(int y=0;y<GetYSize();y++){
+    for(long int y=0;y<GetYSize();y++){
        get_line(y,buffer);
        
-       int y_out = GetYSize() - 1 - y;
+       long int y_out = GetYSize() - 1 - y;
        tmp.set_line(y_out,buffer);
     }
     
-    int size = GetXSize()*GetYSize();
+    long int size = GetXSize()*GetYSize();
     memcpy( data, tmp.data, size*sizeof(BG_FITS_DATA_TYPE));
 }
 
@@ -1736,11 +1732,11 @@ void CBgFits::HorFlip()
 {
    CBgArray buffer;
    
-   for(int y=0;y<GetYSize();y++){
+   for(long int y=0;y<GetYSize();y++){
       get_line(y,buffer);
       
-      for(int x=0;x<buffer.size();x++){
-         int x_new = GetXSize()-1-x;
+      for(long int x=0;x<buffer.size();x++){
+         long int x_new = GetXSize()-1-x;
          setXY(x_new,y,buffer[x]);
       }
    }
@@ -1748,9 +1744,9 @@ void CBgFits::HorFlip()
 
 void CBgFits::Divide( CBgFits& right )
 {
-   int size = m_SizeX*m_SizeY;
+   long int size = m_SizeX*m_SizeY;
    
-   for(int i=0;i<size;i++){
+   for(long int i=0;i<size;i++){
       if ( right.data[i] != 0.00 ){
          data[i] = (data[i] / right.data[i]);
       }
@@ -1758,10 +1754,10 @@ void CBgFits::Divide( CBgFits& right )
 }
 
 
-void CBgFits::Divide( int y, double value )
+void CBgFits::Divide( long int y, double value )
 {
-   for(int x=0;x<m_SizeX;x++){
-      int pos = y*m_SizeX + x;
+   for(long int x=0;x<m_SizeX;x++){
+      long int pos = ((long int)y)*m_SizeX + x;
       
       data[pos] = data[pos] / value;
    }
@@ -1770,9 +1766,9 @@ void CBgFits::Divide( int y, double value )
 
 void CBgFits::Divide( double value )
 {
-   int size = m_SizeX*m_SizeY;
+   long int size = m_SizeX*m_SizeY;
    
-   for(int i=0;i<size;i++){
+   for(long int i=0;i<size;i++){
       data[i] = (data[i] / value);
    }
 }
@@ -1808,18 +1804,18 @@ void CBgFits::AvgChannels(int n_channels, CBgFits& outfits )
 bool CBgFits::Offset( double dx, double dy, CBgFits& out_fits, double multiplier )
 {
    if( m_SizeX != out_fits.m_SizeX || m_SizeY != out_fits.m_SizeY ){
-      printf("RESULT : image sizes differ %dx%d != %dx%d\n",m_SizeX,m_SizeY,out_fits.m_SizeX,out_fits.m_SizeY);
+      printf("RESULT : image sizes differ %ldx%ld != %ldx%ld\n",m_SizeX,m_SizeY,out_fits.m_SizeX,out_fits.m_SizeY);
       return false;
    }
 
    int ret=0;
-   int size = m_SizeX*m_SizeY;
+   long int size = m_SizeX*m_SizeY;
    
-   for(int y=0;y<m_SizeY;y++){
-      for(int x=0;x<m_SizeY;x++){
+   for(long int y=0;y<m_SizeY;y++){
+      for(long int x=0;x<m_SizeY;x++){
          double val = getXY( x , y );
-         int dx_int = int( double( dx ) );
-         int dy_int = int( double( dy ) );
+         long int dx_int = int( double( dx ) );
+         long int dy_int = int( double( dy ) );
          
          
          out_fits.setXY( x + dx_int, y + dy_int, (val*multiplier) );
@@ -1832,17 +1828,17 @@ bool CBgFits::Offset( double dx, double dy, CBgFits& out_fits, double multiplier
 int CBgFits::Compare( CBgFits& right, float min_diff, int verb, bool bCountNaNs /*=true */ )
 {
    if( m_SizeX!=right.m_SizeX || m_SizeY!=right.m_SizeY ){
-      printf("RESULT : image sizes differ %dx%d != %dx%d\n",m_SizeX,m_SizeY,right.m_SizeX,right.m_SizeY);
+      printf("RESULT : image sizes differ %ldx%ld != %ldx%ld\n",m_SizeX,m_SizeY,right.m_SizeX,right.m_SizeY);
       return 1;
    }
    
    int ret=0;
-   int size = m_SizeX*m_SizeY;
+   long int size = m_SizeX*m_SizeY;
    double max_diff = -1e20;
    int max_diff_x=-1,max_diff_y=-1;
    int count_left_nans=0,count_right_nans=0;
    
-   for(int i=0;i<size;i++){
+   for(long int i=0;i<size;i++){
       int channel = (i % m_SizeX);
       double freq = ch2freq(channel);
       
@@ -1864,7 +1860,7 @@ int CBgFits::Compare( CBgFits& right, float min_diff, int verb, bool bCountNaNs 
          if( fabs_diff > min_diff ){
             if( verb >= 1 && gBGPrintfLevel >= BG_INFO_LEVEL ){
                // printf("%e != %e at (%d,%d) - %.2f [MHz]\n",data[i],right.data[i],(i % m_SizeX),(i / m_SizeX),freq);
-               printf("%.12f != %.12f at (%d,%d) - %.2f [MHz]\n",data[i],right.data[i],(i % m_SizeX),(i / m_SizeX),freq);
+               printf("%.12f != %.12f at (%ld,%ld) - %.2f [MHz]\n",data[i],right.data[i],(i % m_SizeX),(i / m_SizeX),freq);
             }
             ret++;
          }
@@ -2263,7 +2259,7 @@ double CBgFits::GetStat( CBgArray& avg_spectrum, CBgArray& rms_spectrum,
 {
    if( rfi_flag_fits_file ){
       if( GetXSize() != rfi_flag_fits_file->GetXSize() || GetYSize() != rfi_flag_fits_file->GetYSize() ){
-         printf("ERROR : provided RFI flags file differs in size (%d,%d) from the analysed FITS file (%d,%d)\n",rfi_flag_fits_file->GetXSize(),rfi_flag_fits_file->GetYSize(),GetXSize(),GetYSize());
+         printf("ERROR : provided RFI flags file differs in size (%ld,%ld) from the analysed FITS file (%ld,%ld)\n",rfi_flag_fits_file->GetXSize(),rfi_flag_fits_file->GetYSize(),GetXSize(),GetYSize());
          return -100000;
       }
    }
@@ -2273,12 +2269,12 @@ double CBgFits::GetStat( CBgArray& avg_spectrum, CBgArray& rms_spectrum,
    }
 
    long double sum=0.00,sum2=0.00,minval=10000000.00,maxval=-100000000.00;
-   int size = m_SizeX*m_SizeY;
+   long int size = m_SizeX*m_SizeY;
     
-   int count=0,minpos=-1,maxpos=-1;
+   long int count=0,minpos=-1,maxpos=-1;
    int n_int=0;
 
-   for(int y=start_int;y<end_int;y++){
+   for(long int y=start_int;y<end_int;y++){
       if( szState && szState[0] ){
          int range_idx;
          cIntRange* pRange = GetRange(y, range_idx);
@@ -2296,8 +2292,8 @@ double CBgFits::GetStat( CBgArray& avg_spectrum, CBgArray& rms_spectrum,
          }
       }
    
-      for(int x=0;x<m_SizeX;x++){
-         int i = y*m_SizeX+x;
+      for(long int x=0;x<m_SizeX;x++){
+         long int i = ((long int)y)*((long int)m_SizeX) + ((long int)x);
          double val = getXY(x,y);
          
          if( rfi_flag_fits_file ){
@@ -2457,8 +2453,8 @@ double CBgFits::GetStat( CBgArray& avg_spectrum, CBgArray& rms_spectrum,
       printf("RMS     = %e\n",(double)rms);
       printf("SUM     = %.8f\n",total_sum_test);
       printf("Int count = %d\n",y_lines_counter);
-      printf("MAX val = %.8f at (%d,%d)\n",(double)maxval,(maxpos%m_SizeX),(maxpos/m_SizeX));
-      printf("MIN val = %.8f at (%d,%d)\n",(double)minval,(minpos%m_SizeX),(minpos/m_SizeX));
+      printf("MAX val = %.8f at (%ld,%ld)\n",(double)maxval,(maxpos%m_SizeX),(maxpos/m_SizeX));
+      printf("MIN val = %.8f at (%ld,%ld)\n",(double)minval,(minpos%m_SizeX),(minpos/m_SizeX));
       printf("INTTIME = %d x %.8f [sec] = %.8f [sec]\n",n_int,inttime,total_inttime);
       printf("TOTAL POWER ( uxtime = %.8f ) = %.20f [?] = %.2f [dBm]\n",GetUnixTime(),total_power,total_power_dbm);
       printf("Non-zero values = %d\n",non_zero_count);
@@ -2522,9 +2518,9 @@ double CBgFits::GetTotalPowerFreq( int integration, double start_freq, double en
 
 int CBgFits::Recalc( eCalcFitsAction_T action, double value )
 {
-   int size = m_SizeX*m_SizeY;
+   long int size = m_SizeX*m_SizeY;
    
-   for(int i=0;i<size;i++){
+   for(long int i=0;i<size;i++){
       switch( action ){
 
          case eInvert :            
@@ -2722,7 +2718,7 @@ int CBgFits::IsReference(int y)
   
 CBgFits* CBgFits::AllocOutFits( const char* fname, int _y_size, int bAddStates )
 {
-   int y_size = GetYSize();
+   long int y_size = GetYSize();
    if( _y_size > 0 ){
       y_size = _y_size;
    }
@@ -2788,12 +2784,12 @@ void CBgFits::dump_max_hold( int start_int, int end_int, const char* szOutFile, 
 {
    float* out_line = new float[m_SizeX];
    
-   for(int x=0;x<m_SizeX;x++){
+   for(long int x=0;x<m_SizeX;x++){
       out_line[x] = -10e9;
    }
    
-   for(int y=0;y<m_SizeY;y++){
-      for(int x=0;x<m_SizeX;x++){
+   for(long int y=0;y<m_SizeY;y++){
+      for(long int x=0;x<m_SizeX;x++){
          if( valXY(x,y) > out_line[x] ){
            out_line[x] = valXY(x,y);
          }
@@ -2801,7 +2797,7 @@ void CBgFits::dump_max_hold( int start_int, int end_int, const char* szOutFile, 
    }
 
    FILE* outfile = fopen(szOutFile,"w");
-   for(int x=0;x<m_SizeX;x++){
+   for(long int x=0;x<m_SizeX;x++){
        double x_val = x;
        if( bShowFreq ){
           x_val = ch2freq(x);
@@ -2818,12 +2814,12 @@ void CBgFits::dump_min_hold( int start_int, int end_int, const char* szOutFile, 
 {
    float* out_line = new float[m_SizeX];
    
-   for(int x=0;x<m_SizeX;x++){
+   for(long int x=0;x<m_SizeX;x++){
       out_line[x] = 10e20;
    }
    
-   for(int y=0;y<m_SizeY;y++){
-      for(int x=0;x<m_SizeX;x++){
+   for(long int y=0;y<m_SizeY;y++){
+      for(long int x=0;x<m_SizeX;x++){
          if( valXY(x,y) < out_line[x] ){
            out_line[x] = valXY(x,y);
          }
@@ -2831,7 +2827,7 @@ void CBgFits::dump_min_hold( int start_int, int end_int, const char* szOutFile, 
    }
 
    FILE* outfile = fopen(szOutFile,"w");
-   for(int x=0;x<m_SizeX;x++){
+   for(long int x=0;x<m_SizeX;x++){
        double x_val = x;
        if( bShowFreq ){
           x_val = ch2freq(x);
@@ -2929,10 +2925,10 @@ double CBgFits::GetChannelWidth()
 
 void CBgFits::Normalize( CBgArray& median_int )
 {
-   for(int y=0;y<GetYSize();y++){
+   for(long int y=0;y<GetYSize();y++){
       float* line = get_line(y);
       
-      for(int x=0;x<GetXSize();x++){
+      for(long int x=0;x<GetXSize();x++){
          line[x] = line[x] / median_int[x];
       }
    }
@@ -2942,10 +2938,10 @@ int CBgFits::FindValue( double value, double delta, eFindValueType_T type /*=eFi
 {
    int ret=0;
 
-   for(int y=0;y<GetYSize();y++){
+   for(long int y=0;y<GetYSize();y++){
       float* line = get_line(y);
       
-      for(int x=0;x<GetXSize();x++){
+      for(long int x=0;x<GetXSize();x++){
       
          if( type == eFindValueExact ){
             if( fabs(line[x]-value) < delta ){
@@ -2973,8 +2969,8 @@ int CBgFits::FindValue( double value, double delta, eFindValueType_T type /*=eFi
 
 void CBgFits::SetNaN()
 {
-   for(int y=0;y<GetYSize();y++){
-      for(int x=0;x<GetXSize();x++){
+   for(long int y=0;y<GetYSize();y++){
+      for(long int x=0;x<GetXSize();x++){
 //         setXY(x,y,FP_NAN);
          setXY(x,y,0.00/0.00); // NaN see https://en.cppreference.com/w/cpp/numeric/math/FP_categories
       }
@@ -2983,8 +2979,8 @@ void CBgFits::SetNaN()
 
 void CBgFits::SetValue(double value)
 {
-   for(int y=0;y<GetYSize();y++){
-      for(int x=0;x<GetXSize();x++){
+   for(long int y=0;y<GetYSize();y++){
+      for(long int x=0;x<GetXSize();x++){
          setXY(x,y,value);
       }
    }
@@ -2992,8 +2988,8 @@ void CBgFits::SetValue(double value)
 
 int CBgFits::CalcMedian( vector<string>& fits_list, CBgFits& out_rms, int bDoAverage )
 {   
-   int ySize=-1;
-   int xSize=-1;
+   long int ySize=-1;
+   long int xSize=-1;
    vector<CBgFits*> fits_tab;
    for(int i=0;i<fits_list.size();i++){
       CBgFits* fits = new CBgFits( fits_list[i].c_str() );
@@ -3007,7 +3003,7 @@ int CBgFits::CalcMedian( vector<string>& fits_list, CBgFits& out_rms, int bDoAve
           xSize = fits->GetXSize();
       }else{
          if( ySize != fits->GetYSize() ){
-            printf("ERROR : not all fits files have equal ySize - %d != %d (file %s)\n",ySize,fits->GetYSize(),fits_list[i].c_str());
+            printf("ERROR : not all fits files have equal ySize - %ld != %ld (file %s)\n",ySize,fits->GetYSize(),fits_list[i].c_str());
             return -1;
          }
       }
@@ -3024,13 +3020,13 @@ int CBgFits::CalcMedian( vector<string>& fits_list, CBgFits& out_rms, int bDoAve
    }
    
    if( gBGPrintfLevel >= BG_INFO_LEVEL ){
-      printf("INFO : Re-sizing current image to (%d,%d)\n",xSize,ySize);
+      printf("INFO : Re-sizing current image to (%ld,%ld)\n",xSize,ySize);
    }
    Realloc(xSize,ySize);
    out_rms.Realloc(xSize,ySize);
    
    CBgFits tmp_fits( xSize, fits_list.size() );
-   for(int y=0;y<ySize;y++){
+   for(long int y=0;y<ySize;y++){
       for(int i=0;i<fits_list.size();i++){
          tmp_fits.set_line(i,(fits_tab[i])->get_line(y));
       }
@@ -3242,10 +3238,10 @@ int CBgFits::SaveAsByte( const char* outfile )
          return( status );
       }
       
-      int nelements = naxes[0] * naxes[1];          /* number of pixels to write */
+      long int nelements = naxes[0] * naxes[1];          /* number of pixels to write */
 
       char* tmp_data = new char[nelements];
-      for(int i=0;i<nelements;i++){
+      for(long int i=0;i<nelements;i++){
          tmp_data[i] = 0;
          if( data[i] > 0 ){
             tmp_data[i] = 1;
@@ -3282,7 +3278,7 @@ double CBgFits::FitPoly( int y, double fit_min_freq, double fit_max_freq, double
    double* fit_spec_pwr = new double[GetXSize()];
                  
    int cnt=0;
-   for(int x=0;x<=GetXSize();x++){
+   for(long int x=0;x<=GetXSize();x++){
       double freq = ch2freq(x);                    
                     
       if( fit_min_freq<=freq && freq<=fit_max_freq ){
@@ -3301,7 +3297,7 @@ double CBgFits::FitPoly( int y, double fit_min_freq, double fit_max_freq, double
    double fit_chi2=0.00;
    double tau = GetIntTime();
    double bandwidth = GetChannelWidth();
-   for(int x=0;x<=GetXSize();x++){
+   for(long int x=0;x<=GetXSize();x++){
       double freq = ch2freq(x);
                                      
       if( fit_min_freq<=freq && freq<=fit_max_freq ){
@@ -3325,8 +3321,8 @@ int CBgFits::ZeroWrongValues( double limit )
 {
    int count_bad=0;
    
-   for(int y=0;y<m_SizeY;y++){
-      for(int x=0;x<m_SizeX;x++){
+   for(long int y=0;y<m_SizeY;y++){
+      for(long int x=0;x<m_SizeX;x++){
           double val = valXY(x,y);
           if( fabs(val) > limit ){
              setXY(x,y,0);
@@ -3341,8 +3337,8 @@ int CBgFits::ZeroWrongValues( double limit )
 int CBgFits::FixBadValues( double minValueOK, double maxValueOK )
 {
    int count_bad=0;
-   for(int y=0;y<m_SizeY;y++){
-      for(int x=0;x<m_SizeX;x++){
+   for(long int y=0;y<m_SizeY;y++){
+      for(long int x=0;x<m_SizeX;x++){
          double val = valXY(x,y);
          
          if( val > maxValueOK ){
@@ -3365,9 +3361,9 @@ void CBgFits::MeanLines( CBgArray& mean_lines, CBgArray& rms_lines )
    rms_lines.assign( GetYSize() , 0 );
    counter.assign( GetYSize(), 0 );
    
-   for(int y=0;y<GetYSize();y++){
+   for(long int y=0;y<GetYSize();y++){
       double sum2 = 0.00;
-      for(int x=0;x<GetXSize();x++){
+      for(long int x=0;x<GetXSize();x++){
          double value = getXY(x,y);
          
          if( !isnan(value) && !isinf(value) ){
@@ -3385,8 +3381,8 @@ void CBgFits::MeanLines( CBgArray& mean_lines, CBgArray& rms_lines )
 
 void CBgFits::Transpose( CBgFits& out_fits_t )
 {
-   for(int ch=0;ch<m_SizeX;ch++){
-      for(int t=0;t<m_SizeY;t++){
+   for(long int ch=0;ch<m_SizeX;ch++){
+      for(long int t=0;t<m_SizeY;t++){
          double val = getXY( ch, t );
          out_fits_t.setXY( t, ch, val );
       }      
@@ -3449,10 +3445,10 @@ void CBgFits::ReadCRValues()
 
 void CBgFits::Oversample( CBgFits& oversampled, int iOverSamplingRatio )
 {
-   int xSize = GetXSize(); 
-   int ySize = GetYSize(); 
-   int xSizeOversampled = iOverSamplingRatio * xSize;
-   int ySizeOversampled = iOverSamplingRatio * ySize;
+   long int xSize = GetXSize(); 
+   long int ySize = GetYSize(); 
+   long int xSizeOversampled = iOverSamplingRatio * xSize;
+   long int ySizeOversampled = iOverSamplingRatio * ySize;
    printf("Creating oversampled file of size %d x %d\n",xSizeOversampled,ySizeOversampled);
    oversampled.Realloc( xSizeOversampled , ySizeOversampled );
    SetKeys( oversampled.GetKeys() );
@@ -3479,10 +3475,10 @@ void CBgFits::Oversample( CBgFits& oversampled, int iOverSamplingRatio )
       oversampled.SetKeywordFloat( "CRPIX2", value*iOverSamplingRatio );
    }
    
-   for(int y=0;y<ySizeOversampled;y++){
-      for(int x=0;x<xSizeOversampled;x++){
-         int x_old = ( x / iOverSamplingRatio );
-         int y_old = ( y / iOverSamplingRatio );
+   for(long int y=0;y<ySizeOversampled;y++){
+      for(long int x=0;x<xSizeOversampled;x++){
+         long int x_old = ( x / iOverSamplingRatio );
+         long int y_old = ( y / iOverSamplingRatio );
 
          double val = value( y_old, x_old );
          oversampled.setXY( x , y , val );

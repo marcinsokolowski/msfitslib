@@ -40,8 +40,11 @@ void get_ymd_hms_ut( time_t ut_time, int& year, int& month, int& day,
 	hour = gmtm.tm_hour;
 	minute = gmtm.tm_min;
 	
-        double frac_sec = (sec-int(sec));
-	sec = gmtm.tm_sec + frac_sec;
+	// WARNING : ut_time is time_t (no fractional part);
+        // double frac_sec = (sec-int(sec));
+	sec = gmtm.tm_sec; //  + frac_sec;
+	
+//	printf("DEBUG : get_ymd_hms_ut , sec = %.8f -> frac_sec = %.8f\n",sec,frac_sec);
 }
 
 

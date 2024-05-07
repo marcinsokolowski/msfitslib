@@ -66,9 +66,7 @@ void parse_cmdline(int argc, char * argv[]) {
             break;
 
          case 'I' :
-            if( optarg ){
-               gIgnoreMissingFITS = true;
-            }
+            gIgnoreMissingFITS = true;
             break;
             
          case 'i' :
@@ -143,11 +141,12 @@ bool generate_lc_in_memory( vector<string>& fits_list )
    CLcTable lc_table( first_fits.GetXSize(), first_fits.GetYSize() );
    // lc_table.Alloc( first_fits.GetXSize(), first_fits.GetYSize() );
 
-  CBgFits fits, rms_fits;   
+//  CBgFits fits, rms_fits;   
   for(int i=0;i<fits_list.size();i++){
-     // CBgFits fits; // if not here field dtime_fs needs to be set to -1 as otherwise it will be the same for all the FITS files 
+     CBgFits fits,rms_fits; // if not here field dtime_fs needs to be set to -1 as otherwise it will be the same for all the FITS files 
      // WARNING : if this is here I think there seem to be some memory leak !!!
      fits.dtime_fs = -1000;
+     
      
      char rms_fits_file[1024];     
      bool bRMSFileFound=false;
@@ -325,6 +324,7 @@ void generate_lc_slow( vector<string>& fits_list )
 
 void print_parameters()
 {
+// if( sscanf( optarg,"(%d,%d)-(%d,%d)",&gBorderStartX,&gBorderStartY,&gBorderEndX,&gBorderEndY )==4 ){
     printf("############################################################################################\n");
     printf("PARAMETERS :\n");
     printf("############################################################################################\n");
@@ -334,6 +334,8 @@ void print_parameters()
     printf("Minimum CHI2     = %.8f\n",CLcTable::m_MinChi2);
     printf("Fast code = %d\n",gFast);
     printf("Use median in Eq. 1 and rms_iqr in Eq. 3 in Bell et al. (2016) = %d\n",CLcTable::m_bUseMedian);
+    printf("Window           = (%d,%d) - (%d,%d)\n",gBorderStartX,gBorderStartY,gBorderEndX,gBorderEndY);
+    printf("Ignore missing   = %d\n",gIgnoreMissingFITS);
     printf("############################################################################################\n");
 }
 

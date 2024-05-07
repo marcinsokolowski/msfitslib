@@ -82,11 +82,11 @@ class CBgFits
 {
 protected :
   fitsfile* m_fptr;
-  int total_counter;
-  int m_lines_counter;
+  long int total_counter;
+  long int m_lines_counter;
   string m_FileName; 
-  int m_SizeX;
-  int m_SizeY;
+  long int m_SizeX;
+  long int m_SizeY;
   int bitpix;
   int image_type;
   
@@ -123,15 +123,15 @@ public :
   static const int m_TypicalBighornsChannels;
   static const int m_TypicalBighornsYSize;
 
-  CBgFits( const char* fits_file=NULL, int xSize=0, int ySize=0 );
-  CBgFits( int xSize, int ySize );
+  CBgFits( const char* fits_file=NULL, long int xSize=0, long int ySize=0 );
+  CBgFits( long int xSize, long int ySize );
   ~CBgFits();
   CBgFits& operator=(const CBgFits& right);
   
   void Clean();
   
   // memory allocation :
-  void Realloc( int sizeX, int sizeY, int bKeepOldData=TRUE, bool bInitToZeros=false );
+  void Realloc( long int sizeX, long int sizeY, int bKeepOldData=TRUE, bool bInitToZeros=false );
 
   // writing fits files piece by piece :
   int Create( const char* fits_file );
@@ -145,7 +145,7 @@ public :
   void reset_lines_counter(){ m_lines_counter = 0; }
   void inc_lines_counter(){ m_lines_counter++; }
   void SetData( BG_FITS_DATA_TYPE* ptr );
-  void SetData( int xSize, int ySize, BG_FITS_DATA_TYPE* ptr );
+  void SetData( long int xSize, long int ySize, BG_FITS_DATA_TYPE* ptr );
   
 
   int ReadFits( const char* fits_file=NULL, int bAutoDetect=0, int bReadImage=1, int bIgnoreHeaderErrors=0, bool transposed=false );  
@@ -194,8 +194,8 @@ public :
   int GetAntRanges( vector<cIntRange>& ranges );
 
   // 
-  inline int GetXSize() const{ return m_SizeX; }
-  inline int GetYSize() const{ return m_SizeY; }
+  inline long int GetXSize() const{ return m_SizeX; }
+  inline long int GetYSize() const{ return m_SizeY; }
   void SetYSize( int ySize ){ m_SizeY = ySize; }
   
   inline float* get_data(){ return data; }
@@ -209,26 +209,26 @@ public :
   void Normalize(double norm_factor);
   void NormalizeY();
   void NormalizeX();
-  float setXY( int x, int y, float value );
-  float addXY( int x, int y, float value );
-  int setY( int y, float value );
-  float* set_line( int y, vector<double>& line );
-  float* set_reim_line( int y, vector<double>& line_re, vector<double>& line_im );
-  float* set_line( int y, float* buffer );
-  float* set_line( int y, CBgArray& line );
-  float* set_line( int y, vector<cValue>& line );  
-  void set_ysize( int lines_counter=-1 );
+  float setXY( long int x, long int y, float value );
+  float addXY( long int x, long int y, float value );
+  int setY( long int y, float value );
+  float* set_line( long int y, vector<double>& line );
+  float* set_reim_line( long int y, vector<double>& line_re, vector<double>& line_im );
+  float* set_line( long int y, float* buffer );
+  float* set_line( long int y, CBgArray& line );
+  float* set_line( long int y, vector<cValue>& line );  
+  void set_ysize( long int lines_counter=-1 );
 
-  float valXY( int x, int y );
-  inline float getXY( int x, int y ){ return valXY(x,y); }
-  float value( int y, int x );
-  float* get_line( int y );
-  float* get_line( int y, float* buffer );
-  float* get_line( int y, CBgArray& buffer );
+  float valXY( long int x, long int y );
+  inline float getXY( long int x, long int y ){ return valXY(x,y); }
+  float value( long int y, long int x );
+  float* get_line( long int y );
+  float* get_line( long int y, float* buffer );
+  float* get_line( long int y, CBgArray& buffer );
   
   // char image :
-  char valXY_char( int x, int y );
-  float valXY_auto( int x, int y );
+  char valXY_char( long int x, long int y );
+  float valXY_auto( long int x, long int y );
   
   // arithmetical operations :
   void VertFlip();
@@ -247,7 +247,7 @@ public :
   bool Offset( double dx, double dy, CBgFits& out_fits, double multiplier=1.00 );
   void Transpose( CBgFits& out_fits_t );
   double Sum(); // calculates sum of pixel values in the image
-  double Sum(int y); // calculates a sum of pixels values in a specified row y  
+  double Sum(long int y); // calculates a sum of pixels values in a specified row y  
   
   double GetStatBorder( double& mean, double& rms, double& minval, double& maxval, int border );
   double GetStat( double& mean, double& rms, double& minval, double& maxval, int x_start=0, int y_start=0, int x_end=-1, int y_end=-1 );
@@ -271,7 +271,7 @@ public :
                );                  
                   
   void Divide( double value );
-  void Divide( int y, double value );
+  void Divide( long int y, double value );
   int Recalc( eCalcFitsAction_T action, double value=0.00 );
   int GetMedianInt( CBgArray& median_int, CBgArray& rms_iqr_int );
   int GetMedianInt( vector<cIntRange>& int_ranges, CBgArray& median_int, CBgArray& rms_iqr_int );
