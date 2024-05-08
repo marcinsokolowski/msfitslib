@@ -2288,7 +2288,7 @@ double CBgFits::GetStat( CBgArray& avg_spectrum, CBgArray& rms_spectrum,
          }
          
          if( gBGPrintfLevel >= BG_DEBUG_LEVEL ){
-            printf("Integration %d used\n",y);
+            printf("Integration %ld used\n",y);
          }
       }
    
@@ -2945,19 +2945,19 @@ int CBgFits::FindValue( double value, double delta, eFindValueType_T type /*=eFi
       
          if( type == eFindValueExact ){
             if( fabs(line[x]-value) < delta ){
-               printf("(%d,%d) = %8f\n",x,y,line[x]);
+               printf("(%ld,%ld) = %8f\n",x,y,line[x]);
                ret++;
             }
          }
          if( type == eFindValueSmaller ){
             if( line[x] < value ){
-               printf("(%d,%d) = %8f\n",x,y,line[x]);
+               printf("(%ld,%ld) = %8f\n",x,y,line[x]);
                ret++;
             }
          }
          if( type == eFindValueLarger ){
             if( line[x] >= value ){
-               printf("(%d,%d) = %8f\n",x,y,line[x]);
+               printf("(%ld,%ld) = %8f\n",x,y,line[x]);
                ret++;
             }
          }
@@ -3449,7 +3449,7 @@ void CBgFits::Oversample( CBgFits& oversampled, int iOverSamplingRatio )
    long int ySize = GetYSize(); 
    long int xSizeOversampled = iOverSamplingRatio * xSize;
    long int ySizeOversampled = iOverSamplingRatio * ySize;
-   printf("Creating oversampled file of size %d x %d\n",xSizeOversampled,ySizeOversampled);
+   printf("Creating oversampled file of size %ld x %ld\n",xSizeOversampled,ySizeOversampled);
    oversampled.Realloc( xSizeOversampled , ySizeOversampled );
    SetKeys( oversampled.GetKeys() );
 
@@ -3485,7 +3485,7 @@ void CBgFits::Oversample( CBgFits& oversampled, int iOverSamplingRatio )
 
          if( true ){
             if( ( x % 100 ) == 0 && (y % 100) == 0  ){
-               printf("(%d,%d) = %.8f (from (%d,%d))\n",x,y,val,x_old,y_old);
+               printf("(%ld,%ld) = %.8f (from (%ld,%ld))\n",x,y,val,x_old,y_old);
             }
          }
       }

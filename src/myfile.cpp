@@ -184,7 +184,7 @@ char* MyFile::GetLine(BOOL_T bNoNewLine/*=FALSE*/)
 		szFullLine << m_pBuffer;
 		// Assert(FALSE,"Buffer to small to read line of file %s",m_FileName.c_str());		
 		while(strlen(m_pBuffer)==(m_Size-1) && m_pBuffer[m_Size-1]!='\n'){
-			fgets(m_pBuffer,m_Size,m_pFile);
+			char* fgets_ret = fgets(m_pBuffer,m_Size,m_pFile);
 			szFullLine << m_pBuffer;
 		}
 		m_Size = strlen(szFullLine.c_str())+1;

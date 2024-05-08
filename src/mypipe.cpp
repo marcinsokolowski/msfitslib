@@ -5,7 +5,7 @@
 CMyPipe::CMyPipe()
 : pipe_write(NULL), pipe_read(NULL)
 {
-	pipe( fd );
+	int pipe_ret = pipe( fd );
 
 	pipe_write = fdopen( fd[1], "w" );
 	pipe_read  = fdopen( fd[0], "r" );

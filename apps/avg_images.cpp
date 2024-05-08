@@ -281,7 +281,7 @@ int main(int argc,char* argv[])
            printf("OK : beam fits file %s read OK\n",szFullBeamFitsFile.c_str());
         }
         if( pBeamImage->GetXSize() != first_fits.GetXSize() || pBeamImage->GetYSize() != first_fits.GetYSize() ){
-           printf("ERROR : size of the beam FITS file is %d x %d != size of image FITS %d x %d -> cannot continue\n",pBeamImage->GetXSize(),first_fits.GetXSize(),pBeamImage->GetYSize(),first_fits.GetYSize());
+           printf("ERROR : size of the beam FITS file is %ld x %ld != size of image FITS %ld x %ld -> cannot continue\n",pBeamImage->GetXSize(),first_fits.GetXSize(),pBeamImage->GetYSize(),first_fits.GetYSize());
            exit(-1);
         }
 

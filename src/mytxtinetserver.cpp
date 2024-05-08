@@ -47,7 +47,7 @@ int CMyTxtInetServer::Run()
 		} 
 		HandleRequest( szMessage.c_str(), answer_buffer );
 		Assert(strlen(answer_buffer)<CCD_MAX_ANSWER_BUFF_SIZE,"Answer exceeds buffer size");
-		write( m_ClientSocket, answer_buffer, CCD_MAX_ANSWER_BUFF_SIZE );
+		ssize_t  write_ret = write( m_ClientSocket, answer_buffer, CCD_MAX_ANSWER_BUFF_SIZE );
 
 		close( m_ClientSocket );
 	}

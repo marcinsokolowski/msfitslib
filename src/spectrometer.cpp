@@ -875,7 +875,7 @@ int CSpectrometer::CorrelateBinary( const char* eda_file, const char* bighorns_f
 //                printf("WARNING : maximum size exceeded -> breaking the loop\n");
 //                break;
 //             }
-             printf("INFO : doubling size of pCrossPowerFullTimeRes image ( %d -> %d lines) - on new Ubuntu >= 18 program crashes at 51000 or close\n",pCrossPowerFullTimeRes->GetYSize(),2*pCrossPowerFullTimeRes->GetYSize() );fflush(stdout);
+             printf("INFO : doubling size of pCrossPowerFullTimeRes image ( %ld -> %ld lines) - on new Ubuntu >= 18 program crashes at 51000 or close\n",pCrossPowerFullTimeRes->GetYSize(),2*pCrossPowerFullTimeRes->GetYSize() );fflush(stdout);
              pCrossPowerFullTimeRes->Realloc( pCrossPowerFullTimeRes->GetXSize(), 2*pCrossPowerFullTimeRes->GetYSize() );                          
           }         
       }
@@ -1092,7 +1092,7 @@ int CSpectrometer::CorrelateBinarySimple( const char* eda_file, const char* bigh
 //                printf("WARNING : maximum size exceeded -> breaking the loop\n");
 //                break;
 //             }
-             printf("INFO : doubling size of pCrossPowerFullTimeRes image ( %d -> %d lines) - on new Ubuntu >= 18 program crashes at 51000 or close\n",pCrossPowerFullTimeRes->GetYSize(),2*pCrossPowerFullTimeRes->GetYSize() );fflush(stdout);
+             printf("INFO : doubling size of pCrossPowerFullTimeRes image ( %ld -> %ld lines) - on new Ubuntu >= 18 program crashes at 51000 or close\n",pCrossPowerFullTimeRes->GetYSize(),2*pCrossPowerFullTimeRes->GetYSize() );fflush(stdout);
              pCrossPowerFullTimeRes->Realloc( pCrossPowerFullTimeRes->GetXSize(), 2*pCrossPowerFullTimeRes->GetYSize() );                          
           }         
       }

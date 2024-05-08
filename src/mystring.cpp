@@ -224,7 +224,7 @@ mystring mystring::double2string( double x, const char* fmt )
 const char* mystring::Fgets()
 {
 	ReAllocBuffer(2048);
-	::fgets(m_pchData, 2048, stdin);
+	char* gets_ret = ::fgets(m_pchData, 2048, stdin);
 	return m_pchData;
 }
 

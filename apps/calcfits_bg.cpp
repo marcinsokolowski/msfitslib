@@ -717,7 +717,7 @@ int main(int argc,char* argv[])
              if( left.GetXSize() == spectrum.size() ){
                 left.SubtractSpectrum( spectrum_bg );
              }else{
-                printf("ERROR : cannot subtract spectrum of different size %d != %d\n",left.GetXSize(),(int)spectrum.size());
+                printf("ERROR : cannot subtract spectrum of different size %ld != %d\n",left.GetXSize(),(int)spectrum.size());
              }                 
           }else{
              printf("ERROR : could not read spectrum from file %s\n",szFitsRight.c_str());
