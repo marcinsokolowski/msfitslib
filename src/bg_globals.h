@@ -107,6 +107,6 @@ void alloc(vector<cValue>& arr, int _size );
 int find_value( vector<int>& arr, int value );
 
 // file functions :
-int get_file_size( const char* filename );
+long int get_file_size( const char* filename );
 
 #endif

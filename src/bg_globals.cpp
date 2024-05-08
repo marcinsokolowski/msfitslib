@@ -637,12 +637,12 @@ void print_cmdline(int argc, char * argv[])
 //#include <sys/types.h>
 // #include <fcntl.h>
 
-int get_file_size( const char* filename )
+long int get_file_size( const char* filename )
 {
 //        if( !DoesFileExist( filename ) ){
 //                return -1;
 //        }
         struct stat buf;
         stat( filename, &buf );
-        return (int)buf.st_size;
+        return (long int)buf.st_size;
 }
