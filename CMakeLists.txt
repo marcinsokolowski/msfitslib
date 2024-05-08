@@ -65,6 +65,9 @@ target_link_libraries(image_differencer msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} 
 add_executable(calcfits_bg  apps/calcfits_bg.cpp)
 target_link_libraries(calcfits_bg msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl -lpthread)
 
+add_executable(cutimage  apps/cutimage.cpp)
+target_link_libraries(cutimage msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl -lpthread)
+
 add_executable(dump_lc  apps/dump_lc/main.cpp apps/dump_lc/lc_table.cpp)
 target_link_libraries(dump_lc msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl -lpthread)
 
