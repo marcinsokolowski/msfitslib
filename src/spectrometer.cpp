@@ -46,6 +46,26 @@ int CSpectrometer::doFFT( unsigned char* data_fft, int in_count, double* spectru
    return ret;            
 }
 
+// vs. Randall's correlator : /home/rwayth/CORRELATOR , void writeOutput
+/* write out correlation products.
+   Apply a normalisation factor that depends on the FFT length and the number
+   of averages so the flux density is the same regardless of the spectral channel width
+   NOTE: Complex input voltages contain negative and positive frequencies, so a spectrum
+   of bandwidth B goes from -B/2 to B/2 freq. So we need to shift the output channel indices
+   when writing out. 
+   
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   
+   In the FFT, channel 0 is the center of the band. Channel N/2 is the
+   start of the band, going up to N, then wrapping around back to channel 0, up to N/2-1.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   
+
+Randall's code :
+            if(inp1==inp2 && (prod_type == 'A' || prod_type=='B')) {
+                // write the auto correlation product
+                fwrite(temp_buffer+nchan/2,sizeof(float),nchan/2,fout_ac);
+                fwrite(temp_buffer,sizeof(float),nchan/2,fout_ac);
+            }
+*/
 void CSpectrometer::fft_shift( std::complex<float>* in, int in_count, vector< std::complex<float> >& out )
 {
    out.assign( in_count, 0 );
@@ -57,8 +77,9 @@ void CSpectrometer::fft_shift( std::complex<float>* in, int in_count, vector< st
    if ( (xSize%2) == 1 ){
       is_odd = 1;
    }
-   
-   for(int x=0;x<=center_freq_x;x++){ // check <= -> <
+
+   // TODO ? I could use memcpy, see Randall's code with fwrite
+   for(int x=0;x<center_freq_x;x++){ // 2024-05-18 : changed <= to < as otherwise we are writing outside array for x=xSize/2 -> out[xSize] is out of band memory error !!!
       out[center_freq_x+x] = in[x];
    }
    for(int x=(center_freq_x+is_odd);x<xSize;x++){
@@ -77,8 +98,9 @@ void CSpectrometer::fft_shift( double* in, int in_count, vector<double>& out )
    if ( (xSize%2) == 1 ){
       is_odd = 1;
    }
-   
-   for(int x=0;x<=center_freq_x;x++){ // check <= -> <
+
+   // TODO ? I could use memcpy, see Randall's code with fwrite
+   for(int x=0;x<center_freq_x;x++){ // 2024-05-18 : changed <= to < as otherwise we are writing outside array for x=xSize/2 -> out[xSize] is out of band memory error !!!
       out[center_freq_x+x] = in[x];
    }
    for(int x=(center_freq_x+is_odd);x<xSize;x++){
@@ -96,8 +118,9 @@ void CSpectrometer::fft_shift( vector<double> in, vector<double>& out )
    if ( (xSize%2) == 1 ){
       is_odd = 1;
    }
-   
-   for(int x=0;x<=center_freq_x;x++){ // check <= -> <
+
+   // TODO ? I could use memcpy, see Randall's code with fwrite
+   for(int x=0;x<center_freq_x;x++){ // 2024-05-18 : changed <= to < as otherwise we are writing outside array for x=xSize/2 -> out[xSize] is out of band memory error !!!
       out[center_freq_x+x] = in[x];
    }
    for(int x=(center_freq_x+is_odd);x<xSize;x++){
