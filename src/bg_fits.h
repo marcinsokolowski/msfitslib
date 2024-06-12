@@ -278,6 +278,7 @@ public :
   void Normalize( CBgArray& median_int );
   int FindValue(double value, double delta=1000, eFindValueType_T type=eFindValueExact);
   void SetValue(double value);
+  void SetZeroValue(); // same as SetValue(0.00), but faster as it uses memset('\0') instead of many setXY calls -> very inefficient
   void SetNaN();
   void AvgChannels(int n_channels, CBgFits& outfits  );
   int SubtractSpectrum( CBgArray& spectrum );

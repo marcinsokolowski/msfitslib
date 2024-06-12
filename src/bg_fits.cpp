@@ -2977,6 +2977,11 @@ void CBgFits::SetNaN()
    }
 }
 
+void CBgFits::SetZeroValue()
+{
+   memset( data, '\0', sizeof(BG_FITS_DATA_TYPE)*m_SizeX*m_SizeY );
+}
+
 void CBgFits::SetValue(double value)
 {
    for(long int y=0;y<GetYSize();y++){
