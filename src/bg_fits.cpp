@@ -3496,3 +3496,46 @@ void CBgFits::Oversample( CBgFits& oversampled, int iOverSamplingRatio )
       }
    }
 }
+
+// See https://www.gaussianwaves.com/2015/11/interpreting-fft-results-complex-dft-frequency-bins-and-fftshift/ 
+// for explanations why it is needed
+void CBgFits::fft_shift( CBgFits& out_image )
+{
+   int xSize = GetXSize();
+   int ySize = GetYSize();
+
+   // TODO : create member object m_tmp_image to avoid allocation every time this function is called 
+   CBgFits tmp_image( xSize, ySize );
+   
+   int center_freq_x = int( xSize/2 );
+   int center_freq_y = int( ySize/2 );
+   
+   int is_odd = 0;
+   if ( (xSize%2) == 1 && (ySize%2) == 1 ){
+      is_odd = 1;
+   }
+
+   // TODO : optimise similar to gridder.c in RTS or check imagefromuv.c , LM_CopyFromFFT which is totally different and may have to do with image orientation, but also is faster !!!
+   // X (horizontal FFT shift) :
+   for(int y=0;y<ySize;y++){ 
+      float* tmp_data = tmp_image.get_line(y);
+      float* image_data = get_line(y);
+      
+      // TODO / WARNING : lools like here for x=center_freq_x and images size = 2N -> center_freq_x = N -> center_freq_x+x can by N+N=2N which is outside image !!!
+      for(int x=0;x<=center_freq_x;x++){ // check <= -> <
+         tmp_data[center_freq_x+x] = image_data[x];
+      }
+      for(int x=(center_freq_x+is_odd);x<xSize;x++){
+         tmp_data[x-(center_freq_x+is_odd)] = image_data[x];
+      }      
+   }
+
+   for(int x=0;x<xSize;x++){ 
+      for(int y=0;y<=center_freq_y;y++){ // check <= -> <
+         out_image.setXY(x,center_freq_y+y,tmp_image.getXY(x,y));
+      }
+      for(int y=(center_freq_y+is_odd);y<ySize;y++){
+         out_image.setXY( x , y-(center_freq_y+is_odd),tmp_image.getXY(x,y));
+      }      
+   }
+}

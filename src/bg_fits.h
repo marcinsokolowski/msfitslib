@@ -287,6 +287,11 @@ public :
   int ZeroWrongValues( double limit=10e20 );
   int FixBadValues( double minValueOK, double maxValueOK );
   
+  // 2D FFTSHIFT - can be done in-place too. It's ok to call it : dirty_image.fft_shift( dirty_image ) to use the same object for output
+  // See https://www.gaussianwaves.com/2015/11/interpreting-fft-results-complex-dft-frequency-bins-and-fftshift/ 
+  // for explanations why it is needed
+  void fft_shift( CBgFits& out_image );
+  
   double MeanColumn( int x, double* out_rms=NULL );
   void MeanLines( CBgArray& mean_lines, CBgArray& rms_lines ); // calculates mean value in every line and returns in array 
   
