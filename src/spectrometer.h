@@ -23,7 +23,7 @@ class CSpectrometer
 public :
    CSpectrometer();
    ~CSpectrometer();
-   
+   void Free();   
 
    static string gPfbCoeffFile;
    static vector<double> gPfbCoeffs;
@@ -34,6 +34,13 @@ public :
    static int m_MaxBytesToProcess;
    static string m_szVoltageDumpFile;
    
+   // FFTW related variables:
+   int fftw_nc;
+   fftw_complex* fftw_in_cx;
+   fftw_complex* fftw_out_cx;
+   fftw_plan fftw_plan_cx;
+   int fftw_flags;
+   
    // eda parameters
    static double m_EDA_ElectricalLenM;
    static int    m_GeometryCorrection; // 0 , no correction, +1 / -1 is sign
@@ -41,12 +48,12 @@ public :
    static void fft_shift( std::complex<float>* in, int in_count, vector< std::complex<float> >& out );
    static void fft_shift( double* in, int in_count, vector<double>& out );
    static void fft_shift( vector<double> in, vector<double>& out );
-   static int doFFT( unsigned char* data_fft, int in_count, double* spectrum, double* spectrum_re, double* spectrum_im, int& out_count, double norm );
-   static int doFFT( double* in, int in_count, double* spectrum, double* spectrum_re, double* spectrum_im, int& out_count, double norm );
-   static int doFFT( std::complex<float>* in, int in_count, double* spectrum, std::complex<float>* spectrum_reim, int& out_count, double norm );
-   static int fileFFT( const char* binfile, double* acc_spec, const char* out_bin_file=NULL, int out_coarse_channel=-1, int skip_extra=0, const char* out_power_file=NULL, const char* out_power_fits=NULL, 
+   int doFFT( unsigned char* data_fft, int in_count, double* spectrum, double* spectrum_re, double* spectrum_im, int& out_count, double norm );
+   int doFFT( double* in, int in_count, double* spectrum, double* spectrum_re, double* spectrum_im, int& out_count, double norm );
+   int doFFT( std::complex<float>* in, int in_count, double* spectrum, std::complex<float>* spectrum_reim, int& out_count, double norm );
+   int fileFFT( const char* binfile, double* acc_spec, const char* out_bin_file=NULL, int out_coarse_channel=-1, int skip_extra=0, const char* out_power_file=NULL, const char* out_power_fits=NULL, 
                        int n_out_channels = N_FINE_CH_PER_BAND, time_t file_ux_start=0, long int infile_size_bytes=-1, const char* out_float_file=NULL );
-   static int filePFB( const char* binfile, double* acc_spec, const char* out_bin_file, int out_coarse_channel, int skip_extra, int n_taps=12 );
+   int filePFB( const char* binfile, double* acc_spec, const char* out_bin_file, int out_coarse_channel, int skip_extra, int n_taps=12 );
 
 
    // binary file reading :

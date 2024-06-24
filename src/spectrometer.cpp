@@ -26,11 +26,27 @@ double CSpectrometer::m_EDA_ElectricalLenM=140.00; // 140m of EDA electrical len
 int    CSpectrometer::m_GeometryCorrection=0;      // no geometry correction
 
 CSpectrometer::CSpectrometer()
+: fftw_nc(-1), fftw_in_cx(NULL), fftw_out_cx(NULL), fftw_plan_cx(NULL)
 {
 }
 
 CSpectrometer::~CSpectrometer()
 {
+   Free();  
+}
+
+void CSpectrometer::Free()
+{
+  if( fftw_in_cx ){
+     fftw_free( fftw_in_cx );
+  }
+  if( fftw_out_cx ){
+     fftw_free( fftw_out_cx );
+  }
+  if( fftw_plan_cx ){  
+     // http://www.fftw.org/fftw3_doc/Using-Plans.html
+     fftw_destroy_plan( fftw_plan_cx );
+  }
 }
 
 int CSpectrometer::doFFT( unsigned char* data_fft, int in_count, double* spectrum, double* spectrum_re, double* spectrum_im, int& out_count, double norm )
@@ -139,7 +155,12 @@ int CSpectrometer::doFFT( std::complex<float>* in, int in_count, double* spectru
              */
 
     // WARNING : was as below 
-    int nc = in_count; // WAS : ( in_count / 2 ) + 1;
+    if( fftw_nc>0 && fftw_nc != in_count ){
+        printf("ERROR : change in number of channels is currently not supported in CSpectrometer::doFFT( std::complex<float> %d != %d !!!\n",fftw_nc,in_count);
+        exit(-1);
+    }
+    
+    fftw_nc = in_count; // WAS : ( in_count / 2 ) + 1;
                 
     // fftw_plan fftw_plan_r2r_1d(int n, double *in, double *out,  fftw_r2r_kind kind, unsigned flags);         
 //    double* out = (double*)malloc ( sizeof ( double ) * in_count );
@@ -147,42 +168,39 @@ int CSpectrometer::doFFT( std::complex<float>* in, int in_count, double* spectru
 
     // output array in complex to complex FFT is the same size as the input one
     // don't believe check maths or example in https://people.sc.fsu.edu/~jburkardt/c_src/fftw_test/fftw_test.c
-    fftw_complex* in_cx = (fftw_complex*)fftw_malloc( sizeof ( fftw_complex ) * in_count );                      
-    fftw_complex* out_cx = (fftw_complex*)fftw_malloc( sizeof ( fftw_complex ) * in_count );
-    memset(out_cx,'\0',sizeof ( fftw_complex ) * nc );
+    if( !fftw_in_cx ){
+       fftw_in_cx = (fftw_complex*)fftw_malloc( sizeof ( fftw_complex ) * in_count );                      
+    }
+    if( !fftw_out_cx ){
+       fftw_out_cx = (fftw_complex*)fftw_malloc( sizeof ( fftw_complex ) * in_count );
+    }
+    memset(fftw_out_cx,'\0',sizeof ( fftw_complex ) * fftw_nc );
     
     for(int i=0;i<in_count;i++){
-        in_cx[i][0] = in[i].real();
-        in_cx[i][1] = in[i].imag();
+        fftw_in_cx[i][0] = in[i].real();
+        fftw_in_cx[i][1] = in[i].imag();
     }
-    
-    int flags = 0;
-    //  flags |= FFTW_EXHAUSTIVE;
-    flags |= FFTW_ESTIMATE;
-    fftw_plan plan_cx = fftw_plan_dft_1d( in_count, in_cx, out_cx,  FFTW_FORWARD, flags );
-    fftw_execute ( plan_cx );
+
+    if( !fftw_plan_cx ){    
+       fftw_flags = 0;
+       //  flags |= FFTW_EXHAUSTIVE;
+       fftw_flags |= FFTW_ESTIMATE;
+       fftw_plan_cx = fftw_plan_dft_1d( in_count, fftw_in_cx, fftw_out_cx,  FFTW_FORWARD, fftw_flags );
+    }
+    fftw_execute ( fftw_plan_cx );
                                    
-    for(int i=0;i<nc;i++){
-       double re = out_cx[i][0] / norm;
-       double im = out_cx[i][1] / norm;
+    for(int i=0;i<fftw_nc;i++){
+       double re = fftw_out_cx[i][0] / norm;
+       double im = fftw_out_cx[i][1] / norm;
 //       double power = sqrt(re*re+im*im);
        double power = re*re+im*im;
        
        spectrum[i] = fabs(power);
        spectrum_reim[i] = std::complex<float>( re, im );
     }
-    out_count = nc; // was nc - 1
+    out_count = fftw_nc; // was fftw_nc - 1
                    
           
-   // cleaning :   
-   // see : http://www.fftw.org/fftw3_doc/Using-Plans.html
-   fftw_destroy_plan( plan_cx );
-//   fftw_cleanup(void);
-
-   fftw_free(out_cx);
-   fftw_free(in_cx);
-//   free(out);
-
    return 1;
 }
 
@@ -194,23 +212,32 @@ int CSpectrometer::doFFT( double* in, int in_count, double* spectrum, double* sp
     the OUT FFT coefficients.
              */
     // printf("DEBUG : norm = %.8f, in_count = %d\n",norm,in_count);             
-    int nc = ( in_count / 2 ) + 1;
+    int new_nc = ( in_count / 2 ) + 1;
+    if( fftw_nc > 0 && fftw_nc != new_nc ){
+       printf("ERROR : change in number of channels is currently not supported in CSpectrometer::doFFT( double* in  %d != %d !!!\n",fftw_nc,new_nc);
+       exit(-1);
+    }
                 
     // fftw_plan fftw_plan_r2r_1d(int n, double *in, double *out,  fftw_r2r_kind kind, unsigned flags);         
 //    double* out = (double*)malloc ( sizeof ( double ) * in_count );
 //    memset(out,'\0',sizeof ( double ) * in_count );
-                      
-    fftw_complex* out_cx = (fftw_complex*)fftw_malloc( sizeof ( fftw_complex ) * nc );
-    memset(out_cx,'\0',sizeof ( fftw_complex ) * nc );
-    int flags = 0;
-    //  flags |= FFTW_EXHAUSTIVE;
-    flags |= FFTW_ESTIMATE;
-    fftw_plan plan_cx = fftw_plan_dft_r2c_1d( in_count, in, out_cx,  flags);
-    fftw_execute ( plan_cx );
+
+    if( !fftw_out_cx ){                      
+       fftw_out_cx = (fftw_complex*)fftw_malloc( sizeof ( fftw_complex ) * fftw_nc );
+    }
+    memset(fftw_out_cx,'\0',sizeof ( fftw_complex ) * fftw_nc );
+    
+    if(! fftw_plan_cx ){
+       fftw_flags = 0;
+       //  flags |= FFTW_EXHAUSTIVE;
+       fftw_flags |= FFTW_ESTIMATE;
+       fftw_plan_cx = fftw_plan_dft_r2c_1d( in_count, in, fftw_out_cx,  fftw_flags);
+    }
+    fftw_execute ( fftw_plan_cx );
                                    
-    for(int i=0;i<nc;i++){
-       double re = out_cx[i][0] / norm;
-       double im = out_cx[i][1] / norm;
+    for(int i=0;i<fftw_nc;i++){
+       double re = fftw_out_cx[i][0] / norm;
+       double im = fftw_out_cx[i][1] / norm;
 //       double power = sqrt(re*re+im*im);
        double power = re*re+im*im;
        
@@ -218,16 +245,9 @@ int CSpectrometer::doFFT( double* in, int in_count, double* spectrum, double* sp
        spectrum_re[i] = re;
        spectrum_im[i] = im;
     }
-    out_count = nc -1 ;
+    out_count = fftw_nc -1 ;
                    
           
-   // cleaning :   
-   // see : http://www.fftw.org/fftw3_doc/Using-Plans.html
-   fftw_destroy_plan( plan_cx );
-//   fftw_cleanup(void);
-   fftw_free(out_cx);
-//   free(out);
-
    return 1;
 }
 
