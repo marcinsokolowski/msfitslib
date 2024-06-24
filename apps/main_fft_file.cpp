@@ -89,13 +89,14 @@ int main(int argc, char* argv[])
 
   double acc_spectrum[N_SAMPLES];
   int nintegr=0;
+  CSpectrometer spectrometer;
 //  if( gBedlamFormat > 0 ){
 //     nintegr = CBedlamSpectrometer::process_voltages( filename.c_str(), acc_spectrum, gSkipNFirst, 1, 1e9, 0, -1, 0, gVerb );
 //  }else{
      if( gPfbTaps <= 0 ){
-        nintegr = CSpectrometer::fileFFT( filename.c_str(), acc_spectrum, gOutBinFile.c_str(), gOutCoarseChannel, gSkipExtra, gOutputPowerFile.c_str(), gOutputPowerFits.c_str(), gDumpNFineChannels, (time_t)gFileStartUxTime, g_infile_size_bytes, gOutBinFloatFile.c_str() );
+        nintegr = spectrometer.fileFFT( filename.c_str(), acc_spectrum, gOutBinFile.c_str(), gOutCoarseChannel, gSkipExtra, gOutputPowerFile.c_str(), gOutputPowerFits.c_str(), gDumpNFineChannels, (time_t)gFileStartUxTime, g_infile_size_bytes, gOutBinFloatFile.c_str() );
      }else{
-        nintegr = CSpectrometer::filePFB( filename.c_str(), acc_spectrum, gOutBinFile.c_str(), gOutCoarseChannel, gSkipExtra, gPfbTaps );
+        nintegr = spectrometer.filePFB( filename.c_str(), acc_spectrum, gOutBinFile.c_str(), gOutCoarseChannel, gSkipExtra, gPfbTaps );
      }
 //  }
   printf("Accumulated bedlam spectrum of %d integrations :\n",nintegr);
