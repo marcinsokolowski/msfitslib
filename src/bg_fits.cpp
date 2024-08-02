@@ -3501,6 +3501,7 @@ void CBgFits::Oversample( CBgFits& oversampled, int iOverSamplingRatio )
 // for explanations why it is needed
 void CBgFits::fft_shift( CBgFits& out_image )
 {
+   printf("TEST : corrected version ???\n");
    int xSize = GetXSize();
    int ySize = GetYSize();
 
@@ -3522,7 +3523,7 @@ void CBgFits::fft_shift( CBgFits& out_image )
       float* image_data = get_line(y);
       
       // TODO / WARNING : lools like here for x=center_freq_x and images size = 2N -> center_freq_x = N -> center_freq_x+x can by N+N=2N which is outside image !!!
-      for(int x=0;x<=center_freq_x;x++){ // check <= -> <
+      for(int x=0;x<center_freq_x;x++){ // check <= -> < // check spectrometer.cpp  // 2024-05-18 : changed <= to < as otherwise we are writing outside array for x=xSize/2 -> out[xSize] is out of band memory error !!!
          tmp_data[center_freq_x+x] = image_data[x];
       }
       for(int x=(center_freq_x+is_odd);x<xSize;x++){
