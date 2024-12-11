@@ -53,7 +53,7 @@ void usage()
    printf("ACTION :\n");
    printf("Two fits files actions  : +,-,/,*,=,sefd_xx_yy,stokes_i,sefd2aot\n");   
    printf("Single fits file actions : \n");
-   printf("\t\t\t l - subtract 2 integrations, d - divide 2 integrations, log, s - statistics, i invert, a abs, sqrt , x - times constant (provide in -v option), n - normalize by median integration, f - find value (default exact, but f< finds smaller, f> finds larger), h - dump values to output file for histograming etc, v - normalise by external spectrum in TXTFILE, t - subtract spectrum from text file, -p print pixel ( X Y ) , m - magnitude left=REAL, right=IMAG, output=MAG.fits \n");
+   printf("\t\t\t l - subtract 2 integrations, d - divide 2 integrations, log, s - statistics, i invert, a abs, sqrt , x - times constant (provide in -v option), n - normalize by median integration, f - find value (default exact, but f< finds smaller, f> finds larger), h - dump values to output file for histograming etc, v - normalise by external spectrum in TXTFILE, t - subtract spectrum from text file, Q - transpose, ;-p print pixel ( X Y ) , m - magnitude left=REAL, right=IMAG, output=MAG.fits \n");
    printf("\t\t\t z - subtract median, dB (lin -> dB), log10, 0 - find zero integrations, lin (dB->lin) \n");
    printf("EXAMPLES :\n");
    printf("\tcalcfits_bg test.fits l 23 373\n");
@@ -194,6 +194,10 @@ eCalcFitsAction_T parse_action( const char* szAction, const char* argv3 )
       if( szAction[0] == 'B' ){
          ret = eAvgImages;
       }   
+      if( szAction[0] == 'Q' || szAction[0] == 'q' ){
+         printf("DEBUG : action = Transpose\n");
+         ret = eTranspose;
+      }   
       if( szAction[0] == 'p' ){
          ret = ePrintPixelValue;
       }   
@@ -306,7 +310,7 @@ int main(int argc,char* argv[])
   if( argc>=3 ){
      action = parse_action( argv[2], argv[3] );
   }
-  if( action == eSubtractLines || action == eDivideLines || action == eGetStat || action == eLog10File || action == eSqrtFile || action == eAstroRootImage || action==eTimesConst || action==eNormalizeByMedian || action==eAddConst ||
+  if( action == eSubtractLines || action == eDivideLines || action == eTranspose || action == eGetStat || action == eLog10File || action == eSqrtFile || action == eAstroRootImage || action==eTimesConst || action==eNormalizeByMedian || action==eAddConst ||
       action==eSubtractMedian || action==eFindValue || action==eDumpForHisto ||
       action == eAvgChannels || action == eSubtractSpectrum || action == eDivbySpectrum  || action == eDBFile || action==eLin2DB || action == eFindZeroInt || action == ePrintPixelValue || action == eInvert || action == eABS 
     ){
@@ -442,6 +446,12 @@ int main(int argc,char* argv[])
      }
   }else{
     printf("1-file action ...\n");fflush(stdout);
+
+     if( action == eTranspose ){
+        printf("Transposing image ...\n");
+        left.Transpose( right );     
+        right.WriteFits("transposed.fits");
+     }
     
     if( action == ePrintPixelValue )    
     {

@@ -151,6 +151,7 @@ public :
   int ReadFits( const char* fits_file=NULL, int bAutoDetect=0, int bReadImage=1, int bIgnoreHeaderErrors=0, bool transposed=false );  
   int ReadFitsCube( const char* fits_file=NULL, int bAutoDetect=0, int bReadImage=1, int bIgnoreHeaderErrors=0 );  
   int WriteFits( const char* fits_file, int bUpdateSizeY=0, int bWriteKeys=1 );
+  static int WriteMultiImageFits( vector<CBgFits*> image_list, const char* fits_file, int bWriteKeys=1 );
   void ResetFilePointer(){ m_fptr = NULL; } // this is a workaround - not sure why required see line 416 in bg_fits.cpp
                                             // //      m_fptr = NULL; // NEW 2016-09-28 - will it be a problem for other things
                                             // perhaps it should be rather uncommented as otherwise programs crash on WriteFits/ fits_create_img(fptr,

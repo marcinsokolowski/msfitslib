@@ -482,6 +482,105 @@ int CBgFits::WriteFits( const char* fits_file, int bUpdateSizeY, int bWriteKeys 
 }
 
 
+int CBgFits::WriteMultiImageFits( vector<CBgFits*> image_list, const char* fits_file, int bWriteKeys )
+{
+   int status = 0;
+
+   if( image_list.size() <= 0 ){
+      return -1;
+   }
+       
+   CBgFits* pFirstFits = image_list[0];    
+   if( !pFirstFits ){
+      return -1;
+   }
+       
+   if( fits_file && strlen(fits_file) ){
+      MyFile::CreateDir(fits_file);
+   
+      fitsfile *fptr=pFirstFits->m_fptr;
+      long naxes[3] = { pFirstFits->m_SizeX, pFirstFits->m_SizeY, int(image_list.size()) };   /* image is 300 pixels wide by 200 rows */
+      long naxis    = 3;
+      long fpixel   = 1; /* first pixel to write      */
+
+      if( !fptr ){
+         string szFitsFileToOverwrite; // with ! mark added to overwrite if file exists (otherwise ERROR occures), see http://www.aip.de/~weber/doc/fitsio/cfitsiohtml/node62.html
+         szFitsFileToOverwrite = "!";
+         szFitsFileToOverwrite += fits_file;
+                                 
+         if (fits_create_file(&fptr, szFitsFileToOverwrite.c_str(), &status)){ /* create new FITS file */
+            if (status) fits_report_error(stderr, status);
+            return( status );
+         }
+         pFirstFits->m_fptr = fptr;
+      }
+//      }
+                
+      /* Write the required keywords for the primary array image */      
+      if ( fits_create_img(fptr,  pFirstFits->bitpix, naxis, naxes, &status) ){
+         if (status) fits_report_error(stderr, status);
+         return( status );
+      }
+                                                                                              
+      long int nelements = naxes[0] * naxes[1];          /* number of pixels to write */
+      
+      // allocate memory for all images in one big chunk :
+      long int total_size = nelements*image_list.size();
+      BG_FITS_DATA_TYPE* data_all_images = new BG_FITS_DATA_TYPE[total_size];
+         
+      BG_FITS_DATA_TYPE* ptr = data_all_images;                                                            
+      for(int i=0;i<image_list.size();i++){
+         /* Write the array of long integers (after converting them to short) */
+         CBgFits* pImage = image_list[i];
+         long int image_size = pImage->GetXSize()*pImage->GetYSize();
+         if( image_size != nelements ){
+            printf("ERROR : image_size = %ld != nelements = %ld -> cannot continue\n",image_size,nelements);
+            return -1;
+         }
+         memcpy( ptr, pImage->data, sizeof(BG_FITS_DATA_TYPE)*image_size );         
+         ptr += image_size;
+         
+         
+         // this may work : https://stackoverflow.com/questions/47359395/write-pixel-data-to-fits-file-cfitsio
+         // fits_write_pix
+/*         if ( fits_write_img(fptr, TFLOAT, fpixel, nelements, pImage->data, &status) ){
+//         if ( fits_write_pix(fptr, TFLOAT, naxes, nelements, pImage->data, &status) ){
+            printf("ERROR : could not write output FITS files of size %ld elements\n",nelements);
+            return( status );
+         }else{
+            printf("INFO : written image %d\n",i);
+         }*/
+      }   
+      
+      // save image:
+      if ( fits_write_img(fptr, TFLOAT, fpixel, nelements*image_list.size(), data_all_images, &status) ){
+         printf("ERROR : could not write full output FITS file of size %ld elements\n",total_size);
+         return( status );
+      }else{
+         printf("INFO : written all images\n");
+      }
+         
+      delete [] data_all_images;   
+         
+      if( bWriteKeys > 0 ) {   
+          pFirstFits->SetKeyValues(); // set values like inttime etc to strings keyword values 
+          pFirstFits->WriteKeys(); // write fits keys 
+      }
+
+      fits_close_file(fptr, &status);            /* close the file */      
+      fptr = NULL;
+//      m_fptr = NULL; // NEW 2016-09-28 - will it be a problem for other things, it was a problem when using single object CBgFits to save many FITS files
+//      m_fptr = NULL; // 2018-12-31 - if commented crashes when using the same object to save FITS files with different names as 
+                     // it uses fptr=m_fptr which points to an already closed FITS file ...
+      return( status );
+   }
+   
+   return status;      
+}
+
+
+
+
 int CBgFits::UpdateImage(  const char* fits_file, const char* out_file )
 {
    int status = 0;
