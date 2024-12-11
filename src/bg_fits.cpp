@@ -482,7 +482,7 @@ int CBgFits::WriteFits( const char* fits_file, int bUpdateSizeY, int bWriteKeys 
 }
 
 
-int CBgFits::WriteMultiImageFits( vector<CBgFits*> image_list, const char* fits_file, int bWriteKeys )
+int CBgFits::WriteMultiImageFits( vector<CBgFits*> image_list, const char* fits_file, double fFirstChCenterFreq, double fChannelWidthMHz, int bWriteKeys )
 {
    int status = 0;
 
