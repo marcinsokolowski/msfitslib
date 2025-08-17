@@ -400,6 +400,9 @@ int main(int argc,char* argv[])
      if( action == eDivide ){
         left.Divide( right );     
      }
+     if( action == eAdd ){
+        left.AddImages( right, 1.00 );     
+     }
 
      if( action == eMultiply ){
         left.Multiply( right );
