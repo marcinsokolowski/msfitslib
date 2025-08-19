@@ -7,6 +7,8 @@
 #include "mystring.h"
 #include "cexcp.h"
 
+#include <vector>
+
 class CMyHisto
 {
 public :
@@ -103,6 +105,7 @@ public :
 	}
 	int GetBinNo( double value );
 	int GetMaxBin();
+	int FindPeaks( std::vector<int>& peak_bins, int nPeaks );
 	double GetRMS( double& mean_val, int first_bin=0, int bin_no=0 );
 };
 

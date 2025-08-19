@@ -1556,6 +1556,34 @@ float* CBgFits::set_reim_line( long int y, vector<double>& line_re, vector<doubl
      
 }
 
+int CBgFits::roll( int row, int shift )
+{
+   BG_FITS_DATA_TYPE* p_tmp_row = new BG_FITS_DATA_TYPE[m_SizeX];
+   memset( p_tmp_row, '\0', m_SizeX*sizeof(BG_FITS_DATA_TYPE) );   
+   
+   for(int i=0;i<m_SizeX;i++){
+      double val = getXY(i,row);
+      
+      long int new_i = i + shift;
+      if( new_i < 0 ){
+         new_i = m_SizeX + new_i;
+      }
+      if( new_i >= m_SizeX ){
+         new_i = (new_i % m_SizeX);
+      }
+      if( new_i >=0 && new_i < m_SizeX ){
+         p_tmp_row[new_i] = val;
+      }
+   }
+   
+   long int pos = ((long int)row)*m_SizeX;
+   memcpy( &(data[pos]), p_tmp_row, m_SizeX*sizeof(BG_FITS_DATA_TYPE) );
+   
+   delete [] p_tmp_row;
+   
+   return 0;
+}
+
 float CBgFits::value( long int y, long int x )
 {
    // WRONG : if( pos>=0 && pos < (m_SizeX*m_SizeY) ){

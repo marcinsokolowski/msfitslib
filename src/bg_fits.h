@@ -219,6 +219,8 @@ public :
   float* set_line( long int y, CBgArray& line );
   float* set_line( long int y, vector<cValue>& line );  
   void set_ysize( long int lines_counter=-1 );
+  
+  int roll( int row, int shift );
 
   float valXY( long int x, long int y );
   inline float getXY( long int x, long int y ){ return valXY(x,y); }

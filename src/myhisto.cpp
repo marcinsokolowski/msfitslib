@@ -8,6 +8,9 @@
 #include "basestructs.h"
 #include "mymacros.h"
 
+#include <vector>
+
+
 BOOL_T CMyHisto::m_DoRetryFit=FALSE;
 double CMyHisto::m_ReasonableMeanFit=10000.000;
 double CMyHisto::m_ReasonableSigmaFit=10000.000;
@@ -610,6 +613,61 @@ int CMyHisto::GetMaxBin()
 		}
 	}
 	return ret;
+}
+
+int CMyHisto::FindPeaks( std::vector<int>& peak_bins, int nPeaks )
+{
+   std::vector<int> excluded_bins;
+   excluded_bins.assign( m_BinNo, 0 );
+   
+   peak_bins.clear();
+   
+   while( peak_bins.size() < nPeaks ){
+      int max_count = 0;
+      int max_bin = -1;
+      
+      int ok_bins = 0;
+      for(int i=0;i<m_BinNo;i++){
+          if( excluded_bins[i] <= 0 ){
+             if( m_pCountTab[i] > max_count )
+             {
+                max_count = m_pCountTab[i];
+                max_bin = i;
+             }        
+             
+             if( m_pCountTab[i] > 0 ){
+                // we count bins above 0 - if there are none -> cannot continue
+                ok_bins++;
+             }             
+          }
+      }
+
+      // no >0 bins which can be used -> sstop the loop 
+      if( ok_bins <= 0 ){
+         break;
+      }
+      
+      // flag all the bins sourounding the peak to nearest 0 :
+      if( max_bin >= 0 ){
+         peak_bins.push_back( max_bin );
+      
+         // flag bins below peak :
+         int i = max_bin;         
+         while( i>=0 && m_pCountTab[i] > 0 ){
+            excluded_bins[i] = 1;
+            i--;
+         }
+         
+         // flag bins above peak:
+         i = max_bin;
+         while( i<m_BinNo && m_pCountTab[i] > 0 ){
+            excluded_bins[i] = 1;
+            i++;
+         }
+      }
+   }   
+   
+   return peak_bins.size();
 }
 
 void CMyHisto::GetStatValues( double& mean, double& rms, double& max_val )
