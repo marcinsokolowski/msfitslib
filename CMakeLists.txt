@@ -109,6 +109,9 @@ target_link_libraries(shift_image msfitslib ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${F
 add_executable(read_write_fits_example apps/read_write_fits_example.cpp)
 target_link_libraries(read_write_fits_example msfitslib ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl -lpthread)
 
+add_executable(fixCoordHdr apps/fixCoordHdr.cpp)
+target_link_libraries(fixCoordHdr msfitslib ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl -lpthread)
+
 
 if(FRB_SEARCH)
    add_executable(create_dynaspec apps/frb_search/main_dynaspec.cpp apps/frb_search/mwa_fits.cpp apps/frb_search/sources.cpp apps/frb_search/dedisp_search.cpp apps/frb_search/myprogress.cpp)
