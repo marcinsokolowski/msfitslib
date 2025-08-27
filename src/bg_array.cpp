@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "bg_fits.h"
+#include "myfile.h"
     
 CBgArray::CBgArray( int _size, double _values )
 {
@@ -78,7 +79,13 @@ CBgArray& CBgArray::Divide( double val )
 
 void CBgArray::SaveToFile( const char* outfile, CBgFits* pFits, CBgArray* pColumn2  )
 {
+   MyFile::CreateDir(outfile);
+
    FILE* outf = fopen(outfile,"w");
+   if( !outf ){
+      printf("ERROR : could not open file %s for writing\n",outfile);
+      return;
+   }
    
    for(int i=0;i<size();i++){
       if( pFits ){
