@@ -112,6 +112,9 @@ target_link_libraries(read_write_fits_example msfitslib ${LIBNOVA_LIB} ${ROOT_LI
 add_executable(fixCoordHdr apps/fixCoordHdr.cpp)
 target_link_libraries(fixCoordHdr msfitslib ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl -lpthread)
 
+add_executable(total_power_simple apps/total_power_simple.cpp)
+target_link_libraries(total_power_simple msfitslib ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl -lpthread)
+
 
 if(FRB_SEARCH)
    add_executable(create_dynaspec apps/frb_search/main_dynaspec.cpp apps/frb_search/mwa_fits.cpp apps/frb_search/sources.cpp apps/frb_search/dedisp_search.cpp apps/frb_search/myprogress.cpp)
@@ -124,8 +127,8 @@ if(FRB_SEARCH)
    target_link_libraries(calcstat msfitslib ${CFITSIO_LIB} ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl -lpthread)
 
    # INSTALLATION:
-   install(TARGETS noise_mapper calcfits_bg cutimage cutimages total_power_vert total_power_hor dump_lc avg_images images2cube sum_images fits2txt homeopatic_avg image_differencer ux2sid_file ux2sid sid2ux radec2azh azh2radec date2date print_sun shift_image flip_vertical flip_horizontal setfitsvalue create_dynaspec dynaspec_search read_write_fits_example RUNTIME DESTINATION bin)
+   install(TARGETS noise_mapper calcfits_bg cutimage cutimages total_power_vert total_power_hor dump_lc avg_images images2cube sum_images fits2txt homeopatic_avg image_differencer ux2sid_file ux2sid sid2ux radec2azh azh2radec date2date print_sun shift_image flip_vertical flip_horizontal setfitsvalue create_dynaspec dynaspec_search read_write_fits_example total_power_simple RUNTIME DESTINATION bin)
 else()
    # INSTALLATION:
-   install(TARGETS noise_mapper calcfits_bg cutimage cutimages total_power_vert total_power_hor dump_lc avg_images images2cube sum_images fits2txt homeopatic_avg image_differencer ux2sid_file ux2sid sid2ux radec2azh azh2radec date2date print_sun shift_image flip_vertical flip_horizontal setfitsvalue read_write_fits_example RUNTIME DESTINATION bin)
+   install(TARGETS noise_mapper calcfits_bg cutimage cutimages total_power_vert total_power_hor dump_lc avg_images images2cube sum_images fits2txt homeopatic_avg image_differencer ux2sid_file ux2sid sid2ux radec2azh azh2radec date2date print_sun shift_image flip_vertical flip_horizontal setfitsvalue read_write_fits_example total_power_simple RUNTIME DESTINATION bin)
 endif()
