@@ -15,17 +15,19 @@ using namespace std;
 string list="fits_list";
 string out_fits="dynaspec.fits";
 
-int gX = 135;
-int gY = 140;
+int gX = 134;
+int gY = 139;
 
 void usage()
 {
    printf("build_dynaspec_simple fits_list dynaspec.fits\n\n\n");
+   printf("-x X : [default %d]\n",gX);
+   printf("-y Y : [default %d]\n",gY);
    exit(0);
 }
 
 void parse_cmdline(int argc, char * argv[]) {
-   char optstring[] = "h";
+   char optstring[] = "hx:y:";
    int opt;
         
    while ((opt = getopt(argc, argv, optstring)) != -1) {
@@ -36,9 +38,13 @@ void parse_cmdline(int argc, char * argv[]) {
             usage();
             break;
 
-/*         case 'B':
-            beam_fits_file = optarg;
-            break;*/
+         case 'x':
+            gX = atol(optarg);
+            break;
+
+         case 'y':
+            gY = atol(optarg);
+            break;
 
          default:   
             fprintf(stderr,"Unknown option %c\n",opt);
@@ -52,8 +58,9 @@ void print_parameters()
     printf("############################################################################################\n");
     printf("PARAMETERS :\n");
     printf("############################################################################################\n");
-    printf("List file    = %s\n",list.c_str());
+    printf("List file    = %s\n",list.c_str());    
     printf("out_fits     = %s\n",out_fits.c_str());
+    printf("(x,y)        = (%d,%d)\n",gX,gY);
     printf("############################################################################################\n");
 }
 
