@@ -20,15 +20,25 @@ CERN root :
 
 # installation:
 
+### Cmake
+```
 mkdir build
-
 cd build
-
 cmake ..
-
 make
-
 sudo make install
+```
+
+### Meson
+
+Can now be built with the [Meson](https://mesonbuild.com/Quick-guide.html) build system
+
+```
+meson setup build --prefix=/path/to/install
+cd build
+meson compile
+meson install     # optional, will install to --prefix
+```
 
 # possible problems :
 
