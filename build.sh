@@ -72,7 +72,7 @@ else
            echo "Group installation at $INSTALL_DIR" 
        else
            INSTALL_DIR=/software/projects/pawsey1154/msok/setonix/2025.08/development/$PROGRAM_NAME
-           MODULEFILE_DIR=/software/projects/pawsey1154/msok/setonix/2025.08/modules/zen3/gcc/12.2.0/$PROGRAM_NAME
+           MODULEFILE_DIR=/software/projects/pawsey1154/msok/setonix/2025.08/modules/zen3/gcc/14.2.0/$PROGRAM_NAME
            echo "User installation at $INSTALL_DIR"
        fi
 
