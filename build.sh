@@ -61,15 +61,12 @@ else
        
        # read script parameters
        if [ $# -eq 1 ] && [ $1 = 'group' ]; then
-           INSTALL_DIR=/software/projects/director2183/setonix/software/$PROGRAM_NAME
-           MODULEFILE_DIR=/software/projects/director2183/setonix/modules/$PROGRAM_NAME
+           INSTALL_DIR=/software/projects/pawsey1154/setonix/software/$PROGRAM_NAME
+           MODULEFILE_DIR=/software/projects/pawsey1154/setonix/modules/$PROGRAM_NAME
            echo "Group installation at $INSTALL_DIR" 
        else
-           # /software/projects/director2183/msok/setonix/2023.08/development/
-           # Was : /software/projects/director2183/msok/setonix/software/ /software/projects/director2183/msok/setonix/modules/
-           # /software/projects/director2183/msok/setonix/2023.08/modules/zen3/gcc/12.2.0/
-           INSTALL_DIR=/software/projects/director2183/msok/setonix/2023.08/development/$PROGRAM_NAME
-           MODULEFILE_DIR=/software/projects/director2183/msok/setonix/2023.08/modules/zen3/gcc/12.2.0/$PROGRAM_NAME
+           INSTALL_DIR=/software/projects/pawsey1154/msok/setonix/2025.08/development/$PROGRAM_NAME
+           MODULEFILE_DIR=/software/projects/pawsey1154/msok/setonix/2025.08/modules/zen3/gcc/12.2.0/$PROGRAM_NAME
            echo "User installation at $INSTALL_DIR"
        fi
 
@@ -78,12 +75,12 @@ else
 
        # read script parameters
        if [ $# -eq 1 ] && [ $1 = 'group' ]; then
-           INSTALL_DIR=/group/director2183/software/centos7.6/development/$PROGRAM_NAME
-           MODULEFILE_DIR=/group/director2183/software/centos7.6/modulefiles/$PROGRAM_NAME
+           INSTALL_DIR=/group/pawsey1154/software/centos7.6/development/$PROGRAM_NAME
+           MODULEFILE_DIR=/group/pawsey1154/software/centos7.6/modulefiles/$PROGRAM_NAME
            echo "Group installation at $INSTALL_DIR" 
        else
-           INSTALL_DIR=/group/director2183/$USER/software/centos7.6/development/$PROGRAM_NAME
-           MODULEFILE_DIR=/group/director2183/$USER/software/centos7.6/modulefiles/$PROGRAM_NAME
+           INSTALL_DIR=/group/pawsey1154/$USER/software/centos7.6/development/$PROGRAM_NAME
+           MODULEFILE_DIR=/group/pawsey1154/$USER/software/centos7.6/modulefiles/$PROGRAM_NAME
            echo "User installation at $INSTALL_DIR"
        fi
     fi
@@ -100,7 +97,7 @@ make INSTALL_DIR=$INSTALL_DIR install
 
 # create modulefile
 if [ $PAWSEY_CLUSTER = "setonix" ]; then
-   LOAD_MODULES="load('cascadelake');load('slurm/20.02.3');load('gcc/8.3.0');load('fftw/3.3.8');load('libnova/0.15.0');load('cfitsio/3.48')"
+   LOAD_MODULES="load('cascadelake');load('singularity/4.1.0-slurm');load('gcc-native/14.2');load('fftw/2.1.5-vwwqlhu');load('libnova/0.15.0-iwh6cpn');load('cfitsio/4.4.0')"
 else
    LOAD_MODULES="load('cascadelake/1.0');load('slurm/20.11.9');load('gcc/8.3.0');load('fftw/3.3.8');load('libnova/devel');load('cfitsio/4.3.1')"
 fi   
