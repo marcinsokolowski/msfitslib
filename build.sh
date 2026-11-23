@@ -13,7 +13,7 @@ if [ $PAWSEY_CLUSTER = "setonix" ]; then
    # 2025.08 software stack :
    module load cfitsio/4.4.0
    module load libnova/0.15.0-iwh6cpn
-   module load fftw/2.1.5-vwwqlhu      
+   module load fftw/3.3.10
 else
    echo "Loading modules for PAWSEY_CLUSTER = $PAWSEY_CLUSTER (!= setonix)"
 
@@ -103,7 +103,7 @@ make INSTALL_DIR=$INSTALL_DIR install
 
 # create modulefile
 if [ $PAWSEY_CLUSTER = "setonix" ]; then
-   LOAD_MODULES="load('cascadelake');load('singularity/4.1.0-slurm');load('gcc-native/14.2');load('fftw/2.1.5-vwwqlhu');load('libnova/0.15.0-iwh6cpn');load('cfitsio/4.4.0')"
+   LOAD_MODULES="load('cascadelake');load('singularity/4.1.0-slurm');load('gcc-native/14.2');load('fftw/3.3.10');load('libnova/0.15.0-iwh6cpn');load('cfitsio/4.4.0')"
 else
    LOAD_MODULES="load('cascadelake/1.0');load('slurm/20.11.9');load('gcc/8.3.0');load('fftw/3.3.8');load('libnova/devel');load('cfitsio/4.3.1')"
 fi   
