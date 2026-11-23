@@ -130,6 +130,9 @@ target_link_libraries(total_power_simple msfitslib ${LIBNOVA_LIB} ${ROOT_LIBRARI
 add_executable(select_integrations apps/select_integrations.cpp)
 target_link_libraries(select_integrations msfitslib ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl -lpthread)
 
+add_executable(running_median apps/running_median.cpp)
+target_link_libraries(running_median msfitslib ${LIBNOVA_LIB} ${ROOT_LIBRARIES} ${FFTW3_LIB} -ldl -lpthread)
+
 
 if(FRB_SEARCH)
    add_executable(create_dynaspec apps/frb_search/main_dynaspec.cpp apps/frb_search/mwa_fits.cpp apps/frb_search/sources.cpp apps/frb_search/dedisp_search.cpp apps/frb_search/myprogress.cpp)
