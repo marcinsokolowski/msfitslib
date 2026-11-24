@@ -109,7 +109,7 @@ else
 fi   
 LIBDIR=lib
 if [ $PAWSEY_CLUSTER = "setonix" ]; then
-   LOAD_MODULES="load('cfitsio/4.0.0');load('libnova/0.15.0-l354muq');load('fftw/3.3.9')"
+   LOAD_MODULES="load('cfitsio/4.4.0');load('libnova/0.15.0-iwh6cpn');load('fftw/3.3.10')"
    LIBDIR=lib64
 fi   
 
